@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Fluxos</title>
+<style>
+:root{--bg:#eef1f5;--panel:#fff;--card:#f6f8fb;--text:#1d2330;--muted:#5f6b7a;--label:#2f3a4a;--border:#d4dae3;--input-bg:#fff;--input-border:#a9b4c3;--placeholder:#8a96a6;--accent:#1f6feb;--accent-weak:#dbe8fd;--err:#b42318;--err-bg:#fdecea;--warn:#7a4f00;--warn-bg:#fff4dc;--ok:#1b7f3b;--ok-bg:#e6f4ea;--code-bg:#0f172a;--code-text:#e2e8f0}
+@media (prefers-color-scheme: dark){:root{--bg:#0d1016;--panel:#161a22;--card:#1d222c;--text:#eef1f6;--muted:#a3adbb;--label:#d3dae4;--border:#2e3542;--input-bg:#2a313d;--input-border:#566275;--placeholder:#8893a3;--accent:#6aa8ff;--accent-weak:#1f3456;--err:#ff8a80;--err-bg:#3a1d1d;--warn:#ffcc66;--warn-bg:#3a2f14;--ok:#7ddc9a;--ok-bg:#16301f;--code-bg:#0a0d13;--code-text:#d6deeb}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+header{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--panel);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+h1{font-size:18px;margin:0}
+.sub{color:var(--muted);font-size:12px}
+main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;padding:16px 20px;max-width:1600px;margin:0 auto}
+@media (max-width:1100px){main{grid-template-columns:1fr}}
+section{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:16px}
+section h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+label{display:block;font-size:12.5px;font-weight:600;color:var(--label);margin-bottom:4px}
+input,select,textarea{width:100%;padding:8px 10px;border:1.5px solid var(--input-border);border-radius:6px;background:var(--input-bg);color:var(--text);font:inherit;transition:border-color .12s,box-shadow .12s}
+input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
+input:hover,select:hover,textarea:hover{border-color:var(--accent)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
+textarea{resize:vertical;font-family:Consolas,"Cascadia Mono",monospace;font-size:12px}
+.mono{font-family:Consolas,"Cascadia Mono",monospace;font-size:12px}
+button{font:inherit;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.small{padding:3px 8px;font-size:12px}
+button.danger{color:var(--err)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>.f{flex:1 1 180px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 10px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--label);margin:0;padding-bottom:8px;cursor:pointer}
+.step{border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
+.step-head .grow{font-weight:600;font-size:14.5px}
+.combo{position:relative}
+.combo-list{position:absolute;z-index:30;left:0;right:0;top:100%;margin-top:3px;max-height:300px;overflow:auto;background:var(--input-bg);border:1.5px solid var(--accent);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.combo-item{padding:7px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+.combo-item.active,.combo-item:hover{background:var(--accent-weak)}
+.combo-item .id{font-family:Consolas,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.combo-item mark{background:transparent;color:var(--accent);font-weight:700}
+.combo-empty{padding:8px 10px;color:var(--muted)}
+.step.collapsed{padding:6px 14px}
+.step.collapsed .step-head{margin-bottom:0}
+.step.dragover{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-weak)}
+.step-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.handle{cursor:grab;color:var(--muted);user-select:none;font-size:16px}
+.num{font-weight:600;min-width:22px}
+.grow{flex:1}
+.params{margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}
+.param-row{display:grid;grid-template-columns:200px 1fr auto;gap:6px;margin-bottom:6px;align-items:start}
+@media (max-width:700px){.param-row{grid-template-columns:1fr}}
+.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:10px;background:var(--accent-weak);color:var(--accent)}
+.tag.warn{background:var(--warn-bg);color:var(--warn)}
+.msgs div{padding:6px 10px;border-radius:6px;margin-bottom:6px;font-size:13px}
+.msgs .e{background:var(--err-bg);color:var(--err)}
+.msgs .w{background:var(--warn-bg);color:var(--warn)}
+.msgs .o{background:var(--ok-bg);color:var(--ok)}
+pre.sql{background:var(--code-bg);color:var(--code-text);padding:12px;border-radius:8px;overflow:auto;max-height:65vh;font-size:12px;margin:0;white-space:pre}
+ol.preview{margin:0;padding-left:24px}
+ol.preview li{margin:3px 0}
+.muted{color:var(--muted)}
+details>summary{cursor:pointer;font-weight:600;font-size:15px}
+.cond{border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
+.params{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px;margin-top:10px}
+.hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Gerador de Fluxos</h1>
+    <div class="sub">Monta o script SQL de um fluxo novo. Não conecta ao banco: você revisa e roda o script no SSMS.</div>
+  </div>
+  <div class="btns">
+    <button data-act="example">Carregar exemplo</button>
+    <button data-act="new-flow">Novo fluxo</button>
+    <button data-act="selftest">Autoteste</button>
+    <button data-act="reset" class="danger">Limpar tudo</button>
+  </div>
+</header>
+
+<main>
+  <div>
+    <section>
+      <details id="catalog-box">
+        <summary>1. Catálogo de ações <span id="catalog-count" class="muted"></span></summary>
+        <p class="hint">Rode no banco e cole o resultado (SSMS: selecione a grade, Ctrl+Shift+C para copiar com cabeçalho, ou Ctrl+C):</p>
+        <pre class="mono muted">SELECT ID, Nome, ComponenteFrontEnd, NomeComponente FROM dbo.Acoes ORDER BY Nome;</pre>
+        <textarea id="catalog-paste" rows="6" placeholder="Cole aqui (colunas separadas por TAB)"></textarea>
+        <div class="btns" style="margin-top:8px">
+          <button data-act="catalog-load" class="primary">Carregar catálogo colado</button>
+          <button data-act="catalog-starter">Voltar ao catálogo inicial</button>
+        </div>
+        <p class="hint">O catálogo inicial é só um ponto de partida (nomes = descrições de passos). Cole o catálogo do seu banco para ter todas as ações com os IDs corretos.</p>
+      </details>
+    </section>
+
+    <section>
+      <h2>2. Fluxo</h2>
+      <div class="row">
+        <div class="f"><label for="flow-nome">Nome do fluxo (até 100)</label><input id="flow-nome" data-flow="nome"></div>
+        <div class="f"><label for="flow-servico">Serviço (IdServico)</label><input id="flow-servico" class="mono" data-flow="servico" placeholder="GUID do serviço, ex.: 00000000-0000-0000-0000-000000000000"></div>
+        <div><label class="check"><input type="checkbox" id="flow-ativo" data-flow="ativo"> Ativo</label></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Passos <span class="btns"><button data-act="collapse-all" class="small">Recolher todos</button><button data-act="expand-all" class="small">Expandir todos</button><button data-act="add-step" class="primary small">+ Passo</button></span></h2>
+      <div id="steps"></div>
+      <button data-act="add-step" class="primary" style="width:100%;margin-top:2px">+ Adicionar passo no fim</button>
+      <p class="hint">Arraste pelo ⠿ ou use ↑ ↓ para reordenar. Ordem, IdPassoAnterior e IdPassoSeguinte são calculados no script.</p>
+    </section>
+
+    <section>
+      <h2>4. Condição (CondicionaisPorFluxo) <span class="btns"><button data-act="add-cond" class="small">+ Condição</button></span></h2>
+      <div id="conds"></div>
+      <p class="hint">Opcional. Só entra no script se houver condição. Campo vazio = NULL (não entra no INSERT); Prioridade é obrigatória.</p>
+    </section>
+  </div>
+
+  <div>
+    <section>
+      <h2>Validação</h2>
+      <div id="msgs" class="msgs"></div>
+    </section>
+    <section>
+      <h2>Visualização</h2>
+      <div id="preview"></div>
+    </section>
+    <section>
+      <h2>Script gerado
+        <span class="btns">
+          <button data-act="copy" class="small">Copiar</button>
+          <button data-act="download" class="small primary">Baixar .sql</button>
+        </span>
+      </h2>
+      <pre id="sql" class="sql"></pre>
+    </section>
+    <section id="selftest-box" hidden>
+      <h2>Autoteste</h2>
+      <div id="selftest" class="msgs"></div>
+    </section>
+  </div>
+</main>
+
+<datalist id="escape-types"></datalist>
+<datalist id="tipos-checkin"></datalist>
+
+<!-- ===================== NÚCLEO (sem tela): regras, validação e geração do SQL ===================== -->
+<script id="core">
+var DEFAULT_SERVICE = ''; // preencha o IdServico do seu serviço
+
+// Valores do enum ESCAPE_TYPES do Controller (FlowAppService.cs). O FindFlow procura o escape por EscapeId = nome do enum.
+var ESCAPE_TYPES = ['LIMIT_DELAY','QUESTIONS_HAS_UNSCH_APPTS','ELEGIBILITY_FAIL','REGISTRATION_FAIL','ALERT_FAIL','AUTHORIZATION_FAIL',
+  'AUTHORIZATIONTOKEN_FAIL','AUTHORIZATIONRPA_FAIL','QRCODEPRINT_FAIL','INSERTINQUEUE_FAIL','SINGLE_QUESTION','COMPANION','CHEST_PAIN',
+  'PREFERENCIAL_SERVICE','BRACELET_PRINT_COMPENION','PRINT_BRACELET_FAIL','COMPANION_INIT','DONT_HAVE_INSURANCE_CARD','AUTHORIZE_FAILS',
+  'DOCUMENT_RESPONSIBILITY_NOT_SIGNED','REQUEST_ACCESS_RESPONSE_FAIL','WITHOUT_CARD','PATIENT_WITH_AUTHORIZATION','MINIMUM_AGE_14',
+  'COMPANION_INIT_NAME'];
+
+// Enum CHECKIN_TYPE do Controller (a comparação no banco não diferencia maiúsculas).
+var TIPOS_CHECKIN = ['Checkin','WebCheckin','Walkin','Ticket','Unknown'];
+
+// Campos de CondicionaisPorFluxo (FlagEscape é o checkbox). t: s = varchar(n), i = int.
+var COND_FIELDS = [
+  {k:'Unidade',t:'s',n:10},{k:'Convenio',t:'s',n:10},{k:'PrimeiroProcedimento',t:'s',n:10},{k:'Medico',t:'s',n:10},
+  {k:'IdadeMin',t:'i'},{k:'IdadeMax',t:'i'},{k:'TipoProcedimento',t:'s',n:10},{k:'TipoPrimeiroProcedimento',t:'s',n:10},
+  {k:'TipoConvenio',t:'s',n:10},{k:'Status',t:'s',n:10},{k:'TipoCheckin',t:'s',n:50,list:'tipos-checkin'},
+  {k:'Prioridade',t:'i',req:true},{k:'LimiteAtraso',t:'i'},{k:'AmbulatorioId',t:'s',n:10},{k:'Especialidade',t:'s',n:10},
+  {k:'TipoAgenda',t:'s',n:10},{k:'Agenda',t:'s',n:10},{k:'EscapeId',t:'s',n:50,list:'escape-types'}
+];
+
+// Ações cujos IDs apareciam no script do usuário (nomes = descrição dos passos; ComponenteFrontEnd desconhecido).
+var STARTER_CATALOG = [
+  {id:'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1',nome:'Inicio'},
+  {id:'8422ACEB-1F59-ED11-AAC4-0213AAF9DDFA',nome:'Processamento'},
+  {id:'9F354CD4-2DB7-EA11-81B0-02BDB92CFAA1',nome:'Atualizar Cadastro'},
+  {id:'676394C2-241E-EC11-AAC4-0213AAF9DDFA',nome:'Atualizar Endereço'},
+  {id:'37B17DC9-241E-EC11-AAC4-0213AAF9DDFA',nome:'Confirmar Dados'},
+  {id:'418A9F66-576F-ED11-AAC4-0213AAF9DDFA',nome:'Confirmar Dados Convênio'},
+  {id:'1BC78EDE-2DB7-EA11-81B0-02BDB92CFAA1',nome:'Elegibilidade'},
+  {id:'C95FF4E6-2DB7-EA11-81B0-02BDB92CFAA1',nome:'Geração de Atendimento'},
+  {id:'8CEE1D76-84A3-430D-A064-333C0B45F173',nome:'Documento (Termos)'},
+  {id:'DF60CE61-55F5-4D8F-9659-6EC22B4EE69C',nome:'Exames Laboratoriais'},
+  {id:'F0F17724-B6E9-4C1A-B379-0C68323A6B6E',nome:'Imprimir Pulseira'},
+  {id:'2E0FD772-6E11-47ED-8C5E-D157637488E5',nome:'Gerar Senha'},
+  {id:'1574E8C7-2DB7-EA11-81B0-02BDB92CFAA1',nome:'Encaminhamento'},
+  {id:'D7906953-439B-4927-B704-31A5F8D381EC',nome:'Imprimir Senha'},
+  {id:'F7C41CDF-31BA-EA11-81B0-02BDB92CFAA1',nome:'Fim'}
+].map(function(a){ return {id:a.id, nome:a.nome, front:null, componente:'', origem:'script'}; });
+
+
+var GUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isGuid(s){ return GUID_RE.test(String(s || '').trim()); }
+function up(s){ return String(s || '').trim().toUpperCase(); }
+function norm(s){ return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g,'').trim().toLowerCase(); }
+function sqlStr(s){ return "'" + String(s == null ? '' : s).replace(/'/g, "''") + "'"; }
+function nstr(s){ return 'N' + sqlStr(s); }
+function oneLine(s){ return String(s || '').replace(/[\r\n]+/g, ' '); }
+function isInt(s){ return /^-?\d+$/.test(String(s || '').trim()); }
+
+var _uid = 0;
+function newUid(){ _uid += 1; return 'u' + Date.now().toString(36) + _uid; }
+function newStep(o){ o = o || {}; return {uid:newUid(), collapsed:!!o.collapsed, acaoId:o.acaoId || '', descricao:o.descricao || '', descAuto:o.descAuto !== false, opcional:!!o.opcional, ativo:o.ativo !== false, copyFrom:o.copyFrom || '', params:(o.params || []).map(function(p){ return {nome:p.nome || '', valor:p.valor || ''}; })}; }
+function newCond(o){ o = o || {}; var c = {FlagEscape:!!o.FlagEscape}; COND_FIELDS.forEach(function(f){ c[f.k] = o[f.k] != null ? String(o[f.k]) : (f.k === 'Prioridade' ? '1' : ''); }); return c; }
+// Fluxo começa sem condição: ela só entra no script se o usuário adicionar ("+ Condição").
+function newState(){ return {catalog:STARTER_CATALOG.map(function(a){ return Object.assign({}, a); }), flow:{servico:DEFAULT_SERVICE, nome:'', ativo:true}, steps:[], conds:[]}; }
+// Condição que veio pronta e não foi tocada (tudo vazio, Prioridade 1, sem escape): rascunhos antigos começavam com uma assim.
+function isUntouchedCond(c){ return !c.FlagEscape && COND_FIELDS.every(function(f){ var v = String(c[f.k] || '').trim(); return f.k === 'Prioridade' ? (v === '' || v === '1') : v === ''; }); }
+
+function findAction(st, id){
+  var key = up(id);
+  if (!key) return null;
+  for (var i = 0; i < st.catalog.length; i++) if (up(st.catalog[i].id) === key) return st.catalog[i];
+  return null;
+}
+function findActionByName(st, name){
+  var key = norm(name);
+  for (var i = 0; i < st.catalog.length; i++) if (norm(st.catalog[i].nome) === key) return st.catalog[i];
+  return null;
+}
+function stepName(st, s){ var a = findAction(st, s.acaoId); return a ? a.nome : (s.descricao || ''); }
+function isInicio(st, s){ var n = norm(stepName(st, s)); return n === 'inicio' || norm(s.descricao) === 'inicio'; }
+function isFim(st, s){ var n = norm(stepName(st, s)); return n === 'fim' || norm(s.descricao) === 'fim'; }
+function manualParams(s){ return (s.params || []).filter(function(p){ return String(p.nome || '').trim() !== ''; }); }
+
+// Lê a colagem do SSMS: colunas por TAB (ou ; ou 2+ espaços), com ou sem cabeçalho; "NULL" vira vazio.
+function parseCatalog(text){
+  var out = [], seen = {};
+  String(text || '').split(/\r?\n/).forEach(function(line){
+    if (!line.trim()) return;
+    var cells = line.split('\t');
+    if (cells.length < 2) cells = line.split(/;|\s{2,}/);
+    cells = cells.map(function(c){ c = c.trim(); return /^null$/i.test(c) ? '' : c; });
+    if (!isGuid(cells[0])) return; // cabeçalho ou lixo
+    var id = up(cells[0]);
+    if (seen[id]) return;
+    seen[id] = true;
+    var f = (cells[2] || '').toLowerCase();
+    out.push({id:id, nome:cells[1] || '', front:(f === '1' || f === 'true') ? true : (f === '0' || f === 'false') ? false : null, componente:cells[3] || '', origem:'banco'});
+  });
+  return out;
+}
+
+function validate(st){
+  var errors = [], warnings = [];
+  var steps = st.steps || [];
+  if (!String(st.flow.nome || '').trim()) errors.push('Informe o nome do fluxo.');
+  if (String(st.flow.nome || '').length > 100) errors.push('Nome do fluxo passa de 100 caracteres.');
+  if (!isGuid(st.flow.servico)) errors.push('Serviço (IdServico) não é um GUID válido.');
+  if (!steps.length) errors.push('Adicione pelo menos um passo.');
+
+  steps.forEach(function(s, i){
+    var p = 'Passo ' + (i + 1) + (s.descricao ? ' (' + s.descricao + ')' : '');
+    if (!String(s.acaoId || '').trim()) errors.push(p + ': escolha a ação.');
+    else if (!isGuid(s.acaoId)) errors.push(p + ': IdAcao não é um GUID válido.');
+    else if (!findAction(st, s.acaoId)) warnings.push(p + ': ação fora do catálogo (o script confere se ela existe antes de gravar).');
+    else {
+      var a = findAction(st, s.acaoId);
+      if (a.front === true && !String(a.componente || '').trim()) warnings.push(p + ': ação de tela sem NomeComponente no catálogo.');
+    }
+    if (!String(s.descricao || '').trim()) warnings.push(p + ': sem descrição.');
+    if (String(s.descricao || '').length > 100) errors.push(p + ': descrição passa de 100 caracteres.');
+    if (String(s.copyFrom || '').trim() && !isGuid(s.copyFrom)) errors.push(p + ': ID do passo de origem dos parâmetros não é um GUID válido.');
+    var names = {};
+    (s.params || []).forEach(function(pr){
+      var n = String(pr.nome || '').trim();
+      if (!n && String(pr.valor || '').trim()) errors.push(p + ': parâmetro com valor e sem nome.');
+      if (n.length > 50) errors.push(p + ': nome de parâmetro "' + n + '" passa de 50 caracteres.');
+      var k = n.toLowerCase();
+      if (n && names[k]) errors.push(p + ': parâmetro "' + n + '" repetido.');
+      names[k] = true;
+    });
+    if (String(s.copyFrom || '').trim() && manualParams(s).length) warnings.push(p + ': copia parâmetros e também tem manuais; os manuais substituem os copiados de mesmo nome.');
+  });
+
+  if (steps.length) {
+    if (!isInicio(st, steps[0])) warnings.push('O 1º passo não é "Início". Em fluxo de escape o 1º passo é marcado como concluído sem executar (StartEscapeFlow).');
+    if (!isFim(st, steps[steps.length - 1])) warnings.push('O último passo não é "Fim".');
+  }
+
+  var conds = st.conds || [];
+  if (!conds.length) warnings.push('Fluxo sem condição: o script não grava CondicionaisPorFluxo, e o FindFlow só escolhe este fluxo depois que houver uma (ok se você vai criá-la à parte).');
+  conds.forEach(function(c, i){
+    var p = 'Condição ' + (i + 1);
+    COND_FIELDS.forEach(function(f){
+      var v = String(c[f.k] || '').trim();
+      if (f.req && !v) errors.push(p + ': ' + f.k + ' é obrigatório.');
+      if (!v) return;
+      if (f.t === 'i' && !isInt(v)) errors.push(p + ': ' + f.k + ' precisa ser número inteiro.');
+      if (f.t === 's' && v.length > f.n) errors.push(p + ': ' + f.k + ' passa de ' + f.n + ' caracteres.');
+    });
+    var esc = String(c.EscapeId || '').trim();
+    if (c.FlagEscape && !esc) errors.push(p + ': fluxo de escape precisa de EscapeId.');
+    if (!c.FlagEscape && esc) warnings.push(p + ': tem EscapeId mas FlagEscape está desmarcado (o FindFlow só usa EscapeId em escape).');
+    if (esc && ESCAPE_TYPES.indexOf(esc) < 0) warnings.push(p + ': EscapeId "' + esc + '" não está no enum ESCAPE_TYPES do Controller.');
+  });
+  return {errors:errors, warnings:warnings};
+}
+
+function pad2(n){ return (n < 10 ? '0' : '') + n; }
+function fmtDate(d){ return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+
+function buildSql(st, now){
+  now = now || new Date();
+  var L = [], steps = st.steps || [], n = steps.length, flowName = String(st.flow.nome || '').trim();
+  L.push('-- ============================================================');
+  L.push('-- Gerador de Fluxos: ' + oneLine(flowName || '(sem nome)'));
+  L.push('-- Gerado em ' + fmtDate(now));
+  L.push('-- Roda tudo de uma vez: valida, grava e faz COMMIT no fim (transação curta, nada fica pendente).');
+  L.push('-- Se qualquer validação ou INSERT falhar, nada é gravado (XACT_ABORT).');
+  L.push('-- ============================================================');
+  L.push('SET NOCOUNT ON;');
+  L.push('SET XACT_ABORT ON;');
+  L.push('');
+  L.push('DECLARE @IDFLUXO UNIQUEIDENTIFIER = NEWID();');
+  steps.forEach(function(s, i){ L.push('DECLARE @IDPASSO' + (i + 1) + ' UNIQUEIDENTIFIER = NEWID();'); });
+  L.push('');
+
+  L.push('-- 1) Validações (antes de gravar)');
+  var seenA = {}, seenC = {};
+  steps.forEach(function(s, i){
+    var id = up(s.acaoId);
+    if (!id || seenA[id]) return;
+    seenA[id] = true;
+    L.push("IF NOT EXISTS (SELECT 1 FROM dbo.Acoes WHERE ID = '" + id + "')");
+    L.push('    THROW 50001, ' + nstr('Ação não encontrada em dbo.Acoes: ' + id + ' (passo ' + (i + 1) + ')') + ', 1;');
+  });
+  steps.forEach(function(s, i){
+    var id = up(s.copyFrom);
+    if (!id || seenC[id]) return;
+    seenC[id] = true;
+    L.push("IF NOT EXISTS (SELECT 1 FROM dbo.PassosPorFluxo WHERE ID = '" + id + "')");
+    L.push('    THROW 50002, ' + nstr('Passo de origem dos parâmetros não encontrado: ' + id + ' (passo ' + (i + 1) + ')') + ', 1;');
+  });
+  L.push('');
+
+  L.push('-- 2) Gravação (tudo ou nada)');
+  L.push('BEGIN TRAN;');
+  L.push('');
+  L.push('INSERT INTO dbo.Fluxos (ID, IdServico, Nome, AtivoInativo)');
+  L.push("VALUES (@IDFLUXO, '" + up(st.flow.servico) + "', " + nstr(flowName) + ', ' + (st.flow.ativo ? 1 : 0) + ');');
+  L.push('');
+
+  if (n) L.push('-- Passos (encadeados por IdPassoAnterior / IdPassoSeguinte e Ordem)');
+  steps.forEach(function(s, i){
+    var prev = i === 0 ? 'NULL' : '@IDPASSO' + i;
+    var next = i === n - 1 ? 'NULL' : '@IDPASSO' + (i + 2);
+    var a = findAction(st, s.acaoId);
+    L.push('-- ' + (i + 1) + '. ' + oneLine(s.descricao) + (a ? '  [ação: ' + oneLine(a.nome) + ']' : ''));
+    L.push('INSERT INTO dbo.PassosPorFluxo (ID, IdFluxo, IdPassoAnterior, IdPassoSeguinte, [Descrição], IdAcao, Ordem, Opcional, AtivoInativo)');
+    L.push('VALUES (@IDPASSO' + (i + 1) + ', @IDFLUXO, ' + prev + ', ' + next + ', ' + nstr(s.descricao) + ", '" + up(s.acaoId) + "', " + (i + 1) + ', ' + (s.opcional ? 1 : 0) + ', ' + (s.ativo ? 1 : 0) + ');');
+  });
+
+  var anyParam = false;
+  steps.forEach(function(s, i){
+    var copy = up(s.copyFrom), manual = manualParams(s), v = '@IDPASSO' + (i + 1);
+    if (!copy && !manual.length) return;
+    if (!anyParam) { L.push(''); L.push('-- Parâmetros dos passos'); anyParam = true; }
+    L.push('-- Passo ' + (i + 1) + ' (' + oneLine(s.descricao) + ')');
+    if (copy) {
+      L.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso)');
+      L.push('SELECT Nome, Valor, ' + v + " FROM dbo.ParametrosPorPasso WHERE IdPasso = '" + copy + "';");
+    }
+    manual.forEach(function(p){
+      var name = String(p.nome).trim();
+      if (copy) L.push('DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = ' + v + ' AND Nome = ' + sqlStr(name) + ';');
+      L.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso) VALUES (' + sqlStr(name) + ', ' + nstr(p.valor) + ', ' + v + ');');
+    });
+  });
+
+  var conds = st.conds || [];
+  if (conds.length) { L.push(''); L.push('-- Condições (CondicionaisPorFluxo)'); }
+  conds.forEach(function(c){
+    var cols = ['IdFluxo', 'FlagEscape', 'Prioridade'];
+    var vals = ['@IDFLUXO', c.FlagEscape ? '1' : '0', String(parseInt(String(c.Prioridade || '1').trim(), 10))];
+    COND_FIELDS.forEach(function(f){
+      if (f.k === 'Prioridade') return;
+      var val = String(c[f.k] || '').trim();
+      if (!val) return;
+      cols.push(f.k);
+      vals.push(f.t === 'i' ? String(parseInt(val, 10)) : sqlStr(val));
+    });
+    L.push('INSERT INTO dbo.CondicionaisPorFluxo (' + cols.join(', ') + ')');
+    L.push('VALUES (' + vals.join(', ') + ');');
+  });
+
+  L.push('');
+  L.push('COMMIT;');
+  L.push('');
+  L.push('-- 3) Conferência (depois do COMMIT)');
+  L.push('SELECT @IDFLUXO AS IdFluxoCriado, ' + nstr(flowName) + ' AS Fluxo;');
+  L.push('SELECT p.Ordem, p.[Descrição], a.Nome AS Acao, p.Opcional, p.AtivoInativo, p.ID, p.IdPassoAnterior, p.IdPassoSeguinte');
+  L.push('FROM dbo.PassosPorFluxo p INNER JOIN dbo.Acoes a ON a.ID = p.IdAcao');
+  L.push('WHERE p.IdFluxo = @IDFLUXO ORDER BY p.Ordem;');
+  L.push('SELECT p.Ordem, p.[Descrição], pp.Nome, CAST(pp.Valor AS varchar(200)) AS Valor');
+  L.push('FROM dbo.ParametrosPorPasso pp INNER JOIN dbo.PassosPorFluxo p ON p.ID = pp.IdPasso');
+  L.push('WHERE p.IdFluxo = @IDFLUXO ORDER BY p.Ordem, pp.Nome;');
+  L.push('SELECT * FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @IDFLUXO;');
+  return L.join('\r\n');
+}
+
+function buildExample(st){
+  function act(name, fallbackId){ var a = findActionByName(st, name); return a ? a.id : (fallbackId || ''); }
+  st.flow.nome = 'Fluxo de exemplo';
+  st.flow.ativo = true;
+  st.steps = [
+    newStep({acaoId:act('Inicio', 'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1') || act('Início'), descricao:'Inicio'}),
+    newStep({acaoId:act('Encaminhamento', '1574E8C7-2DB7-EA11-81B0-02BDB92CFAA1'), descricao:'Encaminhamento', params:[{nome:'local', valor:'RECEPCAO'}]}),
+    newStep({acaoId:act('Imprimir Senha', 'D7906953-439B-4927-B704-31A5F8D381EC'), descricao:'Imprimir Senha', params:[{nome:'QUEUEPRINT_COPIES', valor:'1'}]}),
+    newStep({acaoId:act('Fim', 'F7C41CDF-31BA-EA11-81B0-02BDB92CFAA1'), descricao:'Fim'})
+  ];
+  st.conds = [newCond({TipoCheckin:'Checkin', Prioridade:'1'})];
+  return st;
+}
+
+// ---------- Autotestes (rodam no botão "Autoteste" e fora do navegador) ----------
+var TESTS = [
+  ['sqlStr dobra aspas simples', function(){ eq(sqlStr("D'Avila"), "'D''Avila'"); eq(nstr('ação'), "N'ação'"); }],
+  ['parseCatalog lê TAB com cabeçalho e NULL', function(){
+    var r = parseCatalog('ID\tNome\tComponenteFrontEnd\tNomeComponente\r\nAA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1\tInício\t0\tNULL\r\n2E0FD772-6E11-47ED-8C5E-D157637488E5\tAcompanhante (nome)\t1\tpatientCompanionName\r\n');
+    eq(r.length, 2); eq(r[0].nome, 'Início'); eq(r[0].front, false); eq(r[0].componente, ''); eq(r[1].front, true); eq(r[1].componente, 'patientCompanionName');
+  }],
+  ['parseCatalog ignora linhas vazias, duplicadas e sem GUID', function(){
+    var r = parseCatalog('\n\nID\tNome\naa7a6c3e-fbc5-ea11-81b0-02bdb92cfaa1\tInicio\nAA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1\tInicio\nlixo\n');
+    eq(r.length, 1); eq(r[0].id, 'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1');
+  }],
+  ['encadeamento com 1 passo: anterior e seguinte NULL', function(){
+    var st = newState(); st.flow.nome = 'X'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'})];
+    var sql = buildSql(st);
+    has(sql, 'VALUES (@IDPASSO1, @IDFLUXO, NULL, NULL,');
+    has(sql, 'DECLARE @IDPASSO1 UNIQUEIDENTIFIER = NEWID();'); not(sql, '@IDPASSO2');
+  }],
+  ['encadeamento com 3 passos e DECLAREs completos', function(){
+    var st = newState(); st.flow.nome = 'X';
+    st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'A'}), newStep({acaoId:STARTER_CATALOG[12].id, descricao:'B'}), newStep({acaoId:STARTER_CATALOG[14].id, descricao:'C'})];
+    var sql = buildSql(st);
+    has(sql, 'VALUES (@IDPASSO1, @IDFLUXO, NULL, @IDPASSO2,'); has(sql, 'VALUES (@IDPASSO2, @IDFLUXO, @IDPASSO1, @IDPASSO3,'); has(sql, 'VALUES (@IDPASSO3, @IDFLUXO, @IDPASSO2, NULL,');
+    eq((sql.match(/DECLARE @IDPASSO\d+ /g) || []).length, 3);
+    has(sql, ", 1, 0, 1);"); has(sql, ", 3, 0, 1);");
+  }],
+  ['parâmetros copiados viram INSERT...SELECT e validação da origem', function(){
+    var st = newState(); st.flow.nome = 'X';
+    st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'}), newStep({acaoId:STARTER_CATALOG[12].id, descricao:'Enc', copyFrom:'0cdcd45c-d8d9-464a-b221-ac42aaae43de'})];
+    var sql = buildSql(st);
+    has(sql, "SELECT Nome, Valor, @IDPASSO2 FROM dbo.ParametrosPorPasso WHERE IdPasso = '0CDCD45C-D8D9-464A-B221-AC42AAAE43DE';");
+    has(sql, "IF NOT EXISTS (SELECT 1 FROM dbo.PassosPorFluxo WHERE ID = '0CDCD45C-D8D9-464A-B221-AC42AAAE43DE')");
+  }],
+  ['manual + copiado: DELETE do mesmo nome antes do INSERT manual', function(){
+    var st = newState(); st.flow.nome = 'X';
+    st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'P', copyFrom:'0CDCD45C-D8D9-464A-B221-AC42AAAE43DE', params:[{nome:'local', valor:"it's"}]})];
+    var sql = buildSql(st);
+    var d = sql.indexOf("DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = @IDPASSO1 AND Nome = 'local';");
+    var ins = sql.indexOf("VALUES ('local', N'it''s', @IDPASSO1);");
+    ok(d > 0 && ins > d, 'DELETE antes do INSERT');
+  }],
+  ['manual sem cópia não gera DELETE', function(){
+    var st = newState(); st.flow.nome = 'X';
+    st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'P', params:[{nome:'maxCompanions', valor:'3'}]})];
+    var sql = buildSql(st); not(sql, 'DELETE FROM'); has(sql, "VALUES ('maxCompanions', N'3', @IDPASSO1);");
+  }],
+  ['condição só com campos preenchidos + FlagEscape/Prioridade', function(){
+    var st = newState(); st.flow.nome = 'X'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'})];
+    st.conds = [newCond({FlagEscape:true, EscapeId:'COMPANION_INIT_NAME', TipoCheckin:'Checkin', LimiteAtraso:'-15'})];
+    var sql = buildSql(st);
+    has(sql, 'INSERT INTO dbo.CondicionaisPorFluxo (IdFluxo, FlagEscape, Prioridade, TipoCheckin, LimiteAtraso, EscapeId)');
+    has(sql, "VALUES (@IDFLUXO, 1, 1, 'Checkin', -15, 'COMPANION_INIT_NAME');");
+    not(sql, 'Unidade');
+  }],
+  ['transação curta: COMMIT no fim, sem ROLLBACK, com XACT_ABORT', function(){
+    var st = buildExample(newState()); var sql = buildSql(st);
+    has(sql, 'SET XACT_ABORT ON;'); has(sql, 'BEGIN TRAN;'); has(sql, '\r\nCOMMIT;'); not(sql, 'ROLLBACK');
+    ok(sql.indexOf('BEGIN TRAN;') > sql.indexOf('THROW 50001'), 'validações antes do BEGIN TRAN');
+    ok(sql.indexOf('COMMIT;') < sql.indexOf('-- 3) Conferência'), 'conferência depois do COMMIT');
+  }],
+  ['validação: escape sem EscapeId é erro', function(){
+    var st = newState(); st.flow.nome = 'X'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'}), newStep({acaoId:STARTER_CATALOG[14].id, descricao:'Fim'})];
+    st.conds = [newCond({FlagEscape:true})];
+    var r = validate(st); ok(r.errors.some(function(e){ return e.indexOf('EscapeId') >= 0; }), 'erro de EscapeId');
+  }],
+  ['validação: 1º passo diferente de Início gera aviso', function(){
+    var st = newState(); st.flow.nome = 'X'; st.flow.servico = '00000000-0000-0000-0000-000000000001'; st.steps = [newStep({acaoId:STARTER_CATALOG[12].id, descricao:'Encaminhamento'}), newStep({acaoId:STARTER_CATALOG[14].id, descricao:'Fim'})];
+    var r = validate(st); ok(r.warnings.some(function(w){ return w.indexOf('1º passo') >= 0; }), 'aviso do 1º passo'); eq(r.errors.length, 0);
+  }],
+  ['validação: tamanhos e GUID', function(){
+    var st = newState(); st.flow.nome = 'X'; st.flow.servico = 'abc';
+    st.steps = [newStep({acaoId:'nao-guid', descricao:new Array(102).join('a')})];
+    st.conds = [newCond({Unidade:'12345678901', Prioridade:''})];
+    var r = validate(st), all = r.errors.join(' | ');
+    ['GUID válido', 'IdAcao', '100 caracteres', 'Unidade passa de 10', 'Prioridade é obrigatório'].forEach(function(t){ ok(all.indexOf(t) >= 0, 'esperava erro: ' + t); });
+  }],
+  ['sem condição: script não tem INSERT em CondicionaisPorFluxo', function(){
+    var st = newState(); st.flow.nome = 'X'; st.flow.servico = '00000000-0000-0000-0000-000000000001'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'})];
+    eq(st.conds.length, 0);
+    var sql = buildSql(st); not(sql, 'INSERT INTO dbo.CondicionaisPorFluxo'); not(sql, '-- Condições');
+    var r = validate(st); eq(r.errors.length, 0); ok(r.warnings.some(function(w){ return w.indexOf('sem condição') >= 0; }), 'aviso de fluxo sem condição');
+  }],
+  ['condição pronta e não tocada é reconhecida (rascunho antigo)', function(){
+    ok(isUntouchedCond(newCond()), 'padrão é não tocada');
+    ok(!isUntouchedCond(newCond({FlagEscape:true})), 'escape conta como preenchida');
+    ok(!isUntouchedCond(newCond({TipoCheckin:'Checkin'})), 'TipoCheckin conta como preenchida');
+    ok(!isUntouchedCond(newCond({Prioridade:'2'})), 'Prioridade diferente de 1 conta como preenchida');
+  }],
+  ['exemplo genérico: 4 passos válidos e condição normal', function(){
+    var st = buildExample(newState()); st.flow.servico = '00000000-0000-0000-0000-000000000001';
+    eq(st.steps.length, 4); eq(st.conds[0].FlagEscape, false); eq(st.conds[0].TipoCheckin, 'Checkin');
+    var r = validate(st); eq(r.errors.length, 0);
+  }],
+  ['serviço vem vazio e é obrigatório', function(){
+    var st = newState(); eq(st.flow.servico, ''); st.flow.nome = 'X'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'})];
+    ok(validate(st).errors.some(function(e){ return e.indexOf('Serviço') >= 0; }), 'erro de serviço');
+  }]
+];
+function eq(a, b){ if (a !== b) throw new Error('esperado ' + JSON.stringify(b) + ', obtido ' + JSON.stringify(a)); }
+function ok(c, m){ if (!c) throw new Error(m || 'condição falsa'); }
+function has(s, t){ if (String(s).indexOf(t) < 0) throw new Error('não contém: ' + t); }
+function not(s, t){ if (String(s).indexOf(t) >= 0) throw new Error('não deveria conter: ' + t); }
+function runTests(){ return TESTS.map(function(t){ try { t[1](); return {name:t[0], ok:true}; } catch (e) { return {name:t[0], ok:false, msg:e.message}; } }); }
+if (typeof module !== 'undefined') module.exports = {runTests:runTests};
+</script>
+
+<!-- ===================== TELA ===================== -->
+<script>
+(function(){
+  var STORAGE_KEY = 'geradorFluxos.v1';
+  var state = load();
+  var dragUid = null;
+
+  function load(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && s.flow && Array.isArray(s.steps) && Array.isArray(s.catalog)) {
+          s.steps = s.steps.map(function(x){ return newStep(x); });
+          s.conds = (s.conds || []).map(function(c){ return newCond(c); }).filter(function(c){ return !isUntouchedCond(c); });
+          return s;
+        }
+      }
+    } catch (e) {}
+    return newState();
+  }
+  function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function $(id){ return document.getElementById(id); }
+  function stepByUid(uid){ for (var i = 0; i < state.steps.length; i++) if (state.steps[i].uid === uid) return i; return -1; }
+
+  function fillDatalists(){
+    $('escape-types').innerHTML = ESCAPE_TYPES.map(function(v){ return '<option value="' + esc(v) + '">'; }).join('');
+    $('tipos-checkin').innerHTML = TIPOS_CHECKIN.map(function(v){ return '<option value="' + esc(v) + '">'; }).join('');
+  }
+
+  function renderFlow(){
+    $('flow-nome').value = state.flow.nome || '';
+    $('flow-servico').value = state.flow.servico || '';
+    $('flow-ativo').checked = !!state.flow.ativo;
+    var real = state.catalog.filter(function(a){ return a.origem === 'banco'; }).length;
+    $('catalog-count').textContent = '(' + state.catalog.length + ' ações' + (real ? '' : ', catálogo inicial') + ')';
+  }
+
+  function renderSteps(){
+    combo = null; // a lista de ações é recriada junto com os passos
+    var box = $('steps');
+    if (!state.steps.length) { box.innerHTML = '<p class="muted">Nenhum passo. Use "+ Passo" ou o exemplo.</p>'; return; }
+    box.innerHTML = state.steps.map(function(s, i){
+      var a = findAction(state, s.acaoId);
+      var params = (s.params || []).map(function(p, j){
+        return '<div class="param-row">' +
+          '<input class="mono" placeholder="Nome (até 50)" data-param="nome" data-uid="' + s.uid + '" data-j="' + j + '" value="' + esc(p.nome) + '">' +
+          '<textarea rows="' + (String(p.valor || '').length > 80 ? 4 : 1) + '" placeholder="Valor" data-param="valor" data-uid="' + s.uid + '" data-j="' + j + '">' + esc(p.valor) + '</textarea>' +
+          '<button class="small danger" data-act="del-param" data-uid="' + s.uid + '" data-j="' + j + '" title="Remover parâmetro">✕</button></div>';
+      }).join('');
+      var summary = [];
+      if (s.collapsed) {
+        summary.push(a ? a.nome : (s.acaoId ? 'ação fora do catálogo' : 'sem ação'));
+        if (s.copyFrom) summary.push('copia parâmetros');
+        if (manualParams(s).length) summary.push(manualParams(s).length + ' parâmetro(s) manual(is)');
+        if (s.opcional) summary.push('opcional');
+      }
+      var head = '<div class="step-head"><button class="small" data-act="toggle" data-uid="' + s.uid + '" title="' + (s.collapsed ? 'Expandir' : 'Recolher') + '">' + (s.collapsed ? '▸' : '▾') + '</button>' +
+          '<span class="handle" title="Arrastar">⠿</span><span class="num">' + (i + 1) + '.</span>' +
+          '<span class="grow">' + esc(s.descricao || (a ? a.nome : 'Passo novo')) + (a && a.front === true ? ' <span class="tag">tela</span>' : '') + (s.acaoId && !a ? ' <span class="tag warn">fora do catálogo</span>' : '') +
+            (s.collapsed ? ' <span class="muted" style="font-weight:400;font-size:12.5px">— ' + esc(summary.join(' · ')) + '</span>' : '') + '</span>' +
+          '<button class="small" data-act="insert-below" data-uid="' + s.uid + '" title="Inserir um passo novo logo abaixo deste">+ abaixo</button>' +
+          '<button class="small" data-act="up" data-uid="' + s.uid + '" title="Subir">↑</button>' +
+          '<button class="small" data-act="down" data-uid="' + s.uid + '" title="Descer">↓</button>' +
+          '<button class="small" data-act="dup" data-uid="' + s.uid + '" title="Duplicar">⧉</button>' +
+          '<button class="small danger" data-act="del-step" data-uid="' + s.uid + '" title="Remover">✕</button></div>';
+      if (s.collapsed) return '<div class="step collapsed" draggable="true" data-uid="' + s.uid + '">' + head + '</div>';
+      return '<div class="step" draggable="true" data-uid="' + s.uid + '">' + head +
+        '<div class="row">' +
+          '<div class="f"><label>Ação (digite para filtrar)</label><div class="combo">' +
+            '<input autocomplete="off" spellcheck="false" placeholder="Clique e digite o nome da ação…" data-combo="1" data-uid="' + s.uid + '" value="' + esc(a ? a.nome : '') + '">' +
+            '<div class="combo-list" hidden></div></div></div>' +
+          '<div class="f"><label>IdAcao</label><input class="mono" data-step="acaoId" data-uid="' + s.uid + '" value="' + esc(s.acaoId) + '"></div>' +
+        '</div>' +
+        '<div class="row" style="margin-top:6px">' +
+          '<div class="f"><label>Descrição (até 100)</label><input data-step="descricao" data-uid="' + s.uid + '" value="' + esc(s.descricao) + '"></div>' +
+          '<div><label class="check"><input type="checkbox" data-step="opcional" data-uid="' + s.uid + '"' + (s.opcional ? ' checked' : '') + '> Opcional</label></div>' +
+          '<div><label class="check"><input type="checkbox" data-step="ativo" data-uid="' + s.uid + '"' + (s.ativo ? ' checked' : '') + '> Ativo</label></div>' +
+        '</div>' +
+        '<div class="params">' +
+          '<label>Copiar parâmetros do passo existente (ID do passo de origem)</label>' +
+          '<input class="mono" placeholder="Ex.: 0CDCD45C-D8D9-464A-B221-AC42AAAE43DE (vazio = não copia)" data-step="copyFrom" data-uid="' + s.uid + '" value="' + esc(s.copyFrom) + '">' +
+          '<div style="margin-top:8px"><label>Parâmetros manuais' + (s.copyFrom ? ' (substituem os copiados de mesmo nome)' : '') + '</label>' + params +
+          '<button class="small" data-act="add-param" data-uid="' + s.uid + '">+ Parâmetro manual</button></div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function renderConds(){
+    var box = $('conds');
+    if (!state.conds.length) { box.innerHTML = '<p class="muted">Sem condição: nada de CondicionaisPorFluxo entra no script. Use "+ Condição" se precisar.</p>'; return; }
+    box.innerHTML = state.conds.map(function(c, i){
+      var fields = COND_FIELDS.map(function(f){
+        return '<div><label>' + f.k + (f.t === 's' ? ' (' + f.n + ')' : ' (int)') + (f.req ? ' *' : '') + '</label>' +
+          '<input data-cond="' + f.k + '" data-i="' + i + '" value="' + esc(c[f.k]) + '"' + (f.list ? ' list="' + f.list + '"' : '') + (f.t === 'i' ? ' inputmode="numeric"' : '') + '></div>';
+      }).join('');
+      return '<div class="cond"><div class="step-head"><span class="num">' + (i + 1) + '.</span>' +
+        '<label class="check grow"><input type="checkbox" data-cond="FlagEscape" data-i="' + i + '"' + (c.FlagEscape ? ' checked' : '') + '> Fluxo de escape (FlagEscape)</label>' +
+        '<button class="small danger" data-act="del-cond" data-i="' + i + '" title="Remover condição">✕</button>' +
+        '</div><div class="grid">' + fields + '</div></div>';
+    }).join('');
+  }
+
+  function renderOutputs(){
+    var r = validate(state);
+    var html = r.errors.map(function(e){ return '<div class="e">✕ ' + esc(e) + '</div>'; }).join('') +
+               r.warnings.map(function(w){ return '<div class="w">! ' + esc(w) + '</div>'; }).join('');
+    if (!r.errors.length) html = '<div class="o">✓ Pronto para gerar' + (r.warnings.length ? ' (confira os avisos)' : '') + '</div>' + html;
+    $('msgs').innerHTML = html;
+
+    var c0 = state.conds[0];
+    var head = '<p style="margin:0 0 6px"><strong>' + esc(state.flow.nome || '(sem nome)') + '</strong>' +
+      (state.conds.some(function(c){ return c.FlagEscape; }) ? ' <span class="tag">escape: ' + esc(state.conds.filter(function(c){ return c.FlagEscape; }).map(function(c){ return c.EscapeId || '?'; }).join(', ')) + '</span>' : '') + '</p>';
+    var items = state.steps.map(function(s){
+      var a = findAction(state, s.acaoId), extra = [];
+      if (s.opcional) extra.push('opcional');
+      if (!s.ativo) extra.push('inativo');
+      if (s.copyFrom) extra.push('parâmetros de ' + up(s.copyFrom).slice(0, 8) + '…');
+      if (manualParams(s).length) extra.push(manualParams(s).map(function(p){ return p.nome; }).join(', '));
+      return '<li>' + esc(s.descricao || '(sem descrição)') + ' <span class="muted">— ' + esc(a ? a.nome : (s.acaoId ? 'ação fora do catálogo' : 'sem ação')) + (extra.length ? ' · ' + esc(extra.join(' · ')) : '') + '</span></li>';
+    }).join('');
+    $('preview').innerHTML = head + (items ? '<ol class="preview">' + items + '</ol>' : '<p class="muted">Sem passos.</p>');
+
+    $('sql').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : buildSql(state);
+    save();
+  }
+
+  function renderAll(){ renderFlow(); renderSteps(); renderConds(); renderOutputs(); }
+
+  // Leva até o passo (recém-criado) e já abre a escolha da ação.
+  function focusStep(uid){
+    var el = document.querySelector('.step[data-uid="' + uid + '"]');
+    if (!el) return;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    el.classList.add('dragover');
+    setTimeout(function(){ el.classList.remove('dragover'); }, 1200);
+    var inp = el.querySelector('input[data-combo]');
+    if (inp) setTimeout(function(){ inp.focus({preventScroll:true}); openCombo(inp); }, 300);
+  }
+
+  // ---------- Campo "Ação" com busca (combobox) ----------
+  var combo = null; // {input, list, items, active}
+
+  function comboMatches(text){
+    var q = norm(text);
+    var list = state.catalog.slice().sort(function(a, b){ return a.nome.localeCompare(b.nome, 'pt-BR'); });
+    if (!q) return list;
+    var starts = [], contains = [];
+    list.forEach(function(a){
+      var n = norm(a.nome), pos = n.indexOf(q);
+      if (pos === 0) starts.push(a);
+      else if (pos > 0 || norm(a.id).indexOf(q) >= 0) contains.push(a);
+    });
+    return starts.concat(contains);
+  }
+  function highlight(name, text){
+    var q = norm(text), n = norm(name), pos = q ? n.indexOf(q) : -1;
+    if (pos < 0 || n.length !== name.length) return esc(name);
+    return esc(name.slice(0, pos)) + '<mark>' + esc(name.slice(pos, pos + q.length)) + '</mark>' + esc(name.slice(pos + q.length));
+  }
+  function renderCombo(){
+    if (!combo) return;
+    var text = combo.filter;
+    combo.items = comboMatches(text);
+    if (combo.active >= combo.items.length) combo.active = combo.items.length - 1;
+    if (combo.active < 0 && combo.items.length) combo.active = 0;
+    combo.list.innerHTML = combo.items.length
+      ? combo.items.map(function(a, k){
+          return '<div class="combo-item' + (k === combo.active ? ' active' : '') + '" data-k="' + k + '"><span>' + highlight(a.nome, text) +
+            (a.front === true ? ' <span class="tag">tela</span>' : '') + '</span><span class="id">' + esc(a.id.slice(0, 8)) + '…</span></div>';
+        }).join('')
+      : '<div class="combo-empty">Nenhuma ação com "' + esc(text) + '". Cole o catálogo real ou informe o IdAcao ao lado.</div>';
+    combo.list.hidden = false;
+    var act = combo.list.querySelector('.combo-item.active');
+    if (act) act.scrollIntoView({block:'nearest'});
+  }
+  function openCombo(input){
+    if (combo && combo.input === input) return;
+    closeCombo(false);
+    combo = {input:input, list:input.parentNode.querySelector('.combo-list'), items:[], active:-1, filter:''};
+    input.select();
+    renderCombo();
+  }
+  function closeCombo(restore){
+    if (!combo) return;
+    combo.list.hidden = true;
+    if (restore) {
+      var i = stepByUid(combo.input.getAttribute('data-uid'));
+      var a = i >= 0 ? findAction(state, state.steps[i].acaoId) : null;
+      combo.input.value = a ? a.nome : '';
+    }
+    combo = null;
+  }
+  function chooseAction(a){
+    if (!combo || !a) return;
+    var i = stepByUid(combo.input.getAttribute('data-uid'));
+    closeCombo(false);
+    if (i < 0) return;
+    var s = state.steps[i];
+    s.acaoId = up(a.id);
+    if (s.descAuto || !s.descricao) { s.descricao = a.nome; s.descAuto = true; }
+    renderAll();
+  }
+
+  document.addEventListener('focusin', function(ev){ if (ev.target.hasAttribute && ev.target.hasAttribute('data-combo')) openCombo(ev.target); });
+  document.addEventListener('focusout', function(ev){
+    if (!(ev.target.hasAttribute && ev.target.hasAttribute('data-combo'))) return;
+    setTimeout(function(){ if (combo && combo.input === ev.target && document.activeElement !== ev.target) closeCombo(true); }, 150);
+  });
+  document.addEventListener('mousedown', function(ev){
+    var item = ev.target.closest && ev.target.closest('.combo-item');
+    if (item && combo) { ev.preventDefault(); chooseAction(combo.items[+item.getAttribute('data-k')]); }
+  });
+  document.addEventListener('keydown', function(ev){
+    if (!combo || ev.target !== combo.input) return;
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); combo.active = Math.min(combo.items.length - 1, combo.active + 1); renderCombo(); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); combo.active = Math.max(0, combo.active - 1); renderCombo(); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); chooseAction(combo.items[combo.active]); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); closeCombo(true); combo = null; ev.target.blur(); }
+  });
+
+  function move(i, j){
+    if (j < 0 || j >= state.steps.length || i === j) return;
+    var s = state.steps.splice(i, 1)[0];
+    state.steps.splice(j, 0, s);
+    renderAll();
+  }
+
+  // --- eventos ---
+  document.addEventListener('click', function(ev){
+    if (ev.target.hasAttribute && ev.target.hasAttribute('data-combo') && (!combo || combo.input !== ev.target)) { openCombo(ev.target); return; }
+    var b = ev.target.closest('[data-act]');
+    if (!b) return;
+    var act = b.getAttribute('data-act'), uid = b.getAttribute('data-uid'), i = uid ? stepByUid(uid) : -1;
+    switch (act) {
+      case 'add-step': var ns = newStep(); state.steps.push(ns); renderAll(); focusStep(ns.uid); break;
+      case 'insert-below': if (i >= 0) { var nb = newStep(); state.steps.splice(i + 1, 0, nb); renderAll(); focusStep(nb.uid); } break;
+      case 'toggle': if (i >= 0) { state.steps[i].collapsed = !state.steps[i].collapsed; renderAll(); } break;
+      case 'collapse-all': state.steps.forEach(function(s){ s.collapsed = true; }); renderAll(); break;
+      case 'expand-all': state.steps.forEach(function(s){ s.collapsed = false; }); renderAll(); break;
+      case 'del-step': if (i >= 0 && confirm('Remover o passo ' + (i + 1) + '?')) { state.steps.splice(i, 1); renderAll(); } break;
+      case 'up': move(i, i - 1); break;
+      case 'down': move(i, i + 1); break;
+      case 'dup': if (i >= 0) { var c = newStep(JSON.parse(JSON.stringify(state.steps[i]))); state.steps.splice(i + 1, 0, c); renderAll(); } break;
+      case 'add-param': if (i >= 0) { state.steps[i].params.push({nome:'', valor:''}); renderAll(); } break;
+      case 'del-param': if (i >= 0) { state.steps[i].params.splice(+b.getAttribute('data-j'), 1); renderAll(); } break;
+      case 'add-cond': state.conds.push(newCond()); renderAll(); break;
+      case 'del-cond': state.conds.splice(+b.getAttribute('data-i'), 1); renderAll(); break;
+      case 'catalog-load':
+        var parsed = parseCatalog($('catalog-paste').value);
+        if (!parsed.length) { alert('Nenhuma ação reconhecida. Cole as linhas com o ID (GUID) na 1ª coluna e o Nome na 2ª.'); break; }
+        state.catalog = parsed; $('catalog-paste').value = ''; renderAll();
+        alert(parsed.length + ' ações carregadas.');
+        break;
+      case 'catalog-starter': if (confirm('Voltar ao catálogo inicial (perde o catálogo colado)?')) { state.catalog = newState().catalog; renderAll(); } break;
+      case 'example':
+        if (state.steps.length && !confirm('Substituir o fluxo atual pelo exemplo?')) break;
+        buildExample(state); renderAll(); break;
+      case 'new-flow':
+        if (!confirm('Começar um fluxo novo? (o catálogo é mantido)')) break;
+        var keep = state.catalog; state = newState(); state.catalog = keep; renderAll(); break;
+      case 'reset':
+        if (!confirm('Apagar tudo, inclusive o catálogo colado?')) break;
+        state = newState(); renderAll(); break;
+      case 'copy': copySql(); break;
+      case 'download': downloadSql(); break;
+      case 'selftest': showTests(); break;
+    }
+  });
+
+  document.addEventListener('input', function(ev){
+    var t = ev.target, uid = t.getAttribute('data-uid'), i = uid ? stepByUid(uid) : -1;
+    if (t.hasAttribute('data-combo')) {
+      if (!combo || combo.input !== t) openCombo(t);
+      combo.filter = t.value; combo.active = 0; renderCombo();
+      return;
+    }
+    if (t.hasAttribute('data-flow')) {
+      var k = t.getAttribute('data-flow');
+      state.flow[k] = t.type === 'checkbox' ? t.checked : t.value;
+      renderOutputs();
+    } else if (t.hasAttribute('data-step') && i >= 0) {
+      var f = t.getAttribute('data-step'), s = state.steps[i];
+      if (f === 'acaoSel') return; // tratado no change
+      if (t.type === 'checkbox') s[f] = t.checked;
+      else { s[f] = t.value; if (f === 'descricao') s.descAuto = false; }
+      renderOutputs();
+    } else if (t.hasAttribute('data-param') && i >= 0) {
+      state.steps[i].params[+t.getAttribute('data-j')][t.getAttribute('data-param')] = t.value;
+      renderOutputs();
+    } else if (t.hasAttribute('data-cond')) {
+      var c = state.conds[+t.getAttribute('data-i')], k2 = t.getAttribute('data-cond');
+      c[k2] = t.type === 'checkbox' ? t.checked : t.value;
+      renderOutputs();
+    }
+  });
+
+  document.addEventListener('change', function(ev){
+    var t = ev.target, uid = t.getAttribute('data-uid'), i = uid ? stepByUid(uid) : -1;
+    if (i < 0 || t.hasAttribute('data-combo')) return;
+    var f = t.getAttribute('data-step'), s = state.steps[i];
+    if (f === 'acaoId') {
+      s.acaoId = up(t.value);
+      var a = findAction(state, s.acaoId);
+      if (a && (s.descAuto || !s.descricao)) { s.descricao = a.nome; s.descAuto = true; }
+      renderAll();
+    } else if (f === 'copyFrom') {
+      s.copyFrom = up(t.value);
+      renderAll();
+    }
+  });
+
+  // arrastar e soltar
+  document.addEventListener('dragstart', function(ev){
+    var el = ev.target.closest && ev.target.closest('.step');
+    if (!el) return;
+    dragUid = el.getAttribute('data-uid');
+    try { ev.dataTransfer.setData('text/plain', dragUid); ev.dataTransfer.effectAllowed = 'move'; } catch (e) {}
+  });
+  document.addEventListener('dragover', function(ev){
+    var el = ev.target.closest && ev.target.closest('.step');
+    if (!el || !dragUid) return;
+    ev.preventDefault();
+    document.querySelectorAll('.step.dragover').forEach(function(x){ x.classList.remove('dragover'); });
+    el.classList.add('dragover');
+  });
+  document.addEventListener('drop', function(ev){
+    var el = ev.target.closest && ev.target.closest('.step');
+    if (!el || !dragUid) return;
+    ev.preventDefault();
+    var from = stepByUid(dragUid), to = stepByUid(el.getAttribute('data-uid'));
+    dragUid = null;
+    move(from, to);
+  });
+  document.addEventListener('dragend', function(){ dragUid = null; document.querySelectorAll('.step.dragover').forEach(function(x){ x.classList.remove('dragover'); }); });
+
+  function fileName(){
+    var base = norm(state.flow.nome || 'fluxo').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'fluxo';
+    return base + '.sql';
+  }
+  function copySql(){
+    var txt = $('sql').textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function(){ flash('Script copiado.'); }, fallback);
+    } else fallback();
+    function fallback(){
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flash('Script copiado.'); } catch (e) { alert('Não foi possível copiar; selecione o texto manualmente.'); }
+      document.body.removeChild(ta);
+    }
+  }
+  function downloadSql(){
+    if (validate(state).errors.length) { alert('Corrija os erros da validação antes de baixar.'); return; }
+    var blob = new Blob(['﻿' + buildSql(state)], {type:'text/plain;charset=utf-8'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName();
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  }
+  function flash(msg){ var m = $('msgs'); var d = document.createElement('div'); d.className = 'o'; d.textContent = msg; m.insertBefore(d, m.firstChild); setTimeout(function(){ if (d.parentNode) d.parentNode.removeChild(d); }, 2000); }
+  function showTests(){
+    var res = runTests(), fail = res.filter(function(r){ return !r.ok; });
+    $('selftest-box').hidden = false;
+    $('selftest').innerHTML = '<div class="' + (fail.length ? 'e' : 'o') + '">' + (res.length - fail.length) + ' de ' + res.length + ' testes passaram</div>' +
+      res.map(function(r){ return '<div class="' + (r.ok ? 'o' : 'e') + '">' + (r.ok ? '✓ ' : '✕ ') + esc(r.name) + (r.msg ? ': ' + esc(r.msg) : '') + '</div>'; }).join('');
+    $('selftest-box').scrollIntoView({behavior:'smooth'});
+  }
+
+  fillDatalists();
+  // Abrir com "#exemplo" no fim do endereço carrega o exemplo (se não houver passos).
+  if (location.hash === '#exemplo' && !state.steps.length) buildExample(state);
+  renderAll();
+})();
+</script>
+</body>
+</html>
