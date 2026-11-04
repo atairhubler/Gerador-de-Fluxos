@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gerador de Fluxos</title>
+<title>Gestor de Fluxos</title>
 <style>
 :root{--bg:#eef1f5;--panel:#fff;--card:#f6f8fb;--text:#1d2330;--muted:#5f6b7a;--label:#2f3a4a;--border:#d4dae3;--input-bg:#fff;--input-border:#a9b4c3;--placeholder:#8a96a6;--accent:#1f6feb;--accent-weak:#dbe8fd;--err:#b42318;--err-bg:#fdecea;--warn:#7a4f00;--warn-bg:#fff4dc;--ok:#1b7f3b;--ok-bg:#e6f4ea;--code-bg:#0f172a;--code-text:#e2e8f0}
 @media (prefers-color-scheme: dark){:root{--bg:#0d1016;--panel:#161a22;--card:#1d222c;--text:#eef1f6;--muted:#a3adbb;--label:#d3dae4;--border:#2e3542;--input-bg:#2a313d;--input-border:#566275;--placeholder:#8893a3;--accent:#6aa8ff;--accent-weak:#1f3456;--err:#ff8a80;--err-bg:#3a1d1d;--warn:#ffcc66;--warn-bg:#3a2f14;--ok:#7ddc9a;--ok-bg:#16301f;--code-bg:#0a0d13;--code-text:#d6deeb}}
@@ -21,7 +21,7 @@ input,select,textarea{width:100%;padding:8px 10px;border:1.5px solid var(--input
 input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 input:hover,select:hover,textarea:hover{border-color:var(--accent)}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
-input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
+input[type=checkbox],input[type=radio]{width:18px;height:18px;flex:0 0 18px;padding:0;accent-color:var(--accent);margin:0}
 textarea{resize:vertical;font-family:Consolas,"Cascadia Mono",monospace;font-size:12px}
 .mono{font-family:Consolas,"Cascadia Mono",monospace;font-size:12px}
 button{font:inherit;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
@@ -36,6 +36,49 @@ button.danger{color:var(--err)}
 .check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--label);margin:0;padding-bottom:8px;cursor:pointer}
 .step{border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
 .step-head .grow{font-weight:600;font-size:14.5px}
+button:disabled,textarea:disabled,input:disabled{opacity:.45;cursor:not-allowed}
+button:disabled:hover{border-color:var(--border)}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table.ctable{border-collapse:collapse;width:100%;font-size:13px}
+table.ctable th{position:sticky;top:0;background:var(--card);color:var(--label);font-weight:600;text-align:left;padding:6px;border-bottom:1px solid var(--border);white-space:nowrap}
+table.ctable td{padding:4px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.ctable td.n{color:var(--muted);text-align:right}
+table.ctable input:not([type=checkbox]){padding:5px 7px}
+table.ctable tr:hover td{background:var(--accent-weak)}
+.res-card{border:1px solid var(--border);border-left:4px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:var(--card)}
+.res-card.win{border-left-color:var(--ok);background:var(--ok-bg)}
+.res-card.mark{box-shadow:0 0 0 2px var(--accent)}
+.res-card h4{margin:0;font-size:14.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.res-pos{display:inline-block;min-width:26px;height:26px;line-height:26px;text-align:center;border-radius:13px;background:var(--accent-weak);color:var(--accent);font-weight:700;font-size:13px}
+.res-card.win .res-pos{background:var(--ok);color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{font-size:12px;padding:1px 8px;border-radius:10px;border:1px solid var(--border);background:var(--panel)}
+.res-note{font-size:12.5px;color:var(--muted);margin-top:6px}
+.res-sum{font-size:13px;margin-bottom:10px}
+.load-wrap{max-width:1600px;margin:12px auto 0;padding:0 20px}
+.load-wrap section{margin-bottom:0;border-left:4px solid var(--accent)}
+.origin{margin-top:10px;padding:8px 10px;border-radius:6px;background:var(--accent-weak);font-size:13px}
+.home-link{color:inherit;text-decoration:none}
+.view-title{font-weight:400;color:var(--muted)}
+a.btn{display:inline-block;font:inherit;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);text-decoration:none}
+a.btn:hover{border-color:var(--accent)}
+.toolbar{max-width:1600px;margin:12px auto 0;padding:0 20px;justify-content:flex-end}
+.home{max-width:1100px;margin:40px auto;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{display:block;position:relative;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:10px;padding:18px 18px 16px;color:var(--text);text-decoration:none;min-height:150px}
+a.card:hover{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
+.card h3{margin:6px 0 6px;font-size:16px}
+.card p{margin:0;color:var(--muted);font-size:13px}
+.card-icon{font-size:22px}
+.card.off{opacity:.55;border-left-color:var(--border)}
+.card .tag{position:absolute;top:12px;right:12px}
+.flow-card{border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:var(--card)}
+.flow-card.used{border-left-color:var(--warn)}
+.flow-card h4{margin:0;font-size:14.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+table.mini{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}
+table.mini th,table.mini td{border-bottom:1px solid var(--border);padding:4px 6px;text-align:left;vertical-align:top}
+table.mini th{color:var(--label);font-weight:600}
+table.mini td.n{text-align:right;font-variant-numeric:tabular-nums}
+table.mini td.hot{color:var(--warn);font-weight:700}
 .combo{position:relative}
 .combo-list{position:absolute;z-index:30;left:0;right:0;top:100%;margin-top:3px;max-height:300px;overflow:auto;background:var(--input-bg);border:1.5px solid var(--accent);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .combo-item{padding:7px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
@@ -44,6 +87,9 @@ button.danger{color:var(--err)}
 .combo-item mark{background:transparent;color:var(--accent);font-weight:700}
 .combo-empty{padding:8px 10px;color:var(--muted)}
 .step.collapsed{padding:6px 14px}
+.step.off{border-left-color:var(--err)}
+.step:not(.off) .tag-off{display:none}
+.tag.off-tag{background:var(--err-bg);color:var(--err)}
 .step.collapsed .step-head{margin-bottom:0}
 .step.dragover{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-weak)}
 .step-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
@@ -72,18 +118,53 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
 <body>
 <header>
   <div>
-    <h1>Gerador de Fluxos</h1>
-    <div class="sub">Monta o script SQL de um fluxo novo. Não conecta ao banco: você revisa e roda o script no SSMS.</div>
+    <h1><a href="#/" class="home-link">Gestor de Fluxos</a> <span id="view-title" class="view-title"></span></h1>
+    <div class="sub">Gera scripts SQL dos fluxos. Não conecta ao banco: você revisa e roda o script no SSMS.</div>
   </div>
   <div class="btns">
-    <button data-act="example">Carregar exemplo</button>
-    <button data-act="new-flow">Novo fluxo</button>
+    <a href="#/" id="btn-home" class="btn">← Início</a>
     <button data-act="selftest">Autoteste</button>
-    <button data-act="reset" class="danger">Limpar tudo</button>
   </div>
 </header>
 
-<main>
+<!-- ===== Tela inicial ===== -->
+<div id="view-home" class="view">
+  <div class="home">
+    <a class="card" href="#/novo"><span class="card-icon">＋</span><h3>Criar novo fluxo</h3><p>Monta passos, parâmetros e condições e gera o script de criação.</p></a>
+    <a class="card" href="#/apagar"><span class="card-icon">🗑</span><h3>Apagar fluxo</h3><p>A partir de uma consulta, gera o script para apagar (ou desativar) um fluxo.</p></a>
+    <a class="card" href="#/condicionais"><span class="card-icon">⇄</span><h3>Condicionais por fluxo</h3><p>Simula em qual fluxo cada cenário cai, em tempo real.</p></a>
+    <a class="card" href="#/atualizar"><span class="card-icon">✎</span><h3>Atualizar fluxo</h3><p>Carrega um fluxo existente, edita e gera só as alterações.</p></a>
+  </div>
+</div>
+
+<!-- ===== Criar novo fluxo ===== -->
+<div id="view-novo" class="view" hidden>
+<div class="toolbar btns">
+  <button data-act="load-open" class="primary">Carregar fluxo existente</button>
+  <button data-act="example">Exemplo</button>
+  <button data-act="new-flow">Novo fluxo</button>
+  <button data-act="reset" class="danger">Limpar tudo</button>
+</div>
+<div class="load-wrap">
+<section id="load-box" hidden>
+  <h2>Carregar fluxo existente <span class="btns"><button data-act="load-close" class="small">Fechar</button></span></h2>
+  <p class="hint" style="margin-top:0">Usa um fluxo do banco como modelo. Ele vem <strong>exatamente como está</strong> (nome, ativo, passos, parâmetros e condições).
+    O script gerado cria um fluxo <strong>novo</strong>; o fluxo original não é alterado.</p>
+  <div class="row">
+    <div class="f"><label for="load-idfluxo">IdFluxo *</label><input id="load-idfluxo" class="mono" autocomplete="off" placeholder="GUID do fluxo modelo"></div>
+    <div class="f"><label for="load-idservico">IdServico *</label><input id="load-idservico" class="mono" autocomplete="off" placeholder="GUID do serviço dono do fluxo"></div>
+  </div>
+  <div id="load-ids-msg" class="msgs" style="margin-top:8px"></div>
+  <h2 style="margin-top:12px">Consulta <span class="btns"><button data-act="load-copy-query" id="load-copy-query" class="small">Copiar consulta</button></span></h2>
+  <p class="hint" style="margin-top:0">Rode no banco (só leitura). O resultado vem em <strong>uma ou mais linhas</strong> (pedaços do FluxoJson): clique no <strong>cabeçalho da coluna FluxoJson</strong> (seleciona todas as linhas), Ctrl+C e cole abaixo. A página junta os pedaços.</p>
+  <pre id="load-query" class="sql" style="max-height:200px"></pre>
+  <label for="load-paste" style="margin-top:10px">Resultado (célula FluxoJson)</label>
+  <textarea id="load-paste" rows="4" placeholder='{"id":"...","nome":"...","passos":[...]}'></textarea>
+  <div class="btns" style="margin-top:8px"><button data-act="load-apply" id="load-apply" class="primary">Carregar no editor</button></div>
+</section>
+</div>
+<div id="slot-novo">
+<main id="editor">
   <div>
     <section>
       <details id="catalog-box">
@@ -106,13 +187,20 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
         <div class="f"><label for="flow-servico">Serviço (IdServico)</label><input id="flow-servico" class="mono" data-flow="servico" placeholder="GUID do serviço, ex.: 00000000-0000-0000-0000-000000000000"></div>
         <div><label class="check"><input type="checkbox" id="flow-ativo" data-flow="ativo"> Ativo</label></div>
       </div>
+      <div id="flow-origin"></div>
     </section>
 
     <section>
-      <h2>3. Passos <span class="btns"><button data-act="collapse-all" class="small">Recolher todos</button><button data-act="expand-all" class="small">Expandir todos</button><button data-act="add-step" class="primary small">+ Passo</button></span></h2>
+      <h2>3. Passos <span class="btns"><button data-act="renumber" id="btn-renumber" class="small" hidden title="Renumera a ordem de 1 a N e refaz o encadeamento de todos os passos">Reorganizar ordem</button><button data-act="collapse-all" class="small">Recolher todos</button><button data-act="expand-all" class="small">Expandir todos</button><button data-act="add-step" class="primary small">+ Passo</button></span></h2>
       <div id="steps"></div>
       <button data-act="add-step" class="primary" style="width:100%;margin-top:2px">+ Adicionar passo no fim</button>
       <p class="hint">Arraste pelo ⠿ ou use ↑ ↓ para reordenar. Ordem, IdPassoAnterior e IdPassoSeguinte são calculados no script.</p>
+    </section>
+
+    <section id="removed-box" hidden>
+      <h2>Passos removidos do fluxo</h2>
+      <p class="hint" style="margin-top:0"><strong>Desativar</strong>: sai do fluxo e mantém o histórico (sempre possível). <strong>Apagar</strong>: só para passo que nunca foi usado em check-ins.</p>
+      <div id="removed"></div>
     </section>
 
     <section>
@@ -127,6 +215,10 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
       <h2>Validação</h2>
       <div id="msgs" class="msgs"></div>
     </section>
+    <section id="changes-box" hidden>
+      <h2>Alterações</h2>
+      <div id="changes"></div>
+    </section>
     <section>
       <h2>Visualização</h2>
       <div id="preview"></div>
@@ -140,12 +232,171 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
       </h2>
       <pre id="sql" class="sql"></pre>
     </section>
-    <section id="selftest-box" hidden>
-      <h2>Autoteste</h2>
-      <div id="selftest" class="msgs"></div>
+  </div>
+</main>
+</div>
+</div>
+
+<!-- ===== Atualizar fluxo (usa o mesmo editor, movido para cá) ===== -->
+<div id="view-upd" class="view" hidden>
+<div class="toolbar btns">
+  <button data-act="upd-example">Exemplo</button>
+  <button data-act="upd-reset" class="danger">Limpar tudo</button>
+</div>
+<div class="load-wrap">
+<section id="upd-load-box">
+  <h2>Carregar o fluxo a atualizar <span class="btns"><button data-act="upd-toggle" id="upd-toggle" class="small">Recolher</button></span></h2>
+  <div id="upd-load-body">
+    <div class="row">
+      <div class="f"><label for="upd-idfluxo">IdFluxo *</label><input id="upd-idfluxo" class="mono" autocomplete="off" placeholder="GUID do fluxo"></div>
+      <div class="f"><label for="upd-idservico">IdServico *</label><input id="upd-idservico" class="mono" autocomplete="off" placeholder="GUID do serviço dono do fluxo"></div>
+    </div>
+    <div id="upd-ids-msg" class="msgs" style="margin-top:8px"></div>
+    <h2 style="margin-top:12px">Consulta <span class="btns"><button data-act="upd-copy-query" id="upd-copy-query" class="small">Copiar consulta</button></span></h2>
+    <p class="hint" style="margin-top:0">Rode no banco (só leitura). O resultado vem em <strong>uma ou mais linhas</strong> (pedaços do FluxoJson): clique no <strong>cabeçalho da coluna FluxoJson</strong> (seleciona todas as linhas), Ctrl+C e cole abaixo. A página junta os pedaços.</p>
+    <pre id="upd-query" class="sql" style="max-height:200px"></pre>
+    <label for="upd-paste" style="margin-top:10px">Resultado (célula FluxoJson)</label>
+    <textarea id="upd-paste" rows="3" placeholder='{"id":"...","nome":"...","passos":[...]}'></textarea>
+    <div class="btns" style="margin-top:8px">
+      <button data-act="upd-apply" id="upd-apply" class="primary">Carregar no editor</button>
+      <button data-act="upd-discard" id="upd-discard">Desfazer minhas alterações</button>
+    </div>
+  </div>
+  <div id="upd-loaded" class="origin" hidden></div>
+</section>
+</div>
+<div id="slot-upd"></div>
+</div>
+
+<!-- ===== Apagar fluxo ===== -->
+<div id="view-apagar" class="view" hidden>
+<div class="toolbar btns">
+  <button data-act="del-example">Exemplo</button>
+  <button data-act="del-reset" class="danger">Limpar tudo</button>
+</div>
+<main>
+  <div>
+    <section>
+      <h2>1. Dados do fluxo</h2>
+      <div class="row">
+        <div class="f"><label for="del-idfluxo">IdFluxo *</label><input id="del-idfluxo" class="mono" autocomplete="off" placeholder="GUID do fluxo, ex.: 1A2B3C4D-0000-0000-0000-000000000000"></div>
+        <div class="f"><label for="del-idservico">IdServico *</label><input id="del-idservico" class="mono" autocomplete="off" placeholder="GUID do serviço dono do fluxo"></div>
+      </div>
+      <div id="del-ids-msg" class="msgs" style="margin-top:8px"></div>
+    </section>
+    <section>
+      <h2>2. Consulta <span class="btns"><button data-act="del-copy-query" id="del-copy-query" class="small">Copiar consulta</button></span></h2>
+      <p class="hint" style="margin-top:0">Rode no banco (só leitura). Na grade do resultado, clique no canto superior esquerdo (seleciona tudo) e use <strong>Ctrl+Shift+C</strong> (copia com cabeçalho).</p>
+      <pre id="del-query" class="sql" style="max-height:220px"></pre>
+    </section>
+    <section>
+      <h2>3. Resultado da consulta</h2>
+      <textarea id="del-paste" rows="7" placeholder="Cole aqui o resultado (com cabeçalho)"></textarea>
+      <div class="btns" style="margin-top:8px">
+        <button data-act="del-load" class="primary">Carregar resultado</button>
+        <button data-act="del-clear">Limpar</button>
+      </div>
+    </section>
+    <section>
+      <h2>4. Fluxo encontrado</h2>
+      <div id="del-flows"><p class="muted">Carregue o resultado da consulta.</p></div>
+    </section>
+  </div>
+  <div>
+    <section>
+      <h2>5. O que fazer</h2>
+      <label class="check"><input type="radio" name="del-mode" value="apagar" checked> Apagar (fluxo, passos, parâmetros, condições e configurações dos passos)</label>
+      <label class="check"><input type="radio" name="del-mode" value="desativar"> Desativar (AtivoInativo = 0; mantém tudo e o histórico)</label>
+      <p class="hint">Fluxo que já foi usado em check-ins não pode ser apagado (perderia o histórico do Acompanhamento): use Desativar.</p>
+    </section>
+    <section>
+      <h2>Validação</h2>
+      <div id="del-msgs" class="msgs"></div>
+    </section>
+    <section>
+      <h2>Script gerado
+        <span class="btns">
+          <button data-act="del-copy" class="small">Copiar</button>
+          <button data-act="del-download" class="small primary">Baixar .sql</button>
+        </span>
+      </h2>
+      <pre id="del-sql" class="sql"></pre>
     </section>
   </div>
 </main>
+</div>
+
+<!-- ===== Condicionais por fluxo ===== -->
+<div id="view-cond" class="view" hidden>
+<div class="toolbar btns">
+  <button data-act="cond-example">Exemplo</button>
+  <button data-act="cond-resetall" class="danger">Limpar tudo</button>
+</div>
+<main>
+  <div>
+    <section>
+      <h2>1. Dados</h2>
+      <div class="row">
+        <div class="f"><label for="cond-idfluxo">IdFluxo (opcional)</label><input id="cond-idfluxo" class="mono" autocomplete="off" placeholder="Para destacar um fluxo no resultado"></div>
+        <div class="f"><label for="cond-idservico">IdServico *</label><input id="cond-idservico" class="mono" autocomplete="off" placeholder="GUID do serviço (cliente)"></div>
+      </div>
+      <p class="hint">A consulta sempre traz <strong>todas</strong> as condições do serviço (é preciso para saber quem vence). O IdFluxo, se informado, só é destacado no resultado com a posição dele.</p>
+      <div id="cond-ids-msg" class="msgs"></div>
+    </section>
+    <section>
+      <h2>2. Consulta <span class="btns"><button data-act="cond-copy-query" id="cond-copy-query" class="small">Copiar consulta</button></span></h2>
+      <p class="hint" style="margin-top:0">Rode no banco (só leitura). Na grade do resultado, clique no canto superior esquerdo e use <strong>Ctrl+Shift+C</strong> (copia com cabeçalho).</p>
+      <pre id="cond-query" class="sql" style="max-height:200px"></pre>
+      <label for="cond-paste" style="margin-top:10px">Resultado da consulta (com cabeçalho)</label>
+      <textarea id="cond-paste" rows="4" placeholder="Cole aqui"></textarea>
+      <div class="btns" style="margin-top:8px">
+        <button data-act="cond-load" id="cond-load" class="primary">Carregar condições</button>
+        <button data-act="cond-clear">Limpar</button>
+      </div>
+      <div id="cond-loaded" class="hint"></div>
+    </section>
+    <section>
+      <h2>3. Cenário <span class="btns"><button data-act="cond-reset" class="small">Limpar cenário</button></span></h2>
+      <div class="grid">
+        <div><label for="cond-tipo">Tipo de check-in</label><select id="cond-tipo"></select></div>
+        <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="cond-escape"> Fluxo de escape</label></div>
+        <div><label for="cond-escapeid">EscapeId</label><input id="cond-escapeid" list="cond-escape-list" autocomplete="off" placeholder="obrigatório no escape"></div>
+        <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="cond-agend"> Tem agendamento</label></div>
+      </div>
+      <div class="grid" style="margin-top:10px">
+        <div><label for="cond-hagend">Horário do compromisso</label><input id="cond-hagend" type="time"></div>
+        <div><label for="cond-hcheckin">Início do check-in</label><input id="cond-hcheckin" type="time"></div>
+        <div><label for="cond-atraso">Atraso (min)</label><input id="cond-atraso" inputmode="numeric" title="Minutos depois do horário do compromisso (negativo = adiantado). Calculado quando os dois horários estão preenchidos."></div>
+      </div>
+      <p class="hint" id="cond-atraso-hint" style="margin-top:4px"></p>
+      <div id="cond-fields" class="grid" style="margin-top:10px"></div>
+      <div id="sim-lists"></div>
+      <details style="margin-top:12px">
+        <summary style="font-size:13px">Como o sistema escolhe o fluxo</summary>
+        <ol class="hint" style="padding-left:18px">
+          <li><strong>Filtro (dbo.FindFlow):</strong> serviço, fluxo ativo, FlagEscape e TipoCheckin iguais; cada critério da condição vazio (NULL) <strong>ou</strong> igual ao do cenário. Campo do cenário vazio = o Controller manda NULL, então só passam condições sem aquele critério.</li>
+          <li><strong>Mais específico vence:</strong> entre as que passam, ficam as com mais parâmetros preenchidos (Convênio, Primeiro procedimento, Médico, IdadeMin, IdadeMax, TipoProcedimento, TipoConvênio, Ambulatório, Especialidade, TipoAgenda, Agenda). <strong>Unidade não conta.</strong></li>
+          <li><strong>Check-in com agendamento:</strong> entre as mais específicas, primeiro as dentro do LimiteAtraso (atraso &lt; limite; NULL vale 0). Se nenhuma estiver, vale a prioridade entre todas.</li>
+          <li><strong>Bloqueio por atraso:</strong> depois de escolher, se o check-in já passou do horário do compromisso + LimiteAtraso do fluxo escolhido, o Controller redireciona para o escape <strong>LIMIT_DELAY</strong> (PosBlockStartFlow).</li>
+          <li><strong>Desempate:</strong> menor Prioridade, depois o ID do fluxo.</li>
+          <li>Sem agendamento, o Controller manda NULL em convênio, médico, especialidade, idades, procedimento e agenda. Idade mín./máx. são do <strong>profissional</strong>. TipoProcedimento preenchido nunca casa.</li>
+        </ol>
+      </details>
+    </section>
+  </div>
+  <div>
+    <section>
+      <h2>Resultado</h2>
+      <div id="cond-result"></div>
+    </section>
+  </div>
+</main>
+</div>
+
+<section id="selftest-box" hidden style="max-width:1560px;margin:0 auto 20px">
+  <h2>Autoteste</h2>
+  <div id="selftest" class="msgs"></div>
+</section>
 
 <datalist id="escape-types"></datalist>
 <datalist id="tipos-checkin"></datalist>
@@ -204,7 +455,7 @@ function isInt(s){ return /^-?\d+$/.test(String(s || '').trim()); }
 
 var _uid = 0;
 function newUid(){ _uid += 1; return 'u' + Date.now().toString(36) + _uid; }
-function newStep(o){ o = o || {}; return {uid:newUid(), collapsed:!!o.collapsed, acaoId:o.acaoId || '', descricao:o.descricao || '', descAuto:o.descAuto !== false, opcional:!!o.opcional, ativo:o.ativo !== false, copyFrom:o.copyFrom || '', params:(o.params || []).map(function(p){ return {nome:p.nome || '', valor:p.valor || ''}; })}; }
+function newStep(o){ o = o || {}; return {uid:newUid(), collapsed:!!o.collapsed, acaoId:o.acaoId || '', descricao:o.descricao || '', descAuto:o.descAuto !== false, opcional:!!o.opcional, ativo:o.ativo !== false, copyFrom:o.copyFrom || '', params:(o.params || []).map(function(p){ return {nome:p.nome || '', valor:p.valor || ''}; }), origem:o.origem || null}; }
 function newCond(o){ o = o || {}; var c = {FlagEscape:!!o.FlagEscape}; COND_FIELDS.forEach(function(f){ c[f.k] = o[f.k] != null ? String(o[f.k]) : (f.k === 'Prioridade' ? '1' : ''); }); return c; }
 // Fluxo começa sem condição: ela só entra no script se o usuário adicionar ("+ Condição").
 function newState(){ return {catalog:STARTER_CATALOG.map(function(a){ return Object.assign({}, a); }), flow:{servico:DEFAULT_SERVICE, nome:'', ativo:true}, steps:[], conds:[]}; }
@@ -283,6 +534,7 @@ function validate(st){
   }
 
   var conds = st.conds || [];
+  warnings = warnings.concat(loadedWarnings(st));
   if (!conds.length) warnings.push('Fluxo sem condição: o script não grava CondicionaisPorFluxo, e o FindFlow só escolhe este fluxo depois que houver uma (ok se você vai criá-la à parte).');
   conds.forEach(function(c, i){
     var p = 'Condição ' + (i + 1);
@@ -308,7 +560,7 @@ function buildSql(st, now){
   now = now || new Date();
   var L = [], steps = st.steps || [], n = steps.length, flowName = String(st.flow.nome || '').trim();
   L.push('-- ============================================================');
-  L.push('-- Gerador de Fluxos: ' + oneLine(flowName || '(sem nome)'));
+  L.push('-- Gestor de Fluxos: ' + oneLine(flowName || '(sem nome)'));
   L.push('-- Gerado em ' + fmtDate(now));
   L.push('-- Roda tudo de uma vez: valida, grava e faz COMMIT no fim (transação curta, nada fica pendente).');
   L.push('-- Se qualquer validação ou INSERT falhar, nada é gravado (XACT_ABORT).');
@@ -361,32 +613,12 @@ function buildSql(st, now){
     if (!copy && !manual.length) return;
     if (!anyParam) { L.push(''); L.push('-- Parâmetros dos passos'); anyParam = true; }
     L.push('-- Passo ' + (i + 1) + ' (' + oneLine(s.descricao) + ')');
-    if (copy) {
-      L.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso)');
-      L.push('SELECT Nome, Valor, ' + v + " FROM dbo.ParametrosPorPasso WHERE IdPasso = '" + copy + "';");
-    }
-    manual.forEach(function(p){
-      var name = String(p.nome).trim();
-      if (copy) L.push('DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = ' + v + ' AND Nome = ' + sqlStr(name) + ';');
-      L.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso) VALUES (' + sqlStr(name) + ', ' + nstr(p.valor) + ', ' + v + ');');
-    });
+    paramCreateLines(s, v).forEach(function(x){ L.push(x); });
   });
 
   var conds = st.conds || [];
   if (conds.length) { L.push(''); L.push('-- Condições (CondicionaisPorFluxo)'); }
-  conds.forEach(function(c){
-    var cols = ['IdFluxo', 'FlagEscape', 'Prioridade'];
-    var vals = ['@IDFLUXO', c.FlagEscape ? '1' : '0', String(parseInt(String(c.Prioridade || '1').trim(), 10))];
-    COND_FIELDS.forEach(function(f){
-      if (f.k === 'Prioridade') return;
-      var val = String(c[f.k] || '').trim();
-      if (!val) return;
-      cols.push(f.k);
-      vals.push(f.t === 'i' ? String(parseInt(val, 10)) : sqlStr(val));
-    });
-    L.push('INSERT INTO dbo.CondicionaisPorFluxo (' + cols.join(', ') + ')');
-    L.push('VALUES (' + vals.join(', ') + ');');
-  });
+  conds.forEach(function(c){ condInsertLines(c).forEach(function(x){ L.push(x); }); });
 
   L.push('');
   L.push('COMMIT;');
@@ -403,19 +635,841 @@ function buildSql(st, now){
   return L.join('\r\n');
 }
 
+// Parâmetros de um passo recém-criado (ou com parâmetros substituídos): cópia do passo de origem + manuais (manual substitui o de mesmo nome).
+function paramCreateLines(s, v){
+  var L = [], copy = up(s.copyFrom);
+  if (copy) {
+    L.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso)');
+    L.push('SELECT Nome, Valor, ' + v + " FROM dbo.ParametrosPorPasso WHERE IdPasso = '" + copy + "';");
+  }
+  manualParams(s).forEach(function(p){
+    var name = String(p.nome).trim();
+    if (copy) L.push('DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = ' + v + ' AND Nome = ' + sqlStr(name) + ';');
+    L.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso) VALUES (' + sqlStr(name) + ', ' + nstr(p.valor) + ', ' + v + ');');
+  });
+  return L;
+}
+// INSERT de uma condição: só as colunas preenchidas (vazio = NULL) + FlagEscape e Prioridade.
+function condInsertLines(c){
+  var cols = ['IdFluxo', 'FlagEscape', 'Prioridade'];
+  var vals = ['@IDFLUXO', c.FlagEscape ? '1' : '0', String(parseInt(String(c.Prioridade || '1').trim(), 10))];
+  COND_FIELDS.forEach(function(f){
+    if (f.k === 'Prioridade') return;
+    var val = String(c[f.k] || '').trim();
+    if (!val) return;
+    cols.push(f.k);
+    vals.push(f.t === 'i' ? String(parseInt(val, 10)) : sqlStr(val));
+  });
+  return ['INSERT INTO dbo.CondicionaisPorFluxo (' + cols.join(', ') + ')', 'VALUES (' + vals.join(', ') + ');'];
+}
+
 function buildExample(st){
   function act(name, fallbackId){ var a = findActionByName(st, name); return a ? a.id : (fallbackId || ''); }
-  st.flow.nome = 'Fluxo de exemplo';
+  st.flow.nome = 'Fluxo exemplo';
+  st.flow.servico = EX_SERVICE; // GUID fictício só para o exemplo
   st.flow.ativo = true;
   st.steps = [
     newStep({acaoId:act('Inicio', 'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1') || act('Início'), descricao:'Inicio'}),
-    newStep({acaoId:act('Encaminhamento', '1574E8C7-2DB7-EA11-81B0-02BDB92CFAA1'), descricao:'Encaminhamento', params:[{nome:'local', valor:'RECEPCAO'}]}),
-    newStep({acaoId:act('Imprimir Senha', 'D7906953-439B-4927-B704-31A5F8D381EC'), descricao:'Imprimir Senha', params:[{nome:'QUEUEPRINT_COPIES', valor:'1'}]}),
+    newStep({acaoId:act('Atualizar Cadastro', '9F354CD4-2DB7-EA11-81B0-02BDB92CFAA1'), descricao:'Atualizar Cadastro', opcional:true}),
+    newStep({acaoId:act('Atualizar Endereço', '676394C2-241E-EC11-AAC4-0213AAF9DDFA'), descricao:'Atualizar Endereço', opcional:true}),
+    newStep({acaoId:act('Geração de Atendimento', 'C95FF4E6-2DB7-EA11-81B0-02BDB92CFAA1'), descricao:'Gerar Atendimento', descAuto:false}),
     newStep({acaoId:act('Fim', 'F7C41CDF-31BA-EA11-81B0-02BDB92CFAA1'), descricao:'Fim'})
   ];
-  st.conds = [newCond({TipoCheckin:'Checkin', Prioridade:'1'})];
+  // Condição fictícia de fluxo normal (não é escape)
+  st.conds = [newCond({Unidade:'1', TipoCheckin:'Checkin', Convenio:'20', Prioridade:'1', LimiteAtraso:'30'})];
   return st;
 }
+
+// ---------- Apagar fluxo ----------
+// Colunas da consulta de "Apagar fluxo" (uma linha por passo; fluxo sem passos vem com IdPasso vazio).
+var DELETE_COLUMNS = ['IdFluxo','Fluxo','IdServico','FluxoAtivo','QtdCondicoes','QtdCheckinsInicio','Ordem','IdPasso','Passo','Acao',
+  'QtdParametros','QtdRetornos','QtdDocumentos','QtdPerguntas','QtdRespostas','QtdPerguntaFormulario','QtdAcompanhamento'];
+
+// Consulta do "Apagar fluxo": só é gerada com IdFluxo E IdServico válidos (nunca com valor nulo/vazio).
+function buildDeleteQuery(idFluxo, idServico){
+  if (!isGuid(idFluxo) || !isGuid(idServico)) return null;
+  return [
+  '-- Consulta para "Apagar fluxo" (só leitura), gerada para o fluxo e o serviço informados.',
+  '-- Sem linhas no resultado = esse fluxo não existe nesse serviço.',
+  'SET NOCOUNT ON;',
+  "DECLARE @IdFluxo   UNIQUEIDENTIFIER = '" + up(idFluxo) + "';",
+  "DECLARE @IdServico UNIQUEIDENTIFIER = '" + up(idServico) + "';",
+  '',
+  'IF OBJECT_ID(\'tempdb..#FluxosApagar\') IS NOT NULL DROP TABLE #FluxosApagar;',
+  'SELECT f.ID, f.Nome, f.IdServico, f.AtivoInativo,',
+  '       (SELECT COUNT(*) FROM dbo.CondicionaisPorFluxo c WHERE c.IdFluxo = f.ID) AS QtdCondicoes,',
+  '       (SELECT COUNT(*) FROM dbo.Checkin ck WHERE ck.IdFluxoInicial = f.ID) AS QtdCheckinsInicio',
+  'INTO #FluxosApagar',
+  'FROM dbo.Fluxos f',
+  'WHERE f.ID = @IdFluxo AND f.IdServico = @IdServico;',
+  '',
+  'SELECT F.ID AS IdFluxo, F.Nome AS Fluxo, F.IdServico, F.AtivoInativo AS FluxoAtivo, F.QtdCondicoes, F.QtdCheckinsInicio,',
+  '       p.Ordem, p.ID AS IdPasso, p.[Descrição] AS Passo, a.Nome AS Acao,',
+  '       (SELECT COUNT(*) FROM dbo.ParametrosPorPasso x WHERE x.IdPasso = p.ID) AS QtdParametros,',
+  '       (SELECT COUNT(*) FROM dbo.RetornosPorPasso x WHERE x.IdPasso = p.ID) AS QtdRetornos,',
+  '       (SELECT COUNT(*) FROM dbo.Documentos x WHERE x.IdPasso = p.ID) AS QtdDocumentos,',
+  '       (SELECT COUNT(*) FROM dbo.PerguntasFormulario x WHERE x.IdPasso = p.ID) AS QtdPerguntas,',
+  '       (SELECT COUNT(*) FROM dbo.RespostasFormulario r INNER JOIN dbo.PerguntasFormulario x ON x.IdPergunta = r.IdPergunta WHERE x.IdPasso = p.ID) AS QtdRespostas,',
+  '       (SELECT COUNT(*) FROM dbo.PerguntaFormulario x WHERE x.IdPasso = p.ID) AS QtdPerguntaFormulario,',
+  '       (SELECT COUNT(*) FROM dbo.Acompanhamento x WHERE x.IdPasso = p.ID) AS QtdAcompanhamento',
+  'FROM #FluxosApagar F',
+  'LEFT JOIN dbo.PassosPorFluxo p ON p.IdFluxo = F.ID',
+  'LEFT JOIN dbo.Acoes a ON a.ID = p.IdAcao',
+  'ORDER BY F.Nome, F.ID, p.Ordem;',
+  '',
+  'DROP TABLE #FluxosApagar;'
+  ].join('\r\n');
+}
+
+// O resultado colado precisa ser exatamente do fluxo e do serviço informados.
+function checkSnapshot(flows, idFluxo, idServico){
+  if (!isGuid(idFluxo) || !isGuid(idServico)) return 'Informe IdFluxo e IdServico válidos.';
+  if (!flows.length) return 'Nenhum fluxo no resultado colado.';
+  if (flows.length !== 1 || flows[0].id !== up(idFluxo)) return 'O resultado colado não é do IdFluxo informado (' + up(idFluxo) + '). Rode a consulta gerada nesta tela.';
+  if (flows[0].servico !== up(idServico)) return 'O fluxo do resultado é do serviço ' + flows[0].servico + ', não do IdServico informado (' + up(idServico) + ').';
+  return null;
+}
+
+function toInt(v){ var n = parseInt(String(v == null ? '' : v).trim(), 10); return isNaN(n) ? 0 : n; }
+function isTrue(v){ v = String(v || '').trim().toLowerCase(); return v === '1' || v === 'true'; }
+
+// Lê o resultado colado da consulta (com ou sem cabeçalho) e agrupa por fluxo.
+function parseDeleteSnapshot(text){
+  var lines = String(text || '').split(/\r?\n/).filter(function(l){ return l.trim() !== ''; });
+  if (!lines.length) return {flows:[], error:'Nada foi colado.'};
+  var idx = {}, start = 0;
+  var first = lines[0].split('\t').map(function(c){ return c.trim().toLowerCase(); });
+  if (first.indexOf('idfluxo') >= 0) { first.forEach(function(c, i){ idx[c] = i; }); start = 1; }
+  else DELETE_COLUMNS.forEach(function(c, i){ idx[c.toLowerCase()] = i; });
+  var missing = DELETE_COLUMNS.filter(function(c){ return idx[c.toLowerCase()] === undefined; });
+  if (missing.length) return {flows:[], error:'Faltam colunas no resultado colado: ' + missing.join(', ') + '. Use a consulta desta tela.'};
+  var map = {}, order = [];
+  for (var li = start; li < lines.length; li++) {
+    var cells = lines[li].split('\t');
+    var get = function(c){ var v = (cells[idx[c.toLowerCase()]] || '').trim(); return /^null$/i.test(v) ? '' : v; };
+    var id = up(get('IdFluxo'));
+    if (!isGuid(id)) continue;
+    if (!map[id]) {
+      map[id] = {id:id, nome:get('Fluxo'), servico:up(get('IdServico')), ativo:isTrue(get('FluxoAtivo')), qtdCond:toInt(get('QtdCondicoes')), qtdCheckins:toInt(get('QtdCheckinsInicio')), steps:[]};
+      order.push(id);
+    }
+    var sid = up(get('IdPasso'));
+    if (isGuid(sid) && !map[id].steps.some(function(s){ return s.id === sid; })) {
+      map[id].steps.push({ordem:toInt(get('Ordem')), id:sid, passo:get('Passo'), acao:get('Acao'),
+        qtdParam:toInt(get('QtdParametros')), qtdRet:toInt(get('QtdRetornos')), qtdDoc:toInt(get('QtdDocumentos')), qtdPerg:toInt(get('QtdPerguntas')),
+        qtdResp:toInt(get('QtdRespostas')), qtdPergForm:toInt(get('QtdPerguntaFormulario')), qtdAcomp:toInt(get('QtdAcompanhamento'))});
+    }
+  }
+  if (!order.length) return {flows:[], error:'Nenhum fluxo reconhecido. Confira se colou o resultado da consulta (com a coluna IdFluxo).'};
+  return {flows:order.map(function(i){ return map[i]; }), error:null};
+}
+
+function flowUsage(f){
+  var u = {param:0, ret:0, doc:0, perg:0, resp:0, pergForm:0, acomp:0, checkins:f.qtdCheckins, cond:f.qtdCond, steps:f.steps.length};
+  f.steps.forEach(function(s){ u.param += s.qtdParam; u.ret += s.qtdRet; u.doc += s.qtdDoc; u.perg += s.qtdPerg; u.resp += s.qtdResp; u.pergForm += s.qtdPergForm; u.acomp += s.qtdAcomp; });
+  u.inUse = u.acomp > 0 || u.checkins > 0 || u.resp > 0;
+  return u;
+}
+function usageReasons(u){
+  var r = [];
+  if (u.acomp) r.push(u.acomp + ' registro(s) em Acompanhamento (passos já executados em check-ins)');
+  if (u.checkins) r.push(u.checkins + ' check-in(s) iniciados neste fluxo (Checkin.IdFluxoInicial)');
+  if (u.resp) r.push(u.resp + ' resposta(s) de formulário (RespostasFormulario)');
+  return r;
+}
+
+function validateDelete(flows, mode){
+  var errors = [], warnings = [];
+  if (!flows.length) errors.push('Selecione pelo menos um fluxo.');
+  flows.forEach(function(f){
+    var u = flowUsage(f), name = '"' + (f.nome || f.id) + '"';
+    if (mode === 'apagar') {
+      if (u.inUse) errors.push('Fluxo ' + name + ' já foi usado: ' + usageReasons(u).join('; ') + '. Apagar destruiria o histórico; use "Desativar".');
+      if (u.doc) warnings.push('Fluxo ' + name + ': ' + u.doc + ' documento(s) (termos) ligados aos passos também serão apagados.');
+      if (u.pergForm) warnings.push('Fluxo ' + name + ': ' + u.pergForm + ' pergunta(s) de PerguntaFormulario ficam sem passo (IdPasso = NULL), não são apagadas.');
+      if (f.ativo) warnings.push('Fluxo ' + name + ' está ativo: se algum totem estiver no meio de um check-in nele, esse check-in falha.');
+    } else if (!f.ativo) warnings.push('Fluxo ' + name + ' já está inativo.');
+  });
+  return {errors:errors, warnings:warnings};
+}
+
+function buildDeleteSql(flows, mode, now){
+  now = now || new Date();
+  var L = [], apagar = mode === 'apagar';
+  L.push('-- ============================================================');
+  L.push('-- Gestor de Fluxos: ' + (apagar ? 'APAGAR' : 'DESATIVAR') + ' ' + flows.length + ' fluxo(s)');
+  L.push('-- Gerado em ' + fmtDate(now));
+  flows.forEach(function(f){ L.push('--   ' + oneLine(f.nome) + ' (' + f.id + ')'); });
+  L.push('-- Roda tudo de uma vez: confere, ' + (apagar ? 'apaga' : 'desativa') + ' e faz COMMIT no fim. Se algo falhar, nada é alterado.');
+  L.push('-- ============================================================');
+  L.push('SET NOCOUNT ON;');
+  L.push('SET XACT_ABORT ON;');
+  L.push('');
+  flows.forEach(function(f, i){ L.push('DECLARE @F' + (i + 1) + " UNIQUEIDENTIFIER = '" + f.id + "';  -- " + oneLine(f.nome)); });
+  L.push('');
+  L.push('-- 1) Conferências (antes de alterar)');
+  flows.forEach(function(f, i){
+    var v = '@F' + (i + 1), nm = oneLine(f.nome);
+    L.push('IF NOT EXISTS (SELECT 1 FROM dbo.Fluxos WHERE ID = ' + v + " AND IdServico = '" + up(f.servico) + "')");
+    L.push('    THROW 50010, ' + nstr('Fluxo não encontrado neste serviço: ' + nm + ' (' + f.id + ', serviço ' + up(f.servico) + ')') + ', 1;');
+    if (!apagar) return;
+    L.push('IF (SELECT COUNT(*) FROM dbo.PassosPorFluxo WHERE IdFluxo = ' + v + ') <> ' + f.steps.length);
+    L.push('    THROW 50011, ' + nstr('O fluxo ' + nm + ' mudou desde a consulta (esperava ' + f.steps.length + ' passo(s)). Rode a consulta de novo.') + ', 1;');
+    L.push('IF EXISTS (SELECT 1 FROM dbo.Acompanhamento ac INNER JOIN dbo.PassosPorFluxo p ON p.ID = ac.IdPasso WHERE p.IdFluxo = ' + v + ')');
+    L.push('    THROW 50012, ' + nstr('O fluxo ' + nm + ' já tem passos executados em check-ins (Acompanhamento). Use Desativar.') + ', 1;');
+    L.push('IF EXISTS (SELECT 1 FROM dbo.Checkin WHERE IdFluxoInicial = ' + v + ')');
+    L.push('    THROW 50013, ' + nstr('O fluxo ' + nm + ' já iniciou check-ins (Checkin.IdFluxoInicial). Use Desativar.') + ', 1;');
+    L.push('IF EXISTS (SELECT 1 FROM dbo.RespostasFormulario r INNER JOIN dbo.PerguntasFormulario pf ON pf.IdPergunta = r.IdPergunta INNER JOIN dbo.PassosPorFluxo p ON p.ID = pf.IdPasso WHERE p.IdFluxo = ' + v + ')');
+    L.push('    THROW 50014, ' + nstr('O fluxo ' + nm + ' tem respostas de formulário. Use Desativar.') + ', 1;');
+  });
+  L.push('');
+  L.push('-- 2) ' + (apagar ? 'Exclusão' : 'Desativação') + ' (tudo ou nada)');
+  L.push('BEGIN TRAN;');
+  flows.forEach(function(f, i){
+    var v = '@F' + (i + 1);
+    L.push('');
+    L.push('-- ' + oneLine(f.nome));
+    if (!apagar) { L.push('UPDATE dbo.Fluxos SET AtivoInativo = 0 WHERE ID = ' + v + " AND IdServico = '" + up(f.servico) + "';"); return; }
+    var join = ' INNER JOIN dbo.PassosPorFluxo p ON p.ID = x.IdPasso WHERE p.IdFluxo = ' + v + ';';
+    L.push('DELETE x FROM dbo.ParametrosPorPasso x' + join);
+    L.push('DELETE x FROM dbo.RetornosPorPasso x' + join);
+    L.push('DELETE x FROM dbo.PerguntasFormulario x' + join);
+    L.push('DELETE x FROM dbo.Documentos x' + join);
+    L.push('UPDATE x SET IdPasso = NULL FROM dbo.PerguntaFormulario x' + join);
+    L.push('DELETE FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = ' + v + ';');
+    L.push('DELETE FROM dbo.PassosPorFluxo WHERE IdFluxo = ' + v + ';');
+    L.push('DELETE FROM dbo.Fluxos WHERE ID = ' + v + " AND IdServico = '" + up(f.servico) + "';");
+  });
+  L.push('');
+  L.push('COMMIT;');
+  L.push('');
+  L.push('-- 3) Conferência (depois do COMMIT)');
+  if (apagar) {
+    L.push('-- Esperado: tudo 0.');
+    var parts = flows.map(function(f, i){
+      var v = '@F' + (i + 1);
+      return 'SELECT ' + nstr(f.nome) + ' AS Fluxo, (SELECT COUNT(*) FROM dbo.Fluxos WHERE ID = ' + v + ') AS FluxoRestante, ' +
+        '(SELECT COUNT(*) FROM dbo.PassosPorFluxo WHERE IdFluxo = ' + v + ') AS PassosRestantes, ' +
+        '(SELECT COUNT(*) FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = ' + v + ') AS CondicoesRestantes';
+    });
+    L.push(parts.join('\r\nUNION ALL\r\n') + ';');
+  } else {
+    L.push('SELECT ID, Nome, AtivoInativo FROM dbo.Fluxos WHERE ID IN (' + flows.map(function(f, i){ return '@F' + (i + 1); }).join(', ') + ');');
+  }
+  return L.join('\r\n');
+}
+
+// ---------- Carregar fluxo existente (consulta em JSON, usada também pelo "Atualizar fluxo") ----------
+// Só é gerada com IdFluxo E IdServico válidos. Devolve o JSON do fluxo em pedaços de 4000 caracteres (uma linha cada),
+// porque o SSMS corta células grandes (~43 mil caracteres) ao copiar da grade.
+function buildLoadQuery(idFluxo, idServico){
+  if (!isGuid(idFluxo) || !isGuid(idServico)) return null;
+  return [
+    '-- Consulta para carregar um fluxo (só leitura). O JSON do fluxo vem em PEDAÇOS de 4000 caracteres, uma linha por pedaço',
+    '-- (o SSMS corta células grandes ao copiar). Clique no cabeçalho da coluna FluxoJson (seleciona todas as linhas), Ctrl+C e cole na página.',
+    '-- Resultado NULL = esse fluxo não existe nesse serviço.',
+    'SET NOCOUNT ON;',
+    "DECLARE @IdFluxo   UNIQUEIDENTIFIER = '" + up(idFluxo) + "';",
+    "DECLARE @IdServico UNIQUEIDENTIFIER = '" + up(idServico) + "';",
+    'DECLARE @j NVARCHAR(MAX);',
+    '',
+    'SET @j = (',
+    '  SELECT f.ID AS id, f.Nome AS nome, f.IdServico AS servico, f.AtivoInativo AS ativo,',
+    '         (SELECT CHECKSUM_AGG(CHECKSUM(p.ID, p.IdAcao, p.Ordem, p.IdPassoAnterior, p.IdPassoSeguinte, p.[Descrição], p.Opcional, p.AtivoInativo))',
+    '            FROM dbo.PassosPorFluxo p WHERE p.IdFluxo = f.ID) AS versaoPassos,',
+    '         (SELECT CHECKSUM_AGG(CHECKSUM(pp.IdPasso, pp.Nome, CAST(pp.Valor AS NVARCHAR(MAX))))',
+    '            FROM dbo.ParametrosPorPasso pp INNER JOIN dbo.PassosPorFluxo p ON p.ID = pp.IdPasso WHERE p.IdFluxo = f.ID) AS versaoParametros,',
+    '         (SELECT CHECKSUM_AGG(CHECKSUM(*)) FROM dbo.CondicionaisPorFluxo c WHERE c.IdFluxo = f.ID) AS versaoCondicoes,',
+    '         (SELECT p.ID AS id, p.IdAcao AS acaoId, a.Nome AS acao, a.ComponenteFrontEnd AS acaoTela, a.NomeComponente AS acaoComponente,',
+    '                 p.[Descrição] AS descricao, p.Ordem AS ordem, p.Opcional AS opcional, p.AtivoInativo AS ativo,',
+    '                 p.IdPassoAnterior AS anterior, p.IdPassoSeguinte AS seguinte,',
+    '                 (SELECT COUNT(*) FROM dbo.Acompanhamento x WHERE x.IdPasso = p.ID) AS usos,',
+    '                 (SELECT pp.Nome AS nome, CAST(pp.Valor AS NVARCHAR(MAX)) AS valor',
+    '                    FROM dbo.ParametrosPorPasso pp WHERE pp.IdPasso = p.ID ORDER BY pp.Nome FOR JSON PATH, INCLUDE_NULL_VALUES) AS parametros',
+    '            FROM dbo.PassosPorFluxo p LEFT JOIN dbo.Acoes a ON a.ID = p.IdAcao',
+    '           WHERE p.IdFluxo = f.ID ORDER BY p.Ordem FOR JSON PATH, INCLUDE_NULL_VALUES) AS passos,',
+    '         (SELECT c.* FROM dbo.CondicionaisPorFluxo c WHERE c.IdFluxo = f.ID FOR JSON PATH, INCLUDE_NULL_VALUES) AS condicoes',
+    '    FROM dbo.Fluxos f',
+    '   WHERE f.ID = @IdFluxo AND f.IdServico = @IdServico',
+    '     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER, INCLUDE_NULL_VALUES',
+    ');',
+    '',
+    'IF @j IS NULL',
+    "    SELECT 'NULL' AS FluxoJson;",
+    'ELSE',
+    '    SELECT SUBSTRING(@j, n.i * 4000 + 1, 4000) AS FluxoJson',
+    '      FROM (SELECT TOP ((DATALENGTH(@j) / 2 + 3999) / 4000) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS i',
+    '              FROM sys.all_columns a CROSS JOIN sys.all_columns b) n',
+    '     ORDER BY n.i;'
+  ].join('\r\n');
+}
+
+// Lê a célula colada (com ou sem o cabeçalho "FluxoJson"). Devolve {data} ou {error}.
+function parseLoadedFlow(text){
+  // Junta os pedaços (uma linha por pedaço), sem o cabeçalho "FluxoJson". O JSON do SQL não tem quebra de linha real.
+  var t = String(text || '').split(/\r?\n/).filter(function(l){ return l !== '' && !/^\s*fluxojson\s*$/i.test(l); }).join('').trim();
+  if (!t) return {error:'Nada foi colado.'};
+  if (/^(fluxojson\s*)?null$/i.test(t)) return {error:'A consulta voltou NULL: esse fluxo não existe nesse serviço.'};
+  var a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a < 0) return {error:'Não encontrei o JSON. Copie a célula FluxoJson do resultado da consulta.'};
+  if (b < a) return {error:'O JSON veio cortado (sem o fechamento). Rode a consulta gerada nesta tela (ela devolve o JSON em várias linhas) e copie TODAS as linhas da coluna FluxoJson: clique no cabeçalho da coluna e Ctrl+C.'};
+  var data;
+  try { data = JSON.parse(t.slice(a, b + 1)); }
+  catch (e) { return {error:'O JSON está incompleto ou inválido. Rode a consulta gerada nesta tela de novo (ela devolve o JSON em várias linhas de até 4000 caracteres) e copie TODAS as linhas da coluna FluxoJson: clique no cabeçalho da coluna e Ctrl+C. Detalhe: ' + e.message}; }
+  if (!data || !isGuid(data.id) || !isGuid(data.servico)) return {error:'O JSON não parece ser de um fluxo (faltam id/servico). Use a consulta gerada nesta tela.'};
+  data.id = up(data.id); data.servico = up(data.servico);
+  data.passos = (data.passos || []).slice().sort(function(x, y){ return (x.ordem || 0) - (y.ordem || 0); });
+  data.condicoes = data.condicoes || [];
+  return {data:data};
+}
+
+function condFromDb(c){
+  var o = {FlagEscape: c.FlagEscape === true || c.FlagEscape === 1 || c.FlagEscape === '1'};
+  COND_FIELDS.forEach(function(f){ o[f.k] = c[f.k] == null ? '' : String(c[f.k]); });
+  return newCond(o);
+}
+function condKey(c){ return JSON.stringify([!!c.FlagEscape].concat(COND_FIELDS.map(function(f){ return String(c[f.k] || '').trim().toLowerCase(); }))); }
+
+// Preenche o editor de criação com o fluxo carregado, EXATAMENTE como está no banco (nome, ativo, passos, condições).
+// Parâmetros: cada passo copia do passo de origem (INSERT...SELECT); "Trazer valores para editar" vira manual.
+function loadFlowIntoState(st, data){
+  (data.passos || []).forEach(function(p){
+    if (isGuid(p.acaoId) && !findAction(st, p.acaoId))
+      st.catalog.push({id:up(p.acaoId), nome:p.acao || up(p.acaoId), front:p.acaoTela == null ? null : !!p.acaoTela, componente:p.acaoComponente || '', origem:'fluxo'});
+  });
+  st.flow = {servico:data.servico, nome:data.nome || '', ativo:!!data.ativo};
+  st.steps = (data.passos || []).map(function(p){
+    var params = (p.parametros || []).map(function(x){ return {nome:x.nome || '', valor:x.valor == null ? '' : String(x.valor)}; });
+    var s = newStep({acaoId:up(p.acaoId), descricao:p.descricao || '', descAuto:false, opcional:!!p.opcional, ativo:p.ativo !== false && p.ativo !== 0,
+                     copyFrom:params.length ? up(p.id) : '', collapsed:true});
+    s.origem = {idPasso:up(p.id), params:params};
+    return s;
+  });
+  st.conds = (data.condicoes || []).map(condFromDb);
+  st.loadedFrom = {id:data.id, nome:data.nome || '', servico:data.servico, condKeys:st.conds.map(condKey).sort()};
+  return st;
+}
+// "Trazer valores para editar": troca a cópia pelo conjunto de parâmetros do passo de origem, como manuais.
+function materializeParams(s){
+  if (!s.origem) return s;
+  s.params = s.origem.params.map(function(p){ return {nome:p.nome, valor:p.valor}; });
+  s.copyFrom = '';
+  return s;
+}
+// Avisos de um fluxo criado a partir de outro.
+function loadedWarnings(st){
+  var w = [], lf = st.loadedFrom;
+  if (!lf) return w;
+  var same = up(st.flow.servico) === lf.servico;
+  if (same && st.flow.ativo && st.conds.length && JSON.stringify(st.conds.map(condKey).sort()) === JSON.stringify(lf.condKeys))
+    w.push('As condições estão iguais às do fluxo de origem "' + lf.nome + '" e este fluxo está ativo: os dois vão competir no FindFlow (vence pela prioridade/ID). Ajuste as condições ou desmarque "Ativo".');
+  if (same && norm(st.flow.nome) === norm(lf.nome))
+    w.push('O nome está igual ao do fluxo de origem "' + lf.nome + '". Vale diferenciar para não confundir.');
+  return w;
+}
+
+// ---------- Atualizar fluxo ----------
+// Navegação real do Controller: próximo passo = primeiro passo ATIVO com Ordem maior (RunStep); passo inicial = IdPassoAnterior IS NULL
+// (GetInitialStep, sem olhar AtivoInativo). Por isso o passo desativado fica com AtivoInativo = 0, Ordem = NULL, IdPassoSeguinte = NULL
+// e IdPassoAnterior NÃO nulo (senão viraria um segundo "início").
+function newUpdState(catalog){ return {catalog:catalog || newState().catalog, flow:{servico:'', nome:'', ativo:true}, steps:[], conds:[], removed:[], orig:null}; }
+
+// Carrega o fluxo para EDIÇÃO: parâmetros vêm como manuais (para comparar e alterar só o que mudou).
+function loadFlowForUpdate(st, data){
+  (data.passos || []).forEach(function(p){
+    if (isGuid(p.acaoId) && !findAction(st, p.acaoId))
+      st.catalog.push({id:up(p.acaoId), nome:p.acao || up(p.acaoId), front:p.acaoTela == null ? null : !!p.acaoTela, componente:p.acaoComponente || '', origem:'fluxo'});
+  });
+  st.flow = {servico:data.servico, nome:data.nome || '', ativo:!!data.ativo};
+  st.steps = (data.passos || []).map(function(p){
+    var params = (p.parametros || []).map(function(x){ return {nome:x.nome || '', valor:x.valor == null ? '' : String(x.valor)}; });
+    return newStep({acaoId:up(p.acaoId), descricao:p.descricao || '', descAuto:false, opcional:!!p.opcional, ativo:!!p.ativo, collapsed:true,
+      params:params.map(function(x){ return {nome:x.nome, valor:x.valor}; }),
+      origem:{idPasso:up(p.id), params:params, usos:toInt(p.usos), acaoId:up(p.acaoId), descricao:p.descricao || '', opcional:!!p.opcional, ativo:!!p.ativo,
+              ordem:p.ordem == null ? null : toInt(p.ordem), anterior:isGuid(p.anterior) ? up(p.anterior) : null, seguinte:isGuid(p.seguinte) ? up(p.seguinte) : null}});
+  });
+  st.conds = (data.condicoes || []).map(condFromDb);
+  st.removed = [];
+  st.renumber = false;
+  st.orig = data;
+  st.loadedFrom = null;
+  return st;
+}
+
+// Passo existente saindo do fluxo: Desativar (sempre possível) ou Apagar (só se nunca foi usado).
+function removeStepForUpdate(st, idx){
+  var s = st.steps.splice(idx, 1)[0];
+  if (s && s.origem) st.removed.push({step:s, modo:'desativar'});
+  return s;
+}
+function restoreRemoved(st, k){ var r = st.removed.splice(k, 1)[0]; if (r) st.steps.push(r.step); return r; }
+
+// Ordem e encadeamento finais de cada passo no Atualizar, mudando o MÍNIMO possível (fluxos antigos têm passos inativos com a mesma
+// Ordem de passos ativos; o Controller ignora os inativos e anda pela Ordem dos ativos):
+//  - passo ATIVO mantém a Ordem original enquanto ela for maior que a do ativo anterior na lista; senão ganha (anterior + 1);
+//  - passo INATIVO mantém a Ordem original (o Controller o ignora); passo novo inativo recebe a ordem do ativo anterior;
+//  - encadeamento original é mantido; só muda em passo novo/reordenado, vizinho de passo novo/reordenado, no novo primeiro passo
+//    (IdPassoAnterior NULL = passo inicial) e quando apontava para um passo removido;
+//  - st.renumber = true ("Reorganizar ordem"): ordem 1..N e encadeamento pela lista.
+// Referências: {t:'idx', j} = passo da lista; {t:'lit', id} = ID que não está na lista; null.
+function computeLayout(st){
+  var steps = st.steps, n = steps.length, removed = {}, idxById = {}, L = [], last = 0;
+  (st.removed || []).forEach(function(r){ removed[r.step.origem.idPasso] = true; });
+  steps.forEach(function(s, i){ if (s.origem) idxById[s.origem.idPasso] = i; });
+  steps.forEach(function(s, i){
+    var o = s.origem, lay = {};
+    if (st.renumber) { lay.ordem = i + 1; lay.moved = !o || o.ordem !== i + 1; }
+    else if (!s.ativo) { lay.ordem = o ? o.ordem : (last || 1); lay.moved = !o; }
+    else if (o && o.ordem != null && o.ordem > last) { lay.ordem = o.ordem; lay.moved = false; }
+    else { lay.ordem = last + 1; lay.moved = true; }
+    if (s.ativo && lay.ordem != null) last = Math.max(last, lay.ordem);
+    L.push(lay);
+  });
+  function fromOrig(id){ return id == null ? null : idxById[id] !== undefined ? {t:'idx', j:idxById[id]} : {t:'lit', id:id}; }
+  steps.forEach(function(s, i){
+    var o = s.origem, lay = L[i];
+    var dAnt = i === 0 ? null : {t:'idx', j:i - 1}, dSeg = i === n - 1 ? null : {t:'idx', j:i + 1};
+    if (st.renumber || !o || lay.moved) { lay.ant = dAnt; lay.seg = dSeg; return; }
+    var prevMoved = i > 0 && (!steps[i - 1].origem || L[i - 1].moved), nextMoved = i < n - 1 && (!steps[i + 1].origem || L[i + 1].moved);
+    var ant = fromOrig(o.anterior), seg = fromOrig(o.seguinte);
+    if (i === 0) ant = null;
+    else if (ant === null || removed[o.anterior] || prevMoved) ant = dAnt;
+    if ((o.seguinte && removed[o.seguinte]) || nextMoved) seg = dSeg;
+    lay.ant = ant; lay.seg = seg;
+  });
+  return L;
+}
+function layoutRefId(st, ref){ return ref == null ? null : ref.t === 'lit' ? ref.id : (st.steps[ref.j].origem ? st.steps[ref.j].origem.idPasso : 'NOVO' + ref.j); }
+function layoutRefSql(ref){ return ref == null ? 'NULL' : ref.t === 'lit' ? "'" + ref.id + "'" : '@IDPASSO' + (ref.j + 1); }
+
+function stepFieldChanges(s, ordem, ant, seg){
+  var o = s.origem, ch = [];
+  if (up(s.acaoId) !== o.acaoId) ch.push('ação');
+  if (String(s.descricao || '') !== o.descricao) ch.push('descrição');
+  if (!!s.opcional !== o.opcional) ch.push('opcional');
+  if (!!s.ativo !== o.ativo) ch.push(s.ativo ? 'ativado' : 'inativado');
+  if (ordem !== o.ordem) ch.push('ordem ' + (o.ordem == null ? '-' : o.ordem) + '→' + ordem);
+  if ((ant || null) !== o.anterior || (seg || null) !== o.seguinte) ch.push('encadeamento');
+  return ch;
+}
+// Diferença de parâmetros de um passo existente.
+function paramDiff(s){
+  if (up(s.copyFrom)) return {replace:true};
+  var orig = {}, cur = {}, d = {replace:false, del:[], upd:[], ins:[]};
+  (s.origem.params || []).forEach(function(p){ orig[String(p.nome).trim().toLowerCase()] = p; });
+  manualParams(s).forEach(function(p){ cur[String(p.nome).trim().toLowerCase()] = p; });
+  Object.keys(orig).forEach(function(k){ if (!cur[k]) d.del.push(orig[k].nome); else if (String(cur[k].valor) !== String(orig[k].valor)) d.upd.push(cur[k]); });
+  Object.keys(cur).forEach(function(k){ if (!orig[k]) d.ins.push(cur[k]); });
+  return d;
+}
+function condsChanged(st){
+  var a = st.conds.map(condKey).sort(), b = (st.orig.condicoes || []).map(function(c){ return condKey(condFromDb(c)); }).sort();
+  return JSON.stringify(a) !== JSON.stringify(b);
+}
+// Lista legível de alterações (também usada para saber se há o que gravar).
+function updateChanges(st){
+  var out = [];
+  if (!st.orig) return out;
+  if (st.flow.nome !== (st.orig.nome || '')) out.push({t:'~', m:'Nome do fluxo: "' + (st.orig.nome || '') + '" → "' + st.flow.nome + '"'});
+  if (!!st.flow.ativo !== !!st.orig.ativo) out.push({t:'~', m:'Fluxo ' + (st.flow.ativo ? 'ativado' : 'desativado')});
+  var lay = computeLayout(st);
+  st.steps.forEach(function(s, i){
+    var nm = s.descricao || '(sem descrição)';
+    if (!s.origem) { out.push({t:'+', m:'Passo novo na posição ' + (i + 1) + ': "' + nm + '"'}); return; }
+    var ch = stepFieldChanges(s, lay[i].ordem, layoutRefId(st, lay[i].ant), layoutRefId(st, lay[i].seg));
+    var pd = paramDiff(s), pm = [];
+    if (pd.replace) pm.push('parâmetros substituídos pela cópia do passo ' + up(s.copyFrom).slice(0, 8) + '…');
+    else { pd.del.forEach(function(n){ pm.push('remove "' + n + '"'); }); pd.upd.forEach(function(p){ pm.push('altera "' + p.nome + '"'); }); pd.ins.forEach(function(p){ pm.push('inclui "' + p.nome + '"'); }); }
+    if (ch.length || pm.length) out.push({t:'~', m:'"' + nm + '": ' + ch.concat(pm).join(', ')});
+  });
+  st.removed.forEach(function(r){
+    out.push({t:r.modo === 'apagar' ? '-' : 'x', m:'"' + (r.step.descricao || r.step.origem.descricao) + '" será ' + (r.modo === 'apagar' ? 'APAGADO' : 'desativado (sai do fluxo, histórico mantido)') + (r.step.origem.usos ? ' · usado em ' + r.step.origem.usos + ' registro(s) de Acompanhamento' : '')});
+  });
+  if (condsChanged(st)) out.push({t:'~', m:'Condições: as ' + (st.orig.condicoes || []).length + ' atuais serão substituídas pelas ' + st.conds.length + ' da tela'});
+  return out;
+}
+
+function validateUpdate(st){
+  if (!st.orig) return {errors:['Carregue o fluxo (IdFluxo + IdServico, consulta e resultado).'], warnings:[]};
+  var r = validate(st), errors = r.errors.slice(), warnings = r.warnings.slice();
+  if (up(st.flow.servico) !== up(st.orig.servico)) errors.push('O serviço do fluxo não pode ser trocado na atualização (era ' + up(st.orig.servico) + ').');
+  st.removed.forEach(function(x){
+    if (x.modo === 'apagar' && x.step.origem.usos > 0) errors.push('"' + x.step.origem.descricao + '" já foi usado em ' + x.step.origem.usos + ' registro(s) de Acompanhamento: só pode ser desativado.');
+  });
+  if (!updateChanges(st).length) errors.push('Nenhuma alteração em relação ao banco.');
+  if (condsChanged(st) && (st.orig.condicoes || []).some(function(c){ return COND_FIELDS.some(function(f){ return c[f.k] === ''; }); }))
+    warnings.push('Há condição com texto vazio (\'\') no banco: ao regravar as condições ela vira NULL e passa a casar com qualquer valor.');
+  if (st.steps.some(function(s){ return s.origem && s.origem.usos > 0; }))
+    warnings.push('Este fluxo já tem check-ins: aplique fora do horário de uso. Um check-in em andamento segue pela nova ordem a partir do passo em que está.');
+  return {errors:errors, warnings:warnings};
+}
+
+function buildUpdateSql(st, now){
+  now = now || new Date();
+  var o = st.orig, L = [], steps = st.steps, n = steps.length, chg = updateChanges(st);
+  L.push('-- ============================================================');
+  L.push('-- Gestor de Fluxos: ATUALIZAR "' + oneLine(o.nome) + '" (' + up(o.id) + ')');
+  L.push('-- Gerado em ' + fmtDate(now));
+  L.push('-- Alterações:');
+  chg.forEach(function(c){ L.push('--   ' + c.t + ' ' + oneLine(c.m)); });
+  L.push('-- Roda tudo de uma vez: confere, altera e faz COMMIT no fim. Se algo falhar ou o fluxo mudou desde a consulta, nada é alterado.');
+  L.push('-- ============================================================');
+  L.push('SET NOCOUNT ON;');
+  L.push('SET XACT_ABORT ON;');
+  L.push('');
+  L.push("DECLARE @IDFLUXO UNIQUEIDENTIFIER = '" + up(o.id) + "';");
+  steps.forEach(function(s, i){ L.push('DECLARE @IDPASSO' + (i + 1) + ' UNIQUEIDENTIFIER = ' + (s.origem ? "'" + s.origem.idPasso + "'" : 'NEWID()') + ';  -- ' + oneLine(s.descricao) + (s.origem ? '' : ' (novo)')); });
+  st.removed.forEach(function(r, k){ L.push('DECLARE @REMOVIDO' + (k + 1) + " UNIQUEIDENTIFIER = '" + r.step.origem.idPasso + "';  -- " + oneLine(r.step.origem.descricao) + ' (' + r.modo + ')'); });
+  L.push('');
+  L.push('-- 1) Conferências (antes de alterar)');
+  L.push("IF NOT EXISTS (SELECT 1 FROM dbo.Fluxos WHERE ID = @IDFLUXO AND IdServico = '" + up(o.servico) + "')");
+  L.push('    THROW 50020, ' + nstr('Fluxo não encontrado neste serviço: ' + up(o.id)) + ', 1;');
+  function vnum(v){ return v == null ? '0' : String(toInt(v)); }
+  L.push('IF ISNULL((SELECT CHECKSUM_AGG(CHECKSUM(p.ID, p.IdAcao, p.Ordem, p.IdPassoAnterior, p.IdPassoSeguinte, p.[Descrição], p.Opcional, p.AtivoInativo)) FROM dbo.PassosPorFluxo p WHERE p.IdFluxo = @IDFLUXO), 0) <> ' + vnum(o.versaoPassos));
+  L.push('    THROW 50021, ' + nstr('Os passos do fluxo mudaram desde a consulta. Rode a consulta de novo e refaça as alterações.') + ', 1;');
+  L.push('IF ISNULL((SELECT CHECKSUM_AGG(CHECKSUM(pp.IdPasso, pp.Nome, CAST(pp.Valor AS NVARCHAR(MAX)))) FROM dbo.ParametrosPorPasso pp INNER JOIN dbo.PassosPorFluxo p ON p.ID = pp.IdPasso WHERE p.IdFluxo = @IDFLUXO), 0) <> ' + vnum(o.versaoParametros));
+  L.push('    THROW 50021, ' + nstr('Os parâmetros do fluxo mudaram desde a consulta. Rode a consulta de novo e refaça as alterações.') + ', 1;');
+  L.push('IF ISNULL((SELECT CHECKSUM_AGG(CHECKSUM(*)) FROM dbo.CondicionaisPorFluxo c WHERE c.IdFluxo = @IDFLUXO), 0) <> ' + vnum(o.versaoCondicoes));
+  L.push('    THROW 50021, ' + nstr('As condições do fluxo mudaram desde a consulta. Rode a consulta de novo e refaça as alterações.') + ', 1;');
+  var seenA = {}, seenC = {};
+  steps.forEach(function(s, i){
+    var id = up(s.acaoId);
+    if (id && !seenA[id] && (!s.origem || id !== s.origem.acaoId)) {
+      seenA[id] = true;
+      L.push("IF NOT EXISTS (SELECT 1 FROM dbo.Acoes WHERE ID = '" + id + "')");
+      L.push('    THROW 50001, ' + nstr('Ação não encontrada em dbo.Acoes: ' + id + ' (passo ' + (i + 1) + ')') + ', 1;');
+    }
+    var c = up(s.copyFrom);
+    if (c && !seenC[c]) {
+      seenC[c] = true;
+      L.push("IF NOT EXISTS (SELECT 1 FROM dbo.PassosPorFluxo WHERE ID = '" + c + "')");
+      L.push('    THROW 50002, ' + nstr('Passo de origem dos parâmetros não encontrado: ' + c + ' (passo ' + (i + 1) + ')') + ', 1;');
+    }
+  });
+  st.removed.forEach(function(r, k){
+    if (r.modo !== 'apagar') return;
+    var v = '@REMOVIDO' + (k + 1), nm = oneLine(r.step.origem.descricao);
+    L.push('IF EXISTS (SELECT 1 FROM dbo.Acompanhamento WHERE IdPasso = ' + v + ')');
+    L.push('    THROW 50022, ' + nstr('O passo "' + nm + '" já foi usado em check-ins: use Desativar.') + ', 1;');
+    L.push('IF EXISTS (SELECT 1 FROM dbo.RespostasFormulario r INNER JOIN dbo.PerguntasFormulario pf ON pf.IdPergunta = r.IdPergunta WHERE pf.IdPasso = ' + v + ')');
+    L.push('    THROW 50023, ' + nstr('O passo "' + nm + '" tem respostas de formulário: use Desativar.') + ', 1;');
+  });
+  L.push('');
+  L.push('-- 2) Alterações (tudo ou nada)');
+  L.push('BEGIN TRAN;');
+  if (st.flow.nome !== (o.nome || '') || !!st.flow.ativo !== !!o.ativo) {
+    L.push('');
+    L.push('UPDATE dbo.Fluxos SET Nome = ' + nstr(st.flow.nome) + ', AtivoInativo = ' + (st.flow.ativo ? 1 : 0) + ' WHERE ID = @IDFLUXO;');
+  }
+  st.removed.forEach(function(r, k){
+    var v = '@REMOVIDO' + (k + 1);
+    L.push('');
+    L.push('-- Removido: ' + oneLine(r.step.origem.descricao) + ' (' + r.modo + ')');
+    if (r.modo === 'apagar') {
+      L.push('DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = ' + v + ';');
+      L.push('DELETE FROM dbo.RetornosPorPasso WHERE IdPasso = ' + v + ';');
+      L.push('DELETE FROM dbo.PerguntasFormulario WHERE IdPasso = ' + v + ';');
+      L.push('DELETE FROM dbo.Documentos WHERE IdPasso = ' + v + ';');
+      L.push('UPDATE dbo.PerguntaFormulario SET IdPasso = NULL WHERE IdPasso = ' + v + ';');
+      L.push('DELETE FROM dbo.PassosPorFluxo WHERE ID = ' + v + ';');
+    } else {
+      L.push('-- Sai do fluxo: inativo e sem ordem; IdPassoAnterior fica não nulo para não virar um segundo passo inicial.');
+      L.push('UPDATE dbo.PassosPorFluxo SET AtivoInativo = 0, Ordem = NULL, IdPassoSeguinte = NULL, IdPassoAnterior = ISNULL(IdPassoAnterior, @IDPASSO1) WHERE ID = ' + v + ';');
+    }
+  });
+  if (n) { L.push(''); L.push('-- Passos' + (st.renumber ? ' (ordem 1..' + n + ' e encadeamento reorganizados)' : ' (só os que mudaram; ordem e encadeamento originais preservados nos demais)')); }
+  var lay = computeLayout(st);
+  steps.forEach(function(s, i){
+    var v = '@IDPASSO' + (i + 1), prev = layoutRefSql(lay[i].ant), next = layoutRefSql(lay[i].seg), ord = lay[i].ordem == null ? 'NULL' : String(lay[i].ordem);
+    if (!s.origem) {
+      L.push('-- ' + (i + 1) + '. ' + oneLine(s.descricao) + ' (novo, ordem ' + ord + ')');
+      L.push('INSERT INTO dbo.PassosPorFluxo (ID, IdFluxo, IdPassoAnterior, IdPassoSeguinte, [Descrição], IdAcao, Ordem, Opcional, AtivoInativo)');
+      L.push('VALUES (' + v + ', @IDFLUXO, ' + prev + ', ' + next + ', ' + nstr(s.descricao) + ", '" + up(s.acaoId) + "', " + ord + ', ' + (s.opcional ? 1 : 0) + ', ' + (s.ativo ? 1 : 0) + ');');
+      return;
+    }
+    var ch = stepFieldChanges(s, lay[i].ordem, layoutRefId(st, lay[i].ant), layoutRefId(st, lay[i].seg));
+    if (!ch.length) return;
+    L.push('-- ' + (i + 1) + '. ' + oneLine(s.descricao) + ': ' + ch.join(', '));
+    L.push('UPDATE dbo.PassosPorFluxo SET [Descrição] = ' + nstr(s.descricao) + ", IdAcao = '" + up(s.acaoId) + "', Ordem = " + ord + ', Opcional = ' + (s.opcional ? 1 : 0) +
+      ', AtivoInativo = ' + (s.ativo ? 1 : 0) + ', IdPassoAnterior = ' + prev + ', IdPassoSeguinte = ' + next + ' WHERE ID = ' + v + ';');
+  });
+  var head = false;
+  steps.forEach(function(s, i){
+    var v = '@IDPASSO' + (i + 1), lines = [];
+    if (!s.origem) lines = paramCreateLines(s, v);
+    else {
+      var d = paramDiff(s);
+      if (d.replace) { lines.push('DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = ' + v + ';'); lines = lines.concat(paramCreateLines(s, v)); }
+      else {
+        d.del.forEach(function(nm){ lines.push('DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = ' + v + ' AND Nome = ' + sqlStr(nm) + ';'); });
+        d.upd.forEach(function(p){ lines.push('UPDATE dbo.ParametrosPorPasso SET Valor = ' + nstr(p.valor) + ' WHERE IdPasso = ' + v + ' AND Nome = ' + sqlStr(String(p.nome).trim()) + ';'); });
+        d.ins.forEach(function(p){ lines.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso) VALUES (' + sqlStr(String(p.nome).trim()) + ', ' + nstr(p.valor) + ', ' + v + ');'); });
+      }
+    }
+    if (!lines.length) return;
+    if (!head) { L.push(''); L.push('-- Parâmetros'); head = true; }
+    L.push('-- Passo ' + (i + 1) + ' (' + oneLine(s.descricao) + ')');
+    lines.forEach(function(x){ L.push(x); });
+  });
+  if (condsChanged(st)) {
+    L.push('');
+    L.push('-- Condições: substitui todas (a tabela não tem chave por linha)');
+    L.push('DELETE FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @IDFLUXO;');
+    st.conds.forEach(function(c){ condInsertLines(c).forEach(function(x){ L.push(x); }); });
+  }
+  L.push('');
+  L.push('COMMIT;');
+  L.push('');
+  L.push('-- 3) Conferência (depois do COMMIT)');
+  L.push('SELECT p.Ordem, p.[Descrição], a.Nome AS Acao, p.Opcional, p.AtivoInativo, p.ID, p.IdPassoAnterior, p.IdPassoSeguinte');
+  L.push('FROM dbo.PassosPorFluxo p INNER JOIN dbo.Acoes a ON a.ID = p.IdAcao');
+  L.push('WHERE p.IdFluxo = @IDFLUXO ORDER BY CASE WHEN p.Ordem IS NULL THEN 1 ELSE 0 END, p.Ordem;');
+  L.push('SELECT p.Ordem, p.[Descrição], pp.Nome, CAST(pp.Valor AS varchar(200)) AS Valor');
+  L.push('FROM dbo.ParametrosPorPasso pp INNER JOIN dbo.PassosPorFluxo p ON p.ID = pp.IdPasso');
+  L.push('WHERE p.IdFluxo = @IDFLUXO ORDER BY p.Ordem, pp.Nome;');
+  L.push('SELECT * FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @IDFLUXO;');
+  return L.join('\r\n');
+}
+
+// ---------- Condicionais por fluxo (simulador do FindFlow) ----------
+// Reproduz a procedure dbo.FindFlow (versão do banco, com @Agenda) + FlowAppService.FindFlow / SelectBestFlowByDelayAndPriority.
+var COND_QUERY_COLUMNS = ['IdFluxo','Fluxo','FluxoAtivo','TipoCheckin','FlagEscape','EscapeId','Prioridade','LimiteAtraso','Unidade','Convenio','Medico',
+  'PrimeiroProcedimento','TipoPrimeiroProcedimento','TipoProcedimento','TipoConvenio','IdadeMin','IdadeMax','AmbulatorioId','Especialidade','TipoAgenda','Agenda'];
+
+// Campos do cenário -> parâmetro da procedure -> coluna da condição. appt = só preenchido pelo Controller quando há agendamento.
+var SIM_FIELDS = [
+  {k:'unidade', label:'Unidade', col:'Unidade', appt:false, hint:'Do agendamento; sem agendamento, a unidade do totem.'},
+  {k:'ambulatorio', label:'Ambulatório', col:'AmbulatorioId', appt:false, hint:'Recepção do totem (ReceptionID).'},
+  {k:'convenio', label:'Convênio', col:'Convenio', appt:true},
+  {k:'tipoConvenio', label:'Tipo do convênio', col:'TipoConvenio', appt:true},
+  {k:'medico', label:'Médico', col:'Medico', appt:true},
+  {k:'especialidade', label:'Especialidade', col:'Especialidade', appt:true},
+  {k:'idadeMin', label:'Idade mín. do profissional', col:'IdadeMin', appt:true, num:true, hint:'Faixa do PROFISSIONAL (Professional.MinAge), não a idade do paciente.'},
+  {k:'idadeMax', label:'Idade máx. do profissional', col:'IdadeMax', appt:true, num:true, hint:'Faixa do PROFISSIONAL (Professional.MaxAge).'},
+  {k:'procedimento', label:'Primeiro procedimento', col:'PrimeiroProcedimento', appt:true},
+  {k:'tipoProcedimento', label:'Tipo do procedimento', col:'TipoPrimeiroProcedimento', appt:true, hint:'Procedure.Type, comparado com TipoPrimeiroProcedimento.'},
+  {k:'agenda', label:'Agenda', col:'Agenda', appt:true, hint:'Código da agenda do profissional (ScheduleCode).'}
+];
+// Campos que o Controller conta como "parâmetros preenchidos" (propriedades de FlowParametersDtoFor). Unidade NÃO conta.
+var SPECIFICITY_COLS = ['Convenio','PrimeiroProcedimento','Medico','IdadeMin','IdadeMax','TipoProcedimento','TipoConvenio','AmbulatorioId','Especialidade','TipoAgenda','Agenda'];
+var CHECKIN_TYPES_SIM = ['CHECKIN','WEBCHECKIN','WALKIN','TICKET','UNKNOWN'];
+
+function buildCondQuery(idServico){
+  if (!isGuid(idServico)) return null;
+  return [
+    '-- Consulta para "Condicionais por fluxo" (só leitura): todas as condições dos fluxos do serviço.',
+    '-- Copie a grade inteira COM cabeçalho (clique no canto superior esquerdo da grade e Ctrl+Shift+C).',
+    'SET NOCOUNT ON;',
+    "DECLARE @IdServico UNIQUEIDENTIFIER = '" + up(idServico) + "';",
+    '',
+    'SELECT f.ID AS IdFluxo, f.Nome AS Fluxo, f.AtivoInativo AS FluxoAtivo,',
+    '       c.TipoCheckin, c.FlagEscape, c.EscapeId, c.Prioridade, c.LimiteAtraso,',
+    '       c.Unidade, c.Convenio, c.Medico, c.PrimeiroProcedimento, c.TipoPrimeiroProcedimento, c.TipoProcedimento, c.TipoConvenio,',
+    '       c.IdadeMin, c.IdadeMax, c.AmbulatorioId, c.Especialidade, c.TipoAgenda, c.Agenda',
+    'FROM dbo.Fluxos f',
+    'INNER JOIN dbo.CondicionaisPorFluxo c ON c.IdFluxo = f.ID',
+    'WHERE f.IdServico = @IdServico',
+    'ORDER BY f.Nome, c.Prioridade;'
+  ].join('\r\n');
+}
+
+// Lê a grade colada. "NULL" vira null; célula vazia vira '' (no SQL, '' NÃO é NULL e muda o resultado).
+function parseCondSnapshot(text){
+  var lines = String(text || '').split(/\r?\n/).filter(function(l){ return l.trim() !== ''; });
+  if (!lines.length) return {rows:[], error:'Nada foi colado.'};
+  var idx = {}, start = 0, first = lines[0].split('\t').map(function(c){ return c.trim().toLowerCase(); });
+  if (first.indexOf('idfluxo') >= 0) { first.forEach(function(c, i){ idx[c] = i; }); start = 1; }
+  else COND_QUERY_COLUMNS.forEach(function(c, i){ idx[c.toLowerCase()] = i; });
+  var missing = COND_QUERY_COLUMNS.filter(function(c){ return idx[c.toLowerCase()] === undefined; });
+  if (missing.length) return {rows:[], error:'Faltam colunas no resultado colado: ' + missing.join(', ') + '. Use a consulta desta tela e copie com cabeçalho.'};
+  var rows = [];
+  for (var li = start; li < lines.length; li++) {
+    var cells = lines[li].split('\t');
+    var raw = function(c){ var v = cells[idx[c.toLowerCase()]]; v = v == null ? '' : v.trim(); return /^null$/i.test(v) ? null : v; };
+    var id = up(raw('IdFluxo'));
+    if (!isGuid(id)) continue;
+    var r = {n:rows.length + 1, flowId:id, flowName:raw('Fluxo') || '', flowAtivo:isTrue(raw('FluxoAtivo')), c:{}};
+    COND_QUERY_COLUMNS.slice(3).forEach(function(c){ r.c[c] = raw(c); });
+    r.c.FlagEscape = isTrue(r.c.FlagEscape);
+    r.prio = toInt(r.c.Prioridade);
+    r.limite = r.c.LimiteAtraso == null ? 0 : toInt(r.c.LimiteAtraso); // int no Controller: NULL vira 0
+    rows.push(r);
+  }
+  if (!rows.length) return {rows:[], error:'Nenhuma condição reconhecida. Confira se colou o resultado da consulta (com a coluna IdFluxo).'};
+  return {rows:rows, error:null};
+}
+
+function sqlEq(a, b, num){
+  if (num) { var x = Number(String(a).trim()), y = Number(String(b).trim()); if (!isNaN(x) && !isNaN(y) && String(a).trim() !== '' && String(b).trim() !== '') return x === y; }
+  return String(a).replace(/\s+$/, '').toLowerCase() === String(b).replace(/\s+$/, '').toLowerCase();
+}
+function blankToNull(v){ v = v == null ? '' : String(v).trim(); return v === '' ? null : v; }
+// "HH:MM" -> minutos do dia (ou null)
+function parseHM(v){ var m = /^\s*(\d{1,2}):(\d{2})/.exec(String(v || '')); if (!m) return null; var h = +m[1], mi = +m[2]; return h < 24 && mi < 60 ? h * 60 + mi : null; }
+function fmtHM(min){ var d = Math.floor(min / 1440), r = ((min % 1440) + 1440) % 1440; return pad2(Math.floor(r / 60)) + ':' + pad2(r % 60) + (d > 0 ? ' (+' + d + ' dia' + (d > 1 ? 's' : '') + ')' : d < 0 ? ' (dia anterior)' : ''); }
+// Atraso do cenário: com horário do agendamento e do início do check-in, é a diferença (check-in - agendamento); senão, o campo em minutos.
+function scenarioAtraso(sc){
+  var a = parseHM(sc.horaAgendamento), c = parseHM(sc.horaCheckin);
+  if (a !== null && c !== null) return c - a;
+  return Number(String(sc.atraso || '0').trim()) || 0;
+}
+// Até que horário um limite aceita o check-in (Controller: agora < agendamento + LimiteAtraso).
+function limitText(sc, limite){
+  var a = parseHM(sc.horaAgendamento);
+  if (limite >= 1440) return 'limite de ' + limite + ' min (na prática, sem limite no dia)';
+  return a === null ? 'limite de ' + limite + ' min' : 'aceita check-in iniciado antes de ' + fmtHM(a + limite) + ' (compromisso ' + fmtHM(a) + (limite >= 0 ? ' + ' : ' − ') + Math.abs(limite) + ' min)';
+}
+
+function newScenario(){ var s = {tipo:'CHECKIN', escape:false, escapeId:'', temAgendamento:true, atraso:'0', horaAgendamento:'', horaCheckin:'', values:{}}; SIM_FIELDS.forEach(function(f){ s.values[f.k] = ''; }); return s; }
+// Valor que o Controller mandaria para a procedure (null quando não há).
+function scenarioParam(sc, f){ return (f.appt && !sc.temAgendamento) ? null : blankToNull(sc.values[f.k]); }
+
+// Avalia UMA linha de CondicionaisPorFluxo contra o cenário, na ordem da procedure. Devolve {ok, reason, spec}.
+function evalCondition(row, sc){
+  var c = row.c;
+  var spec = SPECIFICITY_COLS.filter(function(k){ return c[k] !== null; }).length;
+  function fail(m){ return {ok:false, reason:m, spec:spec}; }
+  if (!row.flowAtivo) return fail('Fluxo inativo (AtivoInativo = 0).');
+  if (c.FlagEscape !== !!sc.escape) return fail(c.FlagEscape ? 'É condição de escape (FlagEscape = 1) e o cenário não é escape.' : 'É condição de fluxo normal (FlagEscape = 0) e o cenário é escape.');
+  if (c.TipoCheckin === null) return fail('TipoCheckin está NULL: nunca casa (a procedure compara com "=").');
+  if (!sqlEq(c.TipoCheckin, sc.tipo)) return fail('TipoCheckin é "' + c.TipoCheckin + '" e o cenário é "' + sc.tipo + '".');
+  for (var i = 0; i < SIM_FIELDS.length; i++) {
+    var f = SIM_FIELDS[i], cv = c[f.col];
+    if (cv === null) continue;
+    var p = scenarioParam(sc, f);
+    if (cv === '') return fail(f.label + ' (' + f.col + ') está com texto vazio, não NULL: nunca casa.');
+    if (p === null) return fail(f.label + ' exige "' + cv + '" e o cenário ' + (f.appt && !sc.temAgendamento ? 'não tem agendamento (o Controller manda NULL).' : 'está sem valor.'));
+    if (!sqlEq(cv, p, f.num)) return fail(f.label + ' é "' + cv + '" e o cenário tem "' + p + '".');
+  }
+  if (c.TipoProcedimento !== null) return fail('TipoProcedimento preenchido ("' + c.TipoProcedimento + '"): o Controller nunca envia @ProcedureType, então nunca casa.');
+  if (c.EscapeId !== null) {
+    var e = sc.escape ? blankToNull(sc.escapeId) : null;
+    if (e === null) return fail('EscapeId é "' + c.EscapeId + '" e o cenário ' + (sc.escape ? 'não informou o EscapeId.' : 'não é escape.'));
+    if (!sqlEq(c.EscapeId, e)) return fail('EscapeId é "' + c.EscapeId + '" e o cenário é "' + e + '".');
+  }
+  return {ok:true, reason:'', spec:spec};
+}
+
+// Monta o cenário que faz esta condição casar (o que o Controller precisaria enviar). Mantém o atraso do cenário atual.
+function scenarioFromRow(row, base){
+  var sc = newScenario(), c = row.c, t = String(c.TipoCheckin || '').toUpperCase();
+  sc.tipo = CHECKIN_TYPES_SIM.indexOf(t) >= 0 ? t : 'CHECKIN';
+  sc.escape = !!c.FlagEscape;
+  sc.escapeId = c.EscapeId || '';
+  sc.atraso = base ? base.atraso : '0';
+  SIM_FIELDS.forEach(function(f){ sc.values[f.k] = c[f.col] == null ? '' : c[f.col]; });
+  // Campos do agendamento preenchidos exigem agendamento; sem nenhum, mantém o que o usuário tinha.
+  var precisaAgenda = SIM_FIELDS.some(function(f){ return f.appt && c[f.col] != null; });
+  sc.temAgendamento = precisaAgenda ? true : (base ? base.temAgendamento : true);
+  return sc;
+}
+// O que a condição exige, em texto curto (para mostrar ao usuário).
+function conditionRequirements(row){
+  var c = row.c, r = ['TipoCheckin ' + (c.TipoCheckin === null ? 'NULL' : c.TipoCheckin), c.FlagEscape ? 'escape' + (c.EscapeId ? ' ' + c.EscapeId : '') : 'não é escape'];
+  SIM_FIELDS.forEach(function(f){ if (c[f.col] !== null) r.push(f.label + ' = ' + (c[f.col] === '' ? "''" : c[f.col])); });
+  if (c.TipoProcedimento !== null) r.push('TipoProcedimento = ' + c.TipoProcedimento + ' (nunca casa)');
+  return r;
+}
+
+function cmpPrioId(a, b){ return (a.row.prio - b.row.prio) || (a.row.flowId < b.row.flowId ? -1 : a.row.flowId > b.row.flowId ? 1 : 0); }
+
+// Simulação completa do início do check-in:
+//  1) FindFlow escolhe o fluxo (simulateFind);
+//  2) PosBlockStartFlow (FlowAppService): check-in com compromisso (não webcheckin) e agora >= compromisso + LimiteAtraso DO FLUXO ESCOLHIDO
+//     => redireciona para o escape LIMIT_DELAY (FindFlow de novo, como escape LIMIT_DELAY). O escape não passa de novo por esse bloqueio.
+function simulate(rows, sc){
+  var out = simulateFind(rows, sc);
+  var w = out.ranked[0];
+  if (w && out.delayApplied && !(out.atraso < w.row.limite)) {
+    var esc = JSON.parse(JSON.stringify(sc));
+    esc.escape = true; esc.escapeId = 'LIMIT_DELAY';
+    out.limitDelay = {limite:w.row.limite, flow:w.row.flowName, escape:simulateFind(rows, esc)};
+  }
+  return out;
+}
+
+// Só o FindFlow + desempate: {ranked:[{row, spec, note, chosen}], excluded:[{row, reason}], maxSpec, fallbackDelay}
+function simulateFind(rows, sc){
+  var evals = rows.map(function(r){ var e = evalCondition(r, sc); return {row:r, ok:e.ok, reason:e.reason, spec:e.spec}; });
+  var matches = evals.filter(function(e){ return e.ok; }), excluded = evals.filter(function(e){ return !e.ok; });
+  var out = {ranked:[], excluded:excluded, maxSpec:0, fallbackDelay:false, delayApplied:false};
+  if (!matches.length) return out;
+  var maxSpec = Math.max.apply(null, matches.map(function(m){ return m.spec; }));
+  out.maxSpec = maxSpec;
+  var top = matches.filter(function(m){ return m.spec === maxSpec; }), rest = matches.filter(function(m){ return m.spec < maxSpec; });
+  var atraso = scenarioAtraso(sc);
+  out.atraso = atraso;
+  var ordered;
+  if (sc.temAgendamento && String(sc.tipo).toLowerCase() === 'checkin') {
+    out.delayApplied = true;
+    // Controller: DateTime.Now < horário do compromisso + LimiteAtraso  <=>  atraso < limite
+    var valid = top.filter(function(m){ return atraso < m.row.limite; }), late = top.filter(function(m){ return !(atraso < m.row.limite); });
+    matches.forEach(function(m){ m.window = limitText(sc, m.row.limite); m.inWindow = atraso < m.row.limite; });
+    if (valid.length) {
+      ordered = valid.sort(cmpPrioId).concat(late.sort(cmpPrioId).map(function(m){ m.note = 'Fora do limite de atraso (' + limitText(sc, m.row.limite) + '; atraso do cenário ' + atraso + ' min): só seria escolhido se nenhum estivesse dentro do limite.'; return m; }));
+    } else {
+      out.fallbackDelay = true; // aviso geral na tela: ninguém dentro do limite, vale a prioridade entre todos
+      ordered = top.sort(cmpPrioId);
+    }
+  } else ordered = top.sort(cmpPrioId);
+  ordered.forEach(function(m, i){
+    if (i > 0 && !m.note) m.note = (m.row.prio > ordered[0].row.prio ? 'Mesma especificidade, prioridade maior (' + m.row.prio + ' > ' + ordered[0].row.prio + ').' : 'Mesma especificidade e prioridade: perde no desempate pelo ID do fluxo.');
+  });
+  rest.sort(function(a, b){ return (b.spec - a.spec) || cmpPrioId(a, b); }).forEach(function(m){
+    m.note = 'Atende, mas é menos específico (' + m.spec + ' parâmetro(s) contra ' + maxSpec + '): só seria escolhido se os mais específicos não existissem.';
+  });
+  if (out.fallbackDelay && ordered.length) ordered[0].note = 'Escolhido mesmo fora do limite: nenhum dos fluxos mais específicos estava dentro do limite de atraso, então o FindFlow escolhe pela prioridade.';
+  out.ranked = ordered.concat(rest);
+  out.ranked.forEach(function(m, i){ m.chosen = i === 0; });
+  return out;
+}
+
+// ---------- Dados de exemplo das telas (fictícios) ----------
+var EX_SERVICE = '00006700-A728-40D5-0000-C00000000000';
+var EX_FLOW = '0000E1E1-0000-4000-8000-000000000001';
+var EX_ESCAPE_FLOW = '0000E1E1-0000-4000-8000-000000000002';
+function exampleFlowJson(){
+  function P(n, acao, nome, desc, ordem, opcional, ativo, usos, params){
+    var id = '0000E2E2-0000-4000-8000-00000000000' + n;
+    return {id:id, acaoId:acao, acao:nome, descricao:desc, ordem:ordem, opcional:opcional, ativo:ativo, usos:usos, parametros:params || null,
+            anterior:n === 1 ? null : '0000E2E2-0000-4000-8000-00000000000' + (n - 1), seguinte:n === 6 ? null : '0000E2E2-0000-4000-8000-00000000000' + (n + 1)};
+  }
+  return {id:EX_FLOW, nome:'Fluxo exemplo', servico:EX_SERVICE, ativo:true, versaoPassos:111, versaoParametros:222, versaoCondicoes:333,
+    passos:[
+      P(1, 'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1', 'Inicio', 'Inicio', 1, false, true, 120),
+      P(2, '9F354CD4-2DB7-EA11-81B0-02BDB92CFAA1', 'Atualizar Cadastro', 'Atualizar Cadastro', 2, true, false, 40),
+      P(3, '37B17DC9-241E-EC11-AAC4-0213AAF9DDFA', 'Confirmar Dados', 'Confirmar Dados', 3, true, true, 0),
+      P(4, '1574E8C7-2DB7-EA11-81B0-02BDB92CFAA1', 'Encaminhamento', 'Encaminhamento', 4, false, true, 118,
+        [{nome:'FormTitle', valor:'Realizando encaminhamento'}, {nome:'Mensagem', valor:'Aguarde na recepção.'}]),
+      P(5, 'D7906953-439B-4927-B704-31A5F8D381EC', 'Imprimir Senha', 'Imprimir Senha', 5, false, true, 118, [{nome:'QUEUEPRINT_COPIES', valor:'1'}]),
+      P(6, 'F7C41CDF-31BA-EA11-81B0-02BDB92CFAA1', 'Fim', 'Fim', 6, false, true, 118)],
+    condicoes:[{IdFluxo:EX_FLOW, Unidade:'1', Convenio:'20', TipoCheckin:'Checkin', FlagEscape:false, Prioridade:1, LimiteAtraso:-15},
+               {IdFluxo:EX_FLOW, Unidade:'1', Convenio:'30', TipoCheckin:'Checkin', FlagEscape:false, Prioridade:1, LimiteAtraso:-15}]};
+}
+// Resultado da consulta do "Apagar fluxo" para um fluxo de exemplo nunca usado.
+function exampleDeleteText(){
+  var rows = [DELETE_COLUMNS.join('\t')];
+  [['0000E3E3-0000-4000-8000-000000000001', 'Inicio', 'Início', 0], ['0000E3E3-0000-4000-8000-000000000002', 'Encaminhamento', 'Encaminhamento', 2],
+   ['0000E3E3-0000-4000-8000-000000000003', 'Imprimir Senha', 'Imprimir senha', 1], ['0000E3E3-0000-4000-8000-000000000004', 'Fim', 'Fim', 0]].forEach(function(p, i){
+    rows.push([EX_FLOW, 'Fluxo exemplo', EX_SERVICE, '0', '1', '0', String(i + 1), p[0], p[1], p[2], String(p[3]), '0', '0', '0', '0', '0', '0'].join('\t'));
+  });
+  return rows.join('\r\n');
+}
+// Resultado da consulta do "Condicionais por fluxo" com fluxos de exemplo.
+function exampleCondText(){
+  function L(id, nome, tipo, esc, escId, prio, lim, uni, conv, amb){
+    return [id, nome, '1', tipo, esc, escId || 'NULL', prio, lim, uni || 'NULL', conv || 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', amb || 'NULL', 'NULL', 'NULL', 'NULL'].join('\t');
+  }
+  return [COND_QUERY_COLUMNS.join('\t'),
+    L('0000E1E1-0000-4000-8000-000000000003', 'Exemplo Fluxo Básico', 'Checkin', '0', null, '9', '5000'),
+    L(EX_FLOW, 'Fluxo exemplo', 'Checkin', '0', null, '1', '-15', '1', '20'),
+    L(EX_FLOW, 'Fluxo exemplo', 'Checkin', '0', null, '1', '-15', '1', '30'),
+    L('0000E1E1-0000-4000-8000-000000000004', 'Exemplo Convênio 20 sem limite', 'Checkin', '0', null, '2', '5000', null, '20'),
+    L('0000E1E1-0000-4000-8000-000000000005', 'Exemplo Unidade 1 Ambulatório 3', 'Checkin', '0', null, '1', '5000', '1', null, '3'),
+    L(EX_ESCAPE_FLOW, 'Exemplo Escape Documento Não Assinado', 'Checkin', '1', 'DOCUMENT_RESPONSIBILITY_NOT_SIGNED', '1', '5000', '1', null, '3'),
+    L('0000E1E1-0000-4000-8000-000000000006', 'Exemplo Fluxo Webcheckin', 'Webcheckin', '0', null, '1', '5000')].join('\r\n');
+}
+function exampleScenario(){ var sc = newScenario(); sc.values.unidade = '1'; sc.values.convenio = '20'; sc.horaAgendamento = '10:00'; sc.horaCheckin = '09:40'; return sc; }
 
 // ---------- Autotestes (rodam no botão "Autoteste" e fora do navegador) ----------
 var TESTS = [
@@ -482,7 +1536,7 @@ var TESTS = [
     var r = validate(st); ok(r.errors.some(function(e){ return e.indexOf('EscapeId') >= 0; }), 'erro de EscapeId');
   }],
   ['validação: 1º passo diferente de Início gera aviso', function(){
-    var st = newState(); st.flow.nome = 'X'; st.flow.servico = '00000000-0000-0000-0000-000000000001'; st.steps = [newStep({acaoId:STARTER_CATALOG[12].id, descricao:'Encaminhamento'}), newStep({acaoId:STARTER_CATALOG[14].id, descricao:'Fim'})];
+    var st = newState(); st.flow.nome = 'X'; st.steps = [newStep({acaoId:STARTER_CATALOG[12].id, descricao:'Encaminhamento'}), newStep({acaoId:STARTER_CATALOG[14].id, descricao:'Fim'})];
     var r = validate(st); ok(r.warnings.some(function(w){ return w.indexOf('1º passo') >= 0; }), 'aviso do 1º passo'); eq(r.errors.length, 0);
   }],
   ['validação: tamanhos e GUID', function(){
@@ -493,7 +1547,7 @@ var TESTS = [
     ['GUID válido', 'IdAcao', '100 caracteres', 'Unidade passa de 10', 'Prioridade é obrigatório'].forEach(function(t){ ok(all.indexOf(t) >= 0, 'esperava erro: ' + t); });
   }],
   ['sem condição: script não tem INSERT em CondicionaisPorFluxo', function(){
-    var st = newState(); st.flow.nome = 'X'; st.flow.servico = '00000000-0000-0000-0000-000000000001'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'})];
+    var st = newState(); st.flow.nome = 'X'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'})];
     eq(st.conds.length, 0);
     var sql = buildSql(st); not(sql, 'INSERT INTO dbo.CondicionaisPorFluxo'); not(sql, '-- Condições');
     var r = validate(st); eq(r.errors.length, 0); ok(r.warnings.some(function(w){ return w.indexOf('sem condição') >= 0; }), 'aviso de fluxo sem condição');
@@ -504,29 +1558,367 @@ var TESTS = [
     ok(!isUntouchedCond(newCond({TipoCheckin:'Checkin'})), 'TipoCheckin conta como preenchida');
     ok(!isUntouchedCond(newCond({Prioridade:'2'})), 'Prioridade diferente de 1 conta como preenchida');
   }],
-  ['exemplo genérico: 4 passos válidos e condição normal', function(){
-    var st = buildExample(newState()); st.flow.servico = '00000000-0000-0000-0000-000000000001';
-    eq(st.steps.length, 4); eq(st.conds[0].FlagEscape, false); eq(st.conds[0].TipoCheckin, 'Checkin');
-    var r = validate(st); eq(r.errors.length, 0);
+  ['exemplos das telas são válidos', function(){
+    var st = loadFlowForUpdate(newUpdState(), parseLoadedFlow(JSON.stringify(exampleFlowJson())).data);
+    eq(st.steps.length, 6); eq(updateChanges(st).length, 0);
+    st.steps[3].params[1].valor = 'Por favor aguarde.'; eq(validateUpdate(st).errors.length, 0);
+    var d = parseDeleteSnapshot(exampleDeleteText()); eq(d.error, null); eq(d.flows.length, 1); eq(checkSnapshot(d.flows, EX_FLOW, EX_SERVICE), null);
+    eq(validateDelete(d.flows, 'apagar').errors.length, 0);
+    var c = parseCondSnapshot(exampleCondText()); eq(c.error, null); eq(c.rows.length, 7);
+    var s = simulate(c.rows, exampleScenario()); eq(s.ranked[0].row.flowName, 'Fluxo exemplo'); eq(s.atraso, -20);
   }],
-  ['serviço vem vazio e é obrigatório', function(){
-    var st = newState(); eq(st.flow.servico, ''); st.flow.nome = 'X'; st.steps = [newStep({acaoId:STARTER_CATALOG[0].id, descricao:'Inicio'})];
-    ok(validate(st).errors.some(function(e){ return e.indexOf('Serviço') >= 0; }), 'erro de serviço');
+  ['atualizar: carrega para edição e sem alteração não gera script', function(){
+    var st = loadFlowForUpdate(newUpdState(), updSample());
+    eq(st.steps.length, 4); eq(st.steps[1].copyFrom, ''); eq(st.steps[1].params.length, 2); eq(st.steps[1].origem.usos, 7);
+    var r = validateUpdate(st); ok(r.errors.some(function(e){ return e.indexOf('Nenhuma alteração') >= 0; }), 'sem alteração');
+    eq(updateChanges(st).length, 0);
+  }],
+  ['atualizar: parâmetro alterado, passo novo no meio e passo desativado', function(){
+    var st = loadFlowForUpdate(newUpdState(), updSample());
+    st.steps[1].params[0].valor = 'Novo título';                 // altera FormTitle
+    st.steps[1].params.splice(1, 1);                             // remove Mensagem
+    st.steps[1].params.push({nome:'isLoading', valor:'true'});   // inclui isLoading
+    removeStepForUpdate(st, 2);                                  // tira "Confirmar Dados" (usado) -> desativar
+    st.steps.splice(2, 0, newStep({acaoId:'D7906953-439B-4927-B704-31A5F8D381EC', descricao:'Imprimir Senha'}));
+    var r = validateUpdate(st); eq(r.errors.length, 0);
+    var sql = buildUpdateSql(st);
+    has(sql, "DECLARE @IDFLUXO UNIQUEIDENTIFIER = 'AAAAAAAA-0000-0000-0000-000000000001';");
+    has(sql, "DECLARE @IDPASSO3 UNIQUEIDENTIFIER = NEWID();"); has(sql, "DECLARE @REMOVIDO1 UNIQUEIDENTIFIER = 'BBBBBBBB-0000-0000-0000-000000000003';");
+    has(sql, ') <> 12345'); has(sql, ') <> -77'); has(sql, ') <> 0');
+    has(sql, "UPDATE dbo.ParametrosPorPasso SET Valor = N'Novo título' WHERE IdPasso = @IDPASSO2 AND Nome = 'FormTitle';");
+    has(sql, "DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = @IDPASSO2 AND Nome = 'Mensagem';");
+    has(sql, "VALUES ('isLoading', N'true', @IDPASSO2);");
+    has(sql, "UPDATE dbo.PassosPorFluxo SET AtivoInativo = 0, Ordem = NULL, IdPassoSeguinte = NULL, IdPassoAnterior = ISNULL(IdPassoAnterior, @IDPASSO1) WHERE ID = @REMOVIDO1;");
+    has(sql, 'VALUES (@IDPASSO3, @IDFLUXO, @IDPASSO2, @IDPASSO4, N\'Imprimir Senha\'');
+    has(sql, 'IdPassoAnterior = @IDPASSO1, IdPassoSeguinte = @IDPASSO3 WHERE ID = @IDPASSO2;');
+    has(sql, 'Ordem = 4, Opcional = 0, AtivoInativo = 1, IdPassoAnterior = @IDPASSO3, IdPassoSeguinte = NULL WHERE ID = @IDPASSO4;');
+    not(sql, 'WHERE ID = @IDPASSO1;'); not(sql, 'DELETE FROM dbo.CondicionaisPorFluxo'); not(sql, 'ROLLBACK'); has(sql, '\r\nCOMMIT;');
+    ok(sql.indexOf('THROW 50021') < sql.indexOf('BEGIN TRAN;'), 'conferências antes');
+  }],
+  ['atualizar: fluxo com inativos de mesma Ordem carrega SEM alteração (fluxo antigo)', function(){
+    var st = loadFlowForUpdate(newUpdState(), legacySample());
+    eq(updateChanges(st).length, 0);
+    ok(validateUpdate(st).errors.some(function(e){ return e.indexOf('Nenhuma alteração') >= 0; }), 'nada a gravar');
+  }],
+  ['atualizar: inserir passo só reordena os seguintes que conflitam; inativos ficam', function(){
+    var st = loadFlowForUpdate(newUpdState(), legacySample());
+    // insere um passo ativo logo depois de "Confirmação de Dados" (ordem 2, ativo)
+    var pos = st.steps.map(function(s){ return s.descricao; }).indexOf('Confirmação de Dados');
+    st.steps.splice(pos + 1, 0, newStep({acaoId:'D7906953-439B-4927-B704-31A5F8D381EC', descricao:'Novo'}));
+    var lay = computeLayout(st), byDesc = {};
+    st.steps.forEach(function(s, i){ byDesc[s.descricao + (s.ativo ? '' : ' (inativo)')] = lay[i].ordem; });
+    eq(byDesc['Novo'], 3); eq(byDesc['Confirmação de Dados de Convênio'], 4); eq(byDesc['Exames Laboratoriais'], 5); eq(byDesc['Peso e Altura'], 6);
+    eq(byDesc['Atualização de Cadastro (inativo)'], 2); eq(byDesc['Inicio'], 1);
+    var sql = buildUpdateSql(st);
+    not(sql, "WHERE ID = @IDPASSO1;"); // Início intocado
+    ok(sql.indexOf('Atualização de Cadastro:') < 0, 'inativo anterior intocado');
+    has(sql, '(novo, ordem 3)');
+  }],
+  ['atualizar: "Reorganizar ordem" renumera 1..N', function(){
+    var st = loadFlowForUpdate(newUpdState(), legacySample()); st.renumber = true;
+    var lay = computeLayout(st); eq(lay.map(function(l){ return l.ordem; }).join(','), '1,2,3,4,5,6,7,8');
+    ok(updateChanges(st).length > 0, 'gera alterações');
+  }],
+  ['atualizar: apagar só passo nunca usado; condições e serviço', function(){
+    var st = loadFlowForUpdate(newUpdState(), updSample());
+    removeStepForUpdate(st, 2); st.removed[0].modo = 'apagar';
+    ok(validateUpdate(st).errors.some(function(e){ return e.indexOf('só pode ser desativado') >= 0; }), 'usado não apaga');
+    st = loadFlowForUpdate(newUpdState(), updSample());
+    st.steps[2].origem.usos = 0; removeStepForUpdate(st, 2); st.removed[0].modo = 'apagar';
+    eq(validateUpdate(st).errors.length, 0);
+    var sql = buildUpdateSql(st);
+    has(sql, 'IF EXISTS (SELECT 1 FROM dbo.Acompanhamento WHERE IdPasso = @REMOVIDO1)'); has(sql, 'DELETE FROM dbo.PassosPorFluxo WHERE ID = @REMOVIDO1;');
+    restoreRemoved(st, 0); eq(st.removed.length, 0);
+    st.conds[0].Unidade = '11';
+    sql = buildUpdateSql(st); has(sql, 'DELETE FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @IDFLUXO;'); has(sql, "'11'");
+    st.flow.servico = '00000000-0000-0000-0000-000000000000';
+    ok(validateUpdate(st).errors.some(function(e){ return e.indexOf('serviço') >= 0; }), 'serviço não muda');
+  }],
+  ['condicionais: consulta só com IdServico válido; leitura distingue NULL de vazio', function(){
+    eq(buildCondQuery(''), null); eq(buildCondQuery('x'), null);
+    var q = buildCondQuery('00006700-A728-40D5-0000-C00000000000'); has(q, "DECLARE @IdServico UNIQUEIDENTIFIER = '00006700-A728-40D5-0000-C00000000000';"); has(q, 'c.Agenda');
+    var hdr = COND_QUERY_COLUMNS.join('\t');
+    var line = ['AAAAAAAA-0000-0000-0000-000000000001','F1','1','Checkin','0','NULL','2','NULL','1','','NULL','NULL','NULL','NULL','NULL','NULL','NULL','3','NULL','NULL','NULL'].join('\t');
+    var r = parseCondSnapshot(hdr + '\r\n' + line);
+    eq(r.error, null); eq(r.rows.length, 1); eq(r.rows[0].c.Unidade, '1'); eq(r.rows[0].c.Convenio, ''); eq(r.rows[0].c.Medico, null);
+    eq(r.rows[0].limite, 0); eq(r.rows[0].prio, 2); eq(r.rows[0].c.FlagEscape, false);
+    ok(parseCondSnapshot('Fluxo\nX').error, 'erro sem colunas');
+  }],
+  ['condicionais: exemplo unidade 1 + ambulatório 3, mais específico no topo', function(){
+    var R = simRows([
+      ['A1', 'Só unidade 1', 1, {Unidade:'1'}],
+      ['B1', 'Unidade 1 + ambulatório 3', 5, {Unidade:'1', AmbulatorioId:'3'}],
+      ['C1', 'Unidade 2', 1, {Unidade:'2'}],
+      ['D1', 'Sem critério', 1, {}],
+      ['E1', 'Escape', 1, {Unidade:'1'}, {FlagEscape:true}],
+      ['F1', 'Convênio 20', 1, {Convenio:'20'}]
+    ]);
+    var sc = newScenario(); sc.values.unidade = '1'; sc.values.ambulatorio = '3';
+    var s = simulate(R, sc);
+    eq(s.ranked[0].row.flowName, 'Unidade 1 + ambulatório 3'); eq(s.maxSpec, 1);
+    eq(s.ranked.length, 3); ok(s.ranked[1].note.indexOf('menos específico') >= 0, 'demais são menos específicos');
+    var exc = s.excluded.map(function(e){ return e.row.flowName + ': ' + e.reason; }).join(' | ');
+    has(exc, 'Unidade 2: Unidade é "2"'); has(exc, 'Escape: É condição de escape'); has(exc, 'Convênio 20: Convênio exige "20"');
+  }],
+  ['condicionais: Unidade NÃO conta na especificidade (vence a prioridade)', function(){
+    var R = simRows([['A1', 'Com unidade', 2, {Unidade:'1'}], ['B1', 'Sem unidade', 1, {}]]);
+    var sc = newScenario(); sc.values.unidade = '1';
+    var s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'Sem unidade'); has(s.ranked[1].note, 'prioridade maior');
+  }],
+  ['condicionais: limite de atraso no check-in com agendamento', function(){
+    var R = simRows([['A1', 'Limite 10', 1, {}, {LimiteAtraso:'10'}], ['B1', 'Limite 60', 2, {}, {LimiteAtraso:'60'}]]);
+    var sc = newScenario(); sc.atraso = '30';
+    eq(simulate(R, sc).ranked[0].row.flowName, 'Limite 60');
+    sc.atraso = '100'; var s = simulate(R, sc); eq(s.fallbackDelay, true); eq(s.ranked[0].row.flowName, 'Limite 10');
+    sc.atraso = '30'; sc.tipo = 'WEBCHECKIN'; R.forEach(function(r){ r.c.TipoCheckin = 'WebCheckin'; });
+    s = simulate(R, sc); eq(s.delayApplied, false); eq(s.ranked[0].row.flowName, 'Limite 10');
+  }],
+  ['condicionais: sem agendamento o Controller manda NULL nos campos do agendamento', function(){
+    var R = simRows([['A1', 'Convênio 20', 1, {Convenio:'20'}], ['B1', 'Geral', 2, {}]]);
+    var sc = newScenario(); sc.values.convenio = '20';
+    eq(simulate(R, sc).ranked[0].row.flowName, 'Convênio 20');
+    sc.temAgendamento = false; var s = simulate(R, sc);
+    eq(s.ranked[0].row.flowName, 'Geral'); has(s.excluded[0].reason, 'não tem agendamento');
+  }],
+  ['condicionais: TipoProcedimento, TipoCheckin NULL, texto vazio e EscapeId', function(){
+    var R = simRows([
+      ['A1', 'Com TipoProcedimento', 1, {TipoProcedimento:'X'}],
+      ['B1', 'TipoCheckin nulo', 1, {}, {TipoCheckin:null}],
+      ['C1', 'Unidade vazia', 1, {Unidade:''}],
+      ['D1', 'Escape acompanhante', 1, {}, {FlagEscape:true, EscapeId:'COMPANION_INIT_NAME'}],
+      ['E1', 'Escape geral', 2, {}, {FlagEscape:true}]
+    ]);
+    var sc = newScenario(); sc.values.unidade = '1';
+    var exc = simulate(R, sc).excluded.map(function(e){ return e.reason; }).join(' | ');
+    has(exc, 'nunca envia @ProcedureType'); has(exc, 'TipoCheckin está NULL'); has(exc, 'texto vazio');
+    sc.escape = true; sc.escapeId = 'COMPANION_INIT_NAME';
+    var s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'Escape acompanhante'); eq(s.ranked[1].row.flowName, 'Escape geral');
+    sc.escapeId = 'REQUEST_ACCESS_RESPONSE_FAIL'; s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'Escape geral');
+  }],
+  ['condicionais: "usar no cenário" faz a condição casar (escape com ambulatório)', function(){
+    var R = simRows([
+      ['F4', 'Escape Documento Não Assinado', 1, {Unidade:'11', AmbulatorioId:'11'}, {FlagEscape:true, EscapeId:'DOCUMENT_RESPONSIBILITY_NOT_SIGNED'}],
+      ['F4', 'Escape Documento Não Assinado', 1, {Unidade:'1', AmbulatorioId:'1'}, {FlagEscape:true, EscapeId:'DOCUMENT_RESPONSIBILITY_NOT_SIGNED'}],
+      ['C1', 'Escape Atraso', 1, {}, {FlagEscape:true, EscapeId:'LIMIT_DELAY'}],
+      ['D1', 'Básico', 1, {Convenio:'10'}]
+    ]);
+    var sc = newScenario(); sc.escape = true; sc.values.unidade = '11';
+    var s = simulate(R, sc); eq(s.ranked.length, 0);
+    has(s.excluded[0].reason, 'Ambulatório exige "11"');
+    sc = scenarioFromRow(R[0], sc);
+    eq(sc.escape, true); eq(sc.escapeId, 'DOCUMENT_RESPONSIBILITY_NOT_SIGNED'); eq(sc.values.unidade, '11'); eq(sc.values.ambulatorio, '11'); eq(sc.tipo, 'CHECKIN');
+    s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'Escape Documento Não Assinado'); eq(s.ranked.length, 1);
+    sc = scenarioFromRow(R[3], sc); eq(sc.temAgendamento, true); eq(sc.values.convenio, '10'); eq(simulate(R, sc).ranked[0].row.flowName, 'Básico');
+    has(conditionRequirements(R[0]).join(' · '), 'escape DOCUMENT_RESPONSIBILITY_NOT_SIGNED · Unidade = 11 · Ambulatório = 11');
+  }],
+  ['condicionais: horário do agendamento e do check-in definem o atraso', function(){
+    var R = simRows([['A1', 'Sem Guia (limite -60)', 1, {}, {LimiteAtraso:'-60'}], ['B1', 'Atendimento (limite 15)', 2, {}, {LimiteAtraso:'15'}], ['C1', 'Geral (5000)', 3, {}, {LimiteAtraso:'5000'}]]);
+    var sc = newScenario(); sc.horaAgendamento = '10:00';
+    sc.horaCheckin = '08:30'; eq(scenarioAtraso(sc), -90); eq(simulate(R, sc).ranked[0].row.flowName, 'Sem Guia (limite -60)');   // chegou 1h30 antes
+    sc.horaCheckin = '09:00'; eq(scenarioAtraso(sc), -60); eq(simulate(R, sc).ranked[0].row.flowName, 'Atendimento (limite 15)'); // -60 não é < -60
+    sc.horaCheckin = '10:14'; eq(simulate(R, sc).ranked[0].row.flowName, 'Atendimento (limite 15)');
+    sc.horaCheckin = '10:15'; eq(simulate(R, sc).ranked[0].row.flowName, 'Geral (5000)');
+    has(limitText(sc, 15), 'antes de 10:15'); has(limitText(sc, -60), 'antes de 09:00'); has(limitText(sc, 5000), 'sem limite');
+    sc.horaCheckin = ''; sc.atraso = '20'; eq(scenarioAtraso(sc), 20); // sem horários, vale o campo em minutos
+    eq(parseHM('7:05'), 425); eq(parseHM('24:00'), null); eq(fmtHM(-30), '23:30 (dia anterior)');
+  }],
+  ['condicionais: fora do limite do fluxo escolhido vai para o escape LIMIT_DELAY (PosBlockStartFlow)', function(){
+    var R = simRows([
+      ['A1', 'Elegibilidade com Guia', 1, {Convenio:'10'}, {LimiteAtraso:'-60'}],
+      ['B1', 'com Guia sem Exames', 2, {Convenio:'10'}, {LimiteAtraso:'-15'}],
+      ['C1', 'Básico', 1, {}, {LimiteAtraso:'5000'}],
+      ['D1', 'Escape Tela de Atraso', 1, {}, {FlagEscape:true, EscapeId:'LIMIT_DELAY', LimiteAtraso:'5000'}],
+      ['E1', 'Escape Documento', 1, {}, {FlagEscape:true, EscapeId:'DOCUMENT_RESPONSIBILITY_NOT_SIGNED', LimiteAtraso:'5000'}]
+    ]);
+    var sc = newScenario(); sc.values.convenio = '10'; sc.horaAgendamento = '12:00'; sc.horaCheckin = '19:00';
+    var s = simulate(R, sc);
+    eq(s.fallbackDelay, true); eq(s.ranked[0].row.flowName, 'Elegibilidade com Guia'); has(s.ranked[0].note, 'mesmo fora do limite');
+    ok(s.limitDelay, 'redireciona'); eq(s.limitDelay.escape.ranked[0].row.flowName, 'Escape Tela de Atraso'); eq(s.limitDelay.escape.limitDelay, undefined);
+    sc.horaCheckin = '10:30'; s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'Elegibilidade com Guia'); eq(s.limitDelay, undefined);
+    sc.horaCheckin = '11:30'; s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'com Guia sem Exames'); eq(s.limitDelay, undefined);
+    sc.tipo = 'WEBCHECKIN'; R.forEach(function(r){ r.c.TipoCheckin = 'WebCheckin'; }); sc.horaCheckin = '19:00'; eq(simulate(R, sc).limitDelay, undefined);
+  }],
+  ['condicionais: empate total desempata pelo ID do fluxo (ordem do Guid)', function(){
+    var R = simRows([['F1', 'Segundo', 1, {}], ['A1', 'Primeiro', 1, {}]]);
+    var s = simulate(R, newScenario()); eq(s.ranked[0].row.flowName, 'Primeiro'); has(s.ranked[1].note, 'desempate pelo ID');
+  }],
+  ['carregar: consulta só com IdFluxo e IdServico válidos, em FOR JSON', function(){
+    var F = 'aaaaaaaa-0000-0000-0000-000000000001', S = '00006700-A728-40D5-0000-C00000000000';
+    eq(buildLoadQuery('', S), null); eq(buildLoadQuery(F, null), null); eq(buildLoadQuery('x', S), null);
+    var q = buildLoadQuery(F, S);
+    has(q, "DECLARE @IdFluxo   UNIQUEIDENTIFIER = 'AAAAAAAA-0000-0000-0000-000000000001';"); has(q, 'WHERE f.ID = @IdFluxo AND f.IdServico = @IdServico');
+    has(q, 'FOR JSON PATH, WITHOUT_ARRAY_WRAPPER'); has(q, 'CAST(pp.Valor AS NVARCHAR(MAX)) AS valor');
+    has(q, 'SELECT SUBSTRING(@j, n.i * 4000 + 1, 4000) AS FluxoJson'); has(q, 'ORDER BY n.i;'); has(q, "SELECT 'NULL' AS FluxoJson;"); not(q, 'WITH ');
+  }],
+  ['carregar: lê a célula (com cabeçalho), recusa NULL e JSON cortado', function(){
+    var json = '{"id":"aaaaaaaa-0000-0000-0000-000000000001","nome":"Fluxo X","servico":"00006700-A728-40D5-0000-C00000000000","ativo":true,' +
+      '"passos":[{"id":"bbbbbbbb-0000-0000-0000-000000000002","acaoId":"F7C41CDF-31BA-EA11-81B0-02BDB92CFAA1","acao":"Fim","descricao":"Fim","ordem":2,"opcional":false,"ativo":true,"usos":0,"parametros":null},' +
+      '{"id":"bbbbbbbb-0000-0000-0000-000000000001","acaoId":"99999999-0000-0000-0000-000000000001","acao":"Ação Nova","acaoTela":true,"acaoComponente":"comp","descricao":"Passo \\"A\\"\\tcom tab","ordem":1,"opcional":true,"ativo":true,"usos":3,' +
+      '"parametros":[{"nome":"QUEUEPRINT_LAYOUT","valor":"{\\"a\\":1}\\nlinha2"},{"nome":"x","valor":null}]}],' +
+      '"condicoes":[{"IdFluxo":"aaaaaaaa-0000-0000-0000-000000000001","Unidade":"1","Convenio":null,"FlagEscape":true,"Prioridade":1,"LimiteAtraso":-15,"EscapeId":"COMPANION_INIT_NAME"}]}';
+    // JSON em pedaços de 40 caracteres, uma linha por pedaço (como a consulta devolve), com cabeçalho e linha vazia no fim
+    var partes = []; for (var p = 0; p < json.length; p += 40) partes.push(json.slice(p, p + 40));
+    var rp = parseLoadedFlow('FluxoJson\r\n' + partes.join('\r\n') + '\r\n');
+    eq(rp.error, undefined); eq(rp.data.passos.length, 2);
+    // pedaço que termina em espaço dentro de um texto não pode perder o espaço
+    var j2 = json.replace('"Fluxo X"', '"Fluxo    X"'), cut = j2.indexOf('Fluxo    X') + 7;
+    var rs = parseLoadedFlow(j2.slice(0, cut) + '\n' + j2.slice(cut)); eq(rs.data.nome, 'Fluxo    X');
+    ok(parseLoadedFlow('FluxoJson\r\nNULL').error.indexOf('não existe') >= 0, 'NULL em pedaços');
+    var r = parseLoadedFlow('FluxoJson\r\n' + json);
+    eq(r.error, undefined); eq(r.data.id, 'AAAAAAAA-0000-0000-0000-000000000001'); eq(r.data.passos[0].ordem, 1);
+    ok(parseLoadedFlow('FluxoJson\r\nNULL').error.indexOf('não existe') >= 0, 'NULL = não existe');
+    ok(parseLoadedFlow(json.slice(0, 200)).error, 'JSON cortado');
+    ok(parseLoadedFlow('').error, 'vazio');
+    var st = loadFlowIntoState(newState(), r.data);
+    eq(st.flow.nome, 'Fluxo X'); eq(st.flow.ativo, true); eq(st.flow.servico, '00006700-A728-40D5-0000-C00000000000');
+    eq(st.steps.length, 2); eq(st.steps[0].descricao, 'Passo "A"\tcom tab'); eq(st.steps[0].opcional, true);
+    eq(st.steps[0].copyFrom, 'BBBBBBBB-0000-0000-0000-000000000001'); eq(st.steps[1].copyFrom, '');
+    ok(findAction(st, '99999999-0000-0000-0000-000000000001'), 'ação ausente entra no catálogo');
+    eq(st.conds.length, 1); eq(st.conds[0].FlagEscape, true); eq(st.conds[0].LimiteAtraso, '-15'); eq(st.conds[0].Convenio, '');
+    materializeParams(st.steps[0]);
+    eq(st.steps[0].copyFrom, ''); eq(st.steps[0].params.length, 2); eq(st.steps[0].params[0].valor, '{"a":1}\nlinha2'); eq(st.steps[0].params[1].valor, '');
+    var sql = buildSql(st); has(sql, "VALUES ('QUEUEPRINT_LAYOUT', N'{\"a\":1}\nlinha2', @IDPASSO1);");
+  }],
+  ['carregar: avisa condições e nome iguais ao fluxo de origem', function(){
+    var data = {id:'AAAAAAAA-0000-0000-0000-000000000001', nome:'Fluxo X', servico:'00006700-A728-40D5-0000-C00000000000', ativo:true,
+      passos:[{id:'BBBBBBBB-0000-0000-0000-000000000001', acaoId:STARTER_CATALOG[0].id, descricao:'Inicio', ordem:1, ativo:true, parametros:null}],
+      condicoes:[{Unidade:'1', FlagEscape:false, Prioridade:1, TipoCheckin:'Checkin'}]};
+    var st = loadFlowIntoState(newState(), data), w = validate(st).warnings.join(' | ');
+    ok(w.indexOf('competir') >= 0, 'aviso de condições iguais'); ok(w.indexOf('nome está igual') >= 0, 'aviso de nome igual');
+    st.conds[0].Unidade = '11'; st.flow.nome = 'Fluxo X v2'; w = validate(st).warnings.join(' | ');
+    ok(w.indexOf('competir') < 0 && w.indexOf('nome está igual') < 0, 'sem avisos depois de ajustar');
+  }],
+  ['apagar: consulta só é gerada com IdFluxo e IdServico válidos', function(){
+    var F = 'aaaaaaaa-0000-0000-0000-000000000001', S = '00006700-A728-40D5-0000-C00000000000';
+    eq(buildDeleteQuery('', S), null); eq(buildDeleteQuery(F, ''), null); eq(buildDeleteQuery(null, null), null);
+    eq(buildDeleteQuery('abc', S), null); eq(buildDeleteQuery(F, 'NULL'), null);
+    var q = buildDeleteQuery(F, S);
+    has(q, "DECLARE @IdFluxo   UNIQUEIDENTIFIER = 'AAAAAAAA-0000-0000-0000-000000000001';"); has(q, "DECLARE @IdServico UNIQUEIDENTIFIER = '" + S + "';");
+    has(q, 'WHERE f.ID = @IdFluxo AND f.IdServico = @IdServico;'); not(q, '@Nome'); not(q, '= NULL');
+  }],
+  ['apagar: resultado colado precisa ser do fluxo e serviço informados', function(){
+    var F = 'AAAAAAAA-0000-0000-0000-000000000001', S = '00006700-A728-40D5-0000-C00000000000';
+    var flow = {id:F, servico:S, steps:[]};
+    eq(checkSnapshot([flow], F.toLowerCase(), S), null);
+    ok(checkSnapshot([flow], 'AAAAAAAA-0000-0000-0000-000000000009', S), 'outro fluxo');
+    ok(checkSnapshot([flow], F, '00000000-0000-0000-0000-000000000000'), 'outro serviço');
+    ok(checkSnapshot([flow, {id:'BBBBBBBB-0000-0000-0000-000000000001', servico:S, steps:[]}], F, S), 'mais de um fluxo');
+    ok(checkSnapshot([], F, S), 'vazio');
+  }],
+  ['apagar: lê o resultado com cabeçalho e agrupa por fluxo', function(){
+    var hdr = DELETE_COLUMNS.join('\t');
+    var r = parseDeleteSnapshot(hdr + '\n' +
+      'AAAAAAAA-0000-0000-0000-000000000001\tFluxo A\t00006700-A728-40D5-0000-C00000000000\t1\t2\t0\t1\tBBBBBBBB-0000-0000-0000-000000000001\tInicio\tInício\t0\t0\t0\t0\t0\t0\t0\n' +
+      'AAAAAAAA-0000-0000-0000-000000000001\tFluxo A\t00006700-A728-40D5-0000-C00000000000\t1\t2\t0\t2\tBBBBBBBB-0000-0000-0000-000000000002\tFim\tFim\t3\t0\t1\t0\t0\t0\t0\n' +
+      'AAAAAAAA-0000-0000-0000-000000000002\tFluxo B\t00006700-A728-40D5-0000-C00000000000\t0\t0\t0\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\n');
+    eq(r.error, null); eq(r.flows.length, 2); eq(r.flows[0].steps.length, 2); eq(r.flows[0].qtdCond, 2); eq(r.flows[0].ativo, true);
+    eq(r.flows[1].steps.length, 0); eq(r.flows[1].ativo, false);
+    var u = flowUsage(r.flows[0]); eq(u.param, 3); eq(u.doc, 1); eq(u.inUse, false);
+  }],
+  ['apagar: sem cabeçalho usa a ordem da consulta; sem IdFluxo dá erro', function(){
+    var r = parseDeleteSnapshot('AAAAAAAA-0000-0000-0000-000000000001\tX\t00006700-A728-40D5-0000-C00000000000\t1\t0\t0\t1\tBBBBBBBB-0000-0000-0000-000000000001\tInicio\tInício\t0\t0\t0\t0\t0\t0\t5');
+    eq(r.flows.length, 1); eq(flowUsage(r.flows[0]).acomp, 5); eq(flowUsage(r.flows[0]).inUse, true);
+    ok(parseDeleteSnapshot('Fluxo\tPasso\nX\tY').error, 'erro sem colunas');
+  }],
+  ['apagar: fluxo usado bloqueia apagar e permite desativar', function(){
+    var f = {id:'AAAAAAAA-0000-0000-0000-000000000001', nome:'X', servico:'00006700-A728-40D5-0000-C00000000000', ativo:true, qtdCond:1, qtdCheckins:3, steps:[]};
+    ok(validateDelete([f], 'apagar').errors.length === 1, 'erro ao apagar fluxo usado');
+    eq(validateDelete([f], 'desativar').errors.length, 0);
+    var sql = buildDeleteSql([f], 'desativar');
+    has(sql, "UPDATE dbo.Fluxos SET AtivoInativo = 0 WHERE ID = @F1 AND IdServico = '00006700-A728-40D5-0000-C00000000000';"); not(sql, 'DELETE'); has(sql, '\r\nCOMMIT;'); not(sql, 'ROLLBACK');
+  }],
+  ['apagar: script na ordem segura, com conferências antes', function(){
+    var f = {id:'AAAAAAAA-0000-0000-0000-000000000001', nome:"D'Fluxo", servico:'00006700-A728-40D5-0000-C00000000000', ativo:false, qtdCond:1, qtdCheckins:0,
+      steps:[{id:'BBBBBBBB-0000-0000-0000-000000000001', ordem:1, passo:'Inicio', acao:'Início', qtdParam:1, qtdRet:0, qtdDoc:0, qtdPerg:0, qtdResp:0, qtdPergForm:0, qtdAcomp:0}]};
+    eq(validateDelete([f], 'apagar').errors.length, 0);
+    var sql = buildDeleteSql([f], 'apagar');
+    has(sql, "DECLARE @F1 UNIQUEIDENTIFIER = 'AAAAAAAA-0000-0000-0000-000000000001';");
+    has(sql, 'IF (SELECT COUNT(*) FROM dbo.PassosPorFluxo WHERE IdFluxo = @F1) <> 1'); has(sql, "N'O fluxo D''Fluxo mudou");
+    var order = ['THROW 50014', 'BEGIN TRAN;', 'DELETE x FROM dbo.ParametrosPorPasso', 'DELETE x FROM dbo.RetornosPorPasso', 'DELETE x FROM dbo.PerguntasFormulario',
+      'DELETE x FROM dbo.Documentos', 'UPDATE x SET IdPasso = NULL FROM dbo.PerguntaFormulario', 'DELETE FROM dbo.CondicionaisPorFluxo', 'DELETE FROM dbo.PassosPorFluxo',
+      "DELETE FROM dbo.Fluxos WHERE ID = @F1 AND IdServico = '00006700-A728-40D5-0000-C00000000000';", '\r\nCOMMIT;', 'FluxoRestante'];
+    has(sql, "IF NOT EXISTS (SELECT 1 FROM dbo.Fluxos WHERE ID = @F1 AND IdServico = '00006700-A728-40D5-0000-C00000000000')");
+    var last = -1;
+    order.forEach(function(t){ var p = sql.indexOf(t); ok(p > last, 'fora de ordem ou ausente: ' + t); last = p; });
+  }],
+  ['exemplo genérico: 5 passos válidos e condição normal', function(){
+    var st = buildExample(newState());
+    eq(st.flow.nome, 'Fluxo exemplo'); eq(st.flow.servico, EX_SERVICE);
+    eq(st.steps.map(function(s){ return s.descricao; }).join('|'), 'Inicio|Atualizar Cadastro|Atualizar Endereço|Gerar Atendimento|Fim');
+    eq(st.conds.length, 1); eq(st.conds[0].FlagEscape, false);
+    eq(validate(st).errors.length, 0);
   }]
 ];
+// Fluxo de exemplo (formato do FluxoJson) para os testes do Atualizar.
+function updSample(){
+  var F = 'AAAAAAAA-0000-0000-0000-000000000001', P = function(n){ return 'BBBBBBBB-0000-0000-0000-00000000000' + n; };
+  return {id:F, nome:'Fluxo X', servico:'00006700-A728-40D5-0000-C00000000000', ativo:true, versaoPassos:12345, versaoParametros:-77, versaoCondicoes:null,
+    passos:[
+      {id:P(1), acaoId:'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1', acao:'Início', descricao:'Início', ordem:1, opcional:false, ativo:true, anterior:null, seguinte:P(2), usos:7, parametros:null},
+      {id:P(2), acaoId:'1574E8C7-2DB7-EA11-81B0-02BDB92CFAA1', acao:'Encaminhamento', descricao:'Encaminhamento', ordem:2, opcional:false, ativo:true, anterior:P(1), seguinte:P(3), usos:7,
+       parametros:[{nome:'FormTitle', valor:'Realizando encaminhamento'}, {nome:'Mensagem', valor:'Aguarde'}]},
+      {id:P(3), acaoId:'37B17DC9-241E-EC11-AAC4-0213AAF9DDFA', acao:'Confirmar Dados', descricao:'Confirmar Dados', ordem:3, opcional:true, ativo:true, anterior:P(2), seguinte:P(4), usos:5, parametros:null},
+      {id:P(4), acaoId:'F7C41CDF-31BA-EA11-81B0-02BDB92CFAA1', acao:'Fim', descricao:'Fim', ordem:4, opcional:false, ativo:true, anterior:P(3), seguinte:null, usos:7, parametros:null}],
+    condicoes:[{IdFluxo:F, Unidade:'1', TipoCheckin:'Checkin', FlagEscape:false, Prioridade:1, LimiteAtraso:5000}]};
+}
+// Fluxo fictício no formato de um fluxo antigo: "Fluxo Básico Sem Guia (exemplo)": passos inativos com a mesma Ordem de ativos e encadeamento "torto".
+function legacySample(){
+  function P(id, desc, ordem, ativo, ant, seg){ return {id:id, acaoId:'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1', acao:'x', descricao:desc, ordem:ordem, opcional:false, ativo:ativo, anterior:ant, seguinte:seg, usos:10, parametros:null}; }
+  var A = '00000000-0000-4000-9000-000000000004', B = '00000000-0000-4000-9000-000000000009', C = '00000000-0000-4000-9000-000000000006',
+      D = '00000000-0000-4000-9000-000000000002', E = '00000000-0000-4000-9000-000000000008', F = '00000000-0000-4000-9000-000000000001',
+      G = '00000000-0000-4000-9000-000000000011', H = '00000000-0000-4000-9000-000000000007';
+  return {id:'00000000-0000-4000-9000-000000000003', nome:'Fluxo Básico Sem Guia (exemplo)', servico:'00000000-0000-4000-9000-000000000005', ativo:true,
+    versaoPassos:-278539859, versaoParametros:928938252, versaoCondicoes:-993580354,
+    passos:[P(A, 'Inicio', 1, true, null, B), P(B, 'Atualização de Cadastro', 2, false, A, E), P(C, 'Confirmação de Dados', 2, true, A, D),
+            P(D, 'Confirmação de Dados de Convênio', 3, true, C, G), P(E, 'Atualização de Endereço', 3, false, B, C), P(F, 'Exames Laboratoriais', 4, false, E, null),
+            P(G, 'Exames Laboratoriais', 4, true, D, H), P(H, 'Peso e Altura', 5, true, G, null)].map(function(p){ return p; }),
+    condicoes:[{IdFluxo:'00000000-0000-4000-9000-000000000003', Convenio:'1', TipoCheckin:'Checkin', FlagEscape:false, Prioridade:1, LimiteAtraso:-60}]};
+}
+// Monta linhas de condição para os testes: [prefixoId, nome, prioridade, colunas, extras]
+function simRows(list){
+  return list.map(function(d, i){
+    var c = {TipoCheckin:'Checkin', FlagEscape:false, EscapeId:null, Prioridade:String(d[2]), LimiteAtraso:null};
+    COND_QUERY_COLUMNS.slice(8).forEach(function(k){ c[k] = null; });
+    Object.keys(d[3] || {}).forEach(function(k){ c[k] = d[3][k]; });
+    Object.keys(d[4] || {}).forEach(function(k){ c[k] = d[4][k]; });
+    var id = (d[0] + '000000').slice(0, 8) + '-0000-0000-0000-' + ('000000000000' + (i + 1)).slice(-12);
+    return {n:i + 1, flowId:up(id), flowName:d[1], flowAtivo:true, c:c, prio:toInt(c.Prioridade), limite:c.LimiteAtraso == null ? 0 : toInt(c.LimiteAtraso)};
+  });
+}
 function eq(a, b){ if (a !== b) throw new Error('esperado ' + JSON.stringify(b) + ', obtido ' + JSON.stringify(a)); }
 function ok(c, m){ if (!c) throw new Error(m || 'condição falsa'); }
 function has(s, t){ if (String(s).indexOf(t) < 0) throw new Error('não contém: ' + t); }
 function not(s, t){ if (String(s).indexOf(t) >= 0) throw new Error('não deveria conter: ' + t); }
-function runTests(){ return TESTS.map(function(t){ try { t[1](); return {name:t[0], ok:true}; } catch (e) { return {name:t[0], ok:false, msg:e.message}; } }); }
+function runTests(){ var _svc = DEFAULT_SERVICE; DEFAULT_SERVICE = '00006700-A728-40D5-0000-C00000000000'; try { return runTests0(); } finally { DEFAULT_SERVICE = _svc; } }
+function runTests0(){ return TESTS.map(function(t){ try { t[1](); return {name:t[0], ok:true}; } catch (e) { return {name:t[0], ok:false, msg:e.message}; } }); }
 if (typeof module !== 'undefined') module.exports = {runTests:runTests};
 </script>
 
 <!-- ===================== TELA ===================== -->
 <script>
 (function(){
-  var STORAGE_KEY = 'geradorFluxos.v1';
+  var STORAGE_KEY = 'GestorDeFluxos.v1';
+  // Migra o rascunho salvo com o nome antigo (geradorFluxos.v1), uma vez só.
+  try { if (!localStorage.getItem(STORAGE_KEY) && localStorage.getItem('geradorFluxos.v1')) { localStorage.setItem(STORAGE_KEY, localStorage.getItem('geradorFluxos.v1')); localStorage.removeItem('geradorFluxos.v1'); } } catch (e) {}
   var state = load();
+  // Dois rascunhos no mesmo editor: "novo" (Criar) e "upd" (Atualizar). O catálogo de ações é compartilhado.
+  var UPD_KEY = 'GestorDeFluxos.upd.v1';
+  var mode = 'novo';
+  var docs = {novo:state, upd:loadUpd()};
+  function loadUpd(){
+    var st = newUpdState(state.catalog);
+    try {
+      var s = JSON.parse(localStorage.getItem(UPD_KEY));
+      if (s && s.orig && Array.isArray(s.steps)) {
+        st.flow = s.flow; st.orig = s.orig;
+        st.steps = s.steps.map(function(x){ return newStep(x); });
+        st.conds = (s.conds || []).map(function(c){ return newCond(c); });
+        st.removed = (s.removed || []).map(function(r){ return {step:newStep(r.step), modo:r.modo === 'apagar' ? 'apagar' : 'desativar'}; });
+        st.renumber = !!s.renumber;
+      }
+    } catch (e) {}
+    return st;
+  }
   var dragUid = null;
 
   function load(){
@@ -543,7 +1935,24 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     } catch (e) {}
     return newState();
   }
-  function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+  function save(){
+    try {
+      if (mode === 'upd') { var u = docs.upd; localStorage.setItem(UPD_KEY, JSON.stringify({flow:u.flow, steps:u.steps, conds:u.conds, removed:u.removed, orig:u.orig, renumber:!!u.renumber})); }
+      else localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+  // Troca o documento do editor e move o editor para a tela certa.
+  function setEditorMode(m){
+    if (mode !== m) { save(); mode = m; }
+    docs.upd.catalog = docs.novo.catalog;
+    state = docs[m];
+    $(m === 'upd' ? 'slot-upd' : 'slot-novo').appendChild($('editor'));
+    $('removed-box').hidden = m !== 'upd';
+    $('changes-box').hidden = true; // as alterações aparecem na Visualização
+    $('btn-renumber').hidden = m !== 'upd';
+    $('flow-servico').disabled = m === 'upd';
+    renderAll();
+  }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function $(id){ return document.getElementById(id); }
   function stepByUid(uid){ for (var i = 0; i < state.steps.length; i++) if (state.steps[i].uid === uid) return i; return -1; }
@@ -559,6 +1968,24 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     $('flow-ativo').checked = !!state.flow.ativo;
     var real = state.catalog.filter(function(a){ return a.origem === 'banco'; }).length;
     $('catalog-count').textContent = '(' + state.catalog.length + ' ações' + (real ? '' : ', catálogo inicial') + ')';
+    var lf = state.loadedFrom;
+    $('flow-origin').innerHTML = lf ? '<div class="origin">Carregado do fluxo <strong>' + esc(lf.nome) + '</strong> <span class="mono">(' + esc(lf.id) + ')</span>. ' +
+      'O script cria um fluxo novo; o original não é alterado. <button class="small" data-act="load-unlink">Desvincular</button></div>' :
+      (mode === 'upd' && state.orig ? '<div class="origin">Atualizando o fluxo <strong>' + esc(state.orig.nome) + '</strong> <span class="mono">(' + esc(up(state.orig.id)) + ')</span>. ' +
+        'O script altera <strong>este</strong> fluxo. O serviço não pode ser trocado.</div>' : '');
+  }
+  // Passo existente com conteúdo alterado (ignora mudança só de posição).
+  function stepContentChanged(s){
+    if (!s.origem) return false;
+    var o = s.origem, d = paramDiff(s);
+    return up(s.acaoId) !== o.acaoId || String(s.descricao || '') !== o.descricao || !!s.opcional !== o.opcional || !!s.ativo !== o.ativo ||
+      d.replace || d.del.length > 0 || d.upd.length > 0 || d.ins.length > 0;
+  }
+  function updTags(s){
+    if (mode !== 'upd') return '';
+    if (!s.origem) return ' <span class="tag">novo</span>';
+    return (stepContentChanged(s) ? ' <span class="tag warn">alterado</span>' : '') +
+      ' <span class="tag">' + (s.origem.usos ? 'usado: ' + s.origem.usos : 'nunca usado') + '</span>';
   }
 
   function renderSteps(){
@@ -582,15 +2009,16 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
       }
       var head = '<div class="step-head"><button class="small" data-act="toggle" data-uid="' + s.uid + '" title="' + (s.collapsed ? 'Expandir' : 'Recolher') + '">' + (s.collapsed ? '▸' : '▾') + '</button>' +
           '<span class="handle" title="Arrastar">⠿</span><span class="num">' + (i + 1) + '.</span>' +
-          '<span class="grow">' + esc(s.descricao || (a ? a.nome : 'Passo novo')) + (a && a.front === true ? ' <span class="tag">tela</span>' : '') + (s.acaoId && !a ? ' <span class="tag warn">fora do catálogo</span>' : '') +
+          '<span class="grow">' + esc(s.descricao || (a ? a.nome : 'Passo novo')) + (a && a.front === true ? ' <span class="tag">tela</span>' : '') + (s.acaoId && !a ? ' <span class="tag warn">fora do catálogo</span>' : '') + updTags(s) + ' <span class="tag off-tag tag-off">inativo</span>' +
             (s.collapsed ? ' <span class="muted" style="font-weight:400;font-size:12.5px">— ' + esc(summary.join(' · ')) + '</span>' : '') + '</span>' +
           '<button class="small" data-act="insert-below" data-uid="' + s.uid + '" title="Inserir um passo novo logo abaixo deste">+ abaixo</button>' +
           '<button class="small" data-act="up" data-uid="' + s.uid + '" title="Subir">↑</button>' +
           '<button class="small" data-act="down" data-uid="' + s.uid + '" title="Descer">↓</button>' +
           '<button class="small" data-act="dup" data-uid="' + s.uid + '" title="Duplicar">⧉</button>' +
           '<button class="small danger" data-act="del-step" data-uid="' + s.uid + '" title="Remover">✕</button></div>';
-      if (s.collapsed) return '<div class="step collapsed" draggable="true" data-uid="' + s.uid + '">' + head + '</div>';
-      return '<div class="step" draggable="true" data-uid="' + s.uid + '">' + head +
+      var off = s.ativo ? '' : ' off';
+      if (s.collapsed) return '<div class="step collapsed' + off + '" draggable="true" data-uid="' + s.uid + '">' + head + '</div>';
+      return '<div class="step' + off + '" draggable="true" data-uid="' + s.uid + '">' + head +
         '<div class="row">' +
           '<div class="f"><label>Ação (digite para filtrar)</label><div class="combo">' +
             '<input autocomplete="off" spellcheck="false" placeholder="Clique e digite o nome da ação…" data-combo="1" data-uid="' + s.uid + '" value="' + esc(a ? a.nome : '') + '">' +
@@ -605,29 +2033,77 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
         '<div class="params">' +
           '<label>Copiar parâmetros do passo existente (ID do passo de origem)</label>' +
           '<input class="mono" placeholder="Ex.: 0CDCD45C-D8D9-464A-B221-AC42AAAE43DE (vazio = não copia)" data-step="copyFrom" data-uid="' + s.uid + '" value="' + esc(s.copyFrom) + '">' +
+          (s.origem && s.origem.params.length && up(s.copyFrom) === s.origem.idPasso
+            ? '<div class="hint">Copiando os ' + s.origem.params.length + ' parâmetro(s) do passo original (' + esc(s.origem.params.map(function(p){ return p.nome; }).join(', ')) + '). ' +
+              '<button class="small" data-act="materialize" data-uid="' + s.uid + '">Trazer valores para editar</button></div>'
+            : '') +
           '<div style="margin-top:8px"><label>Parâmetros manuais' + (s.copyFrom ? ' (substituem os copiados de mesmo nome)' : '') + '</label>' + params +
           '<button class="small" data-act="add-param" data-uid="' + s.uid + '">+ Parâmetro manual</button></div>' +
         '</div></div>';
     }).join('');
   }
 
+  // Condições em tabela compacta: uma linha por condição. Colunas fixas + só as colunas que alguma condição usa
+  // (ou que o usuário pediu em "+ Campo" / "Ver todos os campos").
+  var COND_FIXED = ['EscapeId', 'TipoCheckin', 'Prioridade', 'LimiteAtraso'];
+  var COND_WIDTH = {EscapeId:230, TipoCheckin:120, Prioridade:80, LimiteAtraso:95, IdadeMin:80, IdadeMax:80, TipoProcedimento:110, TipoPrimeiroProcedimento:110};
+  function condVisibleCols(){
+    state.condCols = state.condCols || [];
+    return COND_FIELDS.filter(function(f){
+      if (COND_FIXED.indexOf(f.k) >= 0) return true;
+      return state.condShowAll || state.condCols.indexOf(f.k) >= 0 || state.conds.some(function(c){ return String(c[f.k] || '').trim() !== ''; });
+    }).sort(function(a, b){
+      var ia = COND_FIXED.indexOf(a.k), ib = COND_FIXED.indexOf(b.k);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+  }
   function renderConds(){
     var box = $('conds');
     if (!state.conds.length) { box.innerHTML = '<p class="muted">Sem condição: nada de CondicionaisPorFluxo entra no script. Use "+ Condição" se precisar.</p>'; return; }
-    box.innerHTML = state.conds.map(function(c, i){
-      var fields = COND_FIELDS.map(function(f){
-        return '<div><label>' + f.k + (f.t === 's' ? ' (' + f.n + ')' : ' (int)') + (f.req ? ' *' : '') + '</label>' +
-          '<input data-cond="' + f.k + '" data-i="' + i + '" value="' + esc(c[f.k]) + '"' + (f.list ? ' list="' + f.list + '"' : '') + (f.t === 'i' ? ' inputmode="numeric"' : '') + '></div>';
-      }).join('');
-      return '<div class="cond"><div class="step-head"><span class="num">' + (i + 1) + '.</span>' +
-        '<label class="check grow"><input type="checkbox" data-cond="FlagEscape" data-i="' + i + '"' + (c.FlagEscape ? ' checked' : '') + '> Fluxo de escape (FlagEscape)</label>' +
-        '<button class="small danger" data-act="del-cond" data-i="' + i + '" title="Remover condição">✕</button>' +
-        '</div><div class="grid">' + fields + '</div></div>';
+    var cols = condVisibleCols(), hidden = COND_FIELDS.filter(function(f){ return cols.indexOf(f) < 0; });
+    var tools = '<div class="row" style="margin-bottom:8px;align-items:center">' +
+      '<span class="muted" style="font-size:13px">' + state.conds.length + ' condição(ões)</span><span class="grow"></span>' +
+      (hidden.length ? '<select id="cond-add-col" style="width:auto"><option value="">+ Campo…</option>' + hidden.map(function(f){ return '<option value="' + f.k + '">' + f.k + '</option>'; }).join('') + '</select>' : '') +
+      '<button class="small" data-act="cond-showall">' + (state.condShowAll ? 'Ocultar campos vazios' : 'Ver todos os campos') + '</button></div>';
+    var head = '<tr><th>#</th><th title="FlagEscape">Escape</th>' + cols.map(function(f){ return '<th>' + f.k + (f.req ? ' *' : '') + '</th>'; }).join('') + '<th></th></tr>';
+    var rows = state.conds.map(function(c, i){
+      return '<tr><td class="n">' + (i + 1) + '</td>' +
+        '<td style="text-align:center"><input type="checkbox" data-cond="FlagEscape" data-i="' + i + '"' + (c.FlagEscape ? ' checked' : '') + ' title="Fluxo de escape"></td>' +
+        cols.map(function(f){
+          var w = COND_WIDTH[f.k] || 90;
+          return '<td><input data-cond="' + f.k + '" data-i="' + i + '" value="' + esc(c[f.k]) + '" style="min-width:' + w + 'px"' +
+            (f.list ? ' list="' + f.list + '"' : '') + (f.t === 'i' ? ' inputmode="numeric"' : '') + ' title="' + f.k + (f.t === 's' ? ' (até ' + f.n + ')' : ' (inteiro)') + '"></td>';
+        }).join('') +
+        '<td style="white-space:nowrap"><button class="small" data-act="dup-cond" data-i="' + i + '" title="Duplicar condição">⧉</button> ' +
+        '<button class="small danger" data-act="del-cond" data-i="' + i + '" title="Remover condição">✕</button></td></tr>';
     }).join('');
+    box.innerHTML = tools + '<div class="table-wrap"><table class="ctable"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>';
   }
 
+  function currentValidation(){ return mode === 'upd' ? validateUpdate(state) : validate(state); }
+  function currentSql(){ return mode === 'upd' ? buildUpdateSql(state) : buildSql(state); }
+  function renderRemoved(){
+    if (mode !== 'upd') return;
+    var box = $('removed');
+    if (!state.removed.length) { box.innerHTML = '<p class="muted">Nenhum passo removido. Use o ✕ de um passo para tirá-lo do fluxo.</p>'; return; }
+    box.innerHTML = state.removed.map(function(r, k){
+      var o = r.step.origem, usado = o.usos > 0;
+      return '<div class="flow-card' + (r.modo === 'apagar' ? ' used' : '') + '"><h4>' + esc(r.step.descricao || o.descricao) +
+        ' <span class="tag">' + (usado ? 'usado: ' + o.usos : 'nunca usado') + '</span></h4>' +
+        '<div class="row" style="margin-top:6px">' +
+          '<label class="check"><input type="radio" name="rm-' + k + '" data-rm="' + k + '" value="desativar"' + (r.modo !== 'apagar' ? ' checked' : '') + '> Desativar</label>' +
+          '<label class="check"><input type="radio" name="rm-' + k + '" data-rm="' + k + '" value="apagar"' + (r.modo === 'apagar' ? ' checked' : '') + (usado ? ' disabled' : '') + '> Apagar' + (usado ? ' (já usado)' : '') + '</label>' +
+          '<button class="small" data-act="rm-restore" data-k="' + k + '">Voltar para o fluxo</button>' +
+        '</div></div>';
+    }).join('');
+  }
   function renderOutputs(){
-    var r = validate(state);
+    renderRemoved();
+    if (mode === 'upd') {
+      $('btn-renumber').textContent = state.renumber ? '✓ Ordem será reorganizada (1..N)' : 'Reorganizar ordem';
+      $('btn-renumber').classList.toggle('primary', !!state.renumber);
+    }
+    var r = currentValidation();
     var html = r.errors.map(function(e){ return '<div class="e">✕ ' + esc(e) + '</div>'; }).join('') +
                r.warnings.map(function(w){ return '<div class="w">! ' + esc(w) + '</div>'; }).join('');
     if (!r.errors.length) html = '<div class="o">✓ Pronto para gerar' + (r.warnings.length ? ' (confira os avisos)' : '') + '</div>' + html;
@@ -642,11 +2118,35 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
       if (!s.ativo) extra.push('inativo');
       if (s.copyFrom) extra.push('parâmetros de ' + up(s.copyFrom).slice(0, 8) + '…');
       if (manualParams(s).length) extra.push(manualParams(s).map(function(p){ return p.nome; }).join(', '));
-      return '<li>' + esc(s.descricao || '(sem descrição)') + ' <span class="muted">— ' + esc(a ? a.nome : (s.acaoId ? 'ação fora do catálogo' : 'sem ação')) + (extra.length ? ' · ' + esc(extra.join(' · ')) : '') + '</span></li>';
+      // Atualizar: marca o que mudou em relação ao banco
+      var mark = '';
+      if (mode === 'upd') {
+        if (!s.origem) mark = ' <span class="tag">novo</span>';
+        else if (stepContentChanged(s)) {
+          var d = paramDiff(s), what = stepFieldChanges(s, s.origem.ordem, s.origem.anterior, s.origem.seguinte);
+          if (d.replace) what.push('parâmetros substituídos');
+          else { if (d.upd.length) what.push('altera ' + d.upd.map(function(p){ return p.nome; }).join(', ')); if (d.ins.length) what.push('inclui ' + d.ins.map(function(p){ return p.nome; }).join(', ')); if (d.del.length) what.push('remove ' + d.del.join(', ')); }
+          mark = ' <span class="tag warn">alterado: ' + esc(what.join('; ')) + '</span>';
+        }
+      }
+      return '<li>' + esc(s.descricao || '(sem descrição)') + mark + ' <span class="muted">— ' + esc(a ? a.nome : (s.acaoId ? 'ação fora do catálogo' : 'sem ação')) + (extra.length ? ' · ' + esc(extra.join(' · ')) : '') + '</span></li>';
     }).join('');
-    $('preview').innerHTML = head + (items ? '<ol class="preview">' + items + '</ol>' : '<p class="muted">Sem passos.</p>');
+    var removedHtml = '';
+    if (mode === 'upd' && state.removed && state.removed.length) {
+      removedHtml = '<p style="margin:10px 0 4px;font-size:13px;color:var(--muted)">Saem do fluxo:</p><ul class="preview" style="padding-left:22px">' +
+        state.removed.map(function(rm){ return '<li><s>' + esc(rm.step.descricao || rm.step.origem.descricao) + '</s> <span class="tag ' + (rm.modo === 'apagar' ? 'off-tag' : 'warn') + '">' + (rm.modo === 'apagar' ? 'será apagado' : 'será desativado') + '</span></li>'; }).join('') + '</ul>';
+    }
+    var flowChg = '';
+    if (mode === 'upd' && state.orig) {
+      var fc = [];
+      if (state.flow.nome !== (state.orig.nome || '')) fc.push('nome: "' + (state.orig.nome || '') + '" → "' + state.flow.nome + '"');
+      if (!!state.flow.ativo !== !!state.orig.ativo) fc.push(state.flow.ativo ? 'fluxo será ativado' : 'fluxo será desativado');
+      if (condsChanged(state)) fc.push('condições serão regravadas (' + (state.orig.condicoes || []).length + ' → ' + state.conds.length + ')');
+      if (fc.length) flowChg = '<p style="margin:0 0 6px"><span class="tag warn">' + esc(fc.join(' · ')) + '</span></p>';
+    }
+    $('preview').innerHTML = head + flowChg + (items ? '<ol class="preview">' + items + '</ol>' : '<p class="muted">Sem passos.</p>') + removedHtml;
 
-    $('sql').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : buildSql(state);
+    $('sql').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : currentSql();
     save();
   }
 
@@ -763,30 +2263,56 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
       case 'toggle': if (i >= 0) { state.steps[i].collapsed = !state.steps[i].collapsed; renderAll(); } break;
       case 'collapse-all': state.steps.forEach(function(s){ s.collapsed = true; }); renderAll(); break;
       case 'expand-all': state.steps.forEach(function(s){ s.collapsed = false; }); renderAll(); break;
-      case 'del-step': if (i >= 0 && confirm('Remover o passo ' + (i + 1) + '?')) { state.steps.splice(i, 1); renderAll(); } break;
+      case 'del-step':
+        if (i < 0) break;
+        // Atualizar: passo que já existe no banco vai para "Passos removidos" (Desativar/Apagar), dá para voltar.
+        if (mode === 'upd' && state.steps[i].origem) { removeStepForUpdate(state, i); renderAll(); $('removed-box').scrollIntoView({behavior:'smooth', block:'nearest'}); break; }
+        if (confirm('Remover o passo ' + (i + 1) + '?')) { state.steps.splice(i, 1); renderAll(); }
+        break;
+      case 'rm-restore': restoreRemoved(state, +b.getAttribute('data-k')); renderAll(); break;
+      case 'renumber': if (mode === 'upd') { state.renumber = !state.renumber; renderAll(); } break;
       case 'up': move(i, i - 1); break;
       case 'down': move(i, i + 1); break;
-      case 'dup': if (i >= 0) { var c = newStep(JSON.parse(JSON.stringify(state.steps[i]))); state.steps.splice(i + 1, 0, c); renderAll(); } break;
+      case 'dup': if (i >= 0) { var c = newStep(JSON.parse(JSON.stringify(state.steps[i]))); if (mode === 'upd') c.origem = null; state.steps.splice(i + 1, 0, c); renderAll(); } break;
       case 'add-param': if (i >= 0) { state.steps[i].params.push({nome:'', valor:''}); renderAll(); } break;
       case 'del-param': if (i >= 0) { state.steps[i].params.splice(+b.getAttribute('data-j'), 1); renderAll(); } break;
       case 'add-cond': state.conds.push(newCond()); renderAll(); break;
       case 'del-cond': state.conds.splice(+b.getAttribute('data-i'), 1); renderAll(); break;
+      case 'dup-cond': var ci = +b.getAttribute('data-i'); state.conds.splice(ci + 1, 0, newCond(JSON.parse(JSON.stringify(state.conds[ci])))); renderAll(); break;
+      case 'cond-showall': state.condShowAll = !state.condShowAll; renderAll(); break;
       case 'catalog-load':
         var parsed = parseCatalog($('catalog-paste').value);
         if (!parsed.length) { alert('Nenhuma ação reconhecida. Cole as linhas com o ID (GUID) na 1ª coluna e o Nome na 2ª.'); break; }
-        state.catalog = parsed; $('catalog-paste').value = ''; renderAll();
+        state.catalog = docs.novo.catalog = docs.upd.catalog = parsed; $('catalog-paste').value = ''; renderAll();
         alert(parsed.length + ' ações carregadas.');
         break;
-      case 'catalog-starter': if (confirm('Voltar ao catálogo inicial (perde o catálogo colado)?')) { state.catalog = newState().catalog; renderAll(); } break;
+      case 'catalog-starter': if (confirm('Voltar ao catálogo inicial (perde o catálogo colado)?')) { state.catalog = docs.novo.catalog = docs.upd.catalog = newState().catalog; renderAll(); } break;
       case 'example':
         if (state.steps.length && !confirm('Substituir o fluxo atual pelo exemplo?')) break;
-        buildExample(state); renderAll(); break;
+        state.loadedFrom = null; buildExample(state); renderAll(); break;
+      case 'load-open': $('load-box').hidden = false; renderLoad(); $('load-box').scrollIntoView({behavior:'smooth', block:'start'}); $('load-idfluxo').focus({preventScroll:true}); break;
+      case 'load-close': $('load-box').hidden = true; break;
+      case 'load-copy-query': var lq = buildLoadQuery($('load-idfluxo').value.trim(), $('load-idservico').value.trim()); if (lq) copyText(lq, 'load-ids-msg'); break;
+      case 'load-apply':
+        var lids = {f:$('load-idfluxo').value.trim(), s:$('load-idservico').value.trim()};
+        if (!buildLoadQuery(lids.f, lids.s)) { alert('Informe IdFluxo e IdServico válidos primeiro.'); break; }
+        var lr = parseLoadedFlow($('load-paste').value);
+        if (lr.error) { alert(lr.error); break; }
+        if (lr.data.id !== up(lids.f) || lr.data.servico !== up(lids.s)) { alert('O resultado colado é de outro fluxo/serviço (' + lr.data.id + ' / ' + lr.data.servico + '). Rode a consulta gerada nesta tela.'); break; }
+        if (state.steps.length && !confirm('Substituir o fluxo em edição pelo fluxo "' + (lr.data.nome || lr.data.id) + '"?')) break;
+        loadFlowIntoState(state, lr.data);
+        $('load-paste').value = ''; $('load-box').hidden = true;
+        renderAll(); window.scrollTo(0, 0);
+        flash('Fluxo "' + (lr.data.nome || lr.data.id) + '" carregado: ' + state.steps.length + ' passo(s), ' + state.conds.length + ' condição(ões).');
+        break;
+      case 'load-unlink': state.loadedFrom = null; renderAll(); break;
+      case 'materialize': if (i >= 0) { materializeParams(state.steps[i]); state.steps[i].collapsed = false; renderAll(); } break;
       case 'new-flow':
         if (!confirm('Começar um fluxo novo? (o catálogo é mantido)')) break;
-        var keep = state.catalog; state = newState(); state.catalog = keep; renderAll(); break;
+        var keep = state.catalog; state = newState(); state.catalog = keep; docs.novo = state; renderAll(); break;
       case 'reset':
         if (!confirm('Apagar tudo, inclusive o catálogo colado?')) break;
-        state = newState(); renderAll(); break;
+        state = newState(); docs.novo = state; docs.upd.catalog = state.catalog; renderAll(); break;
       case 'copy': copySql(); break;
       case 'download': downloadSql(); break;
       case 'selftest': showTests(); break;
@@ -807,7 +2333,11 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     } else if (t.hasAttribute('data-step') && i >= 0) {
       var f = t.getAttribute('data-step'), s = state.steps[i];
       if (f === 'acaoSel') return; // tratado no change
-      if (t.type === 'checkbox') s[f] = t.checked;
+      if (t.type === 'checkbox') {
+        s[f] = t.checked;
+        // Ativo desmarcado: borda vermelha e etiqueta "inativo" na hora, sem redesenhar o passo.
+        if (f === 'ativo') { var card = t.closest('.step'); if (card) card.classList.toggle('off', !t.checked); }
+      }
       else { s[f] = t.value; if (f === 'descricao') s.descAuto = false; }
       renderOutputs();
     } else if (t.hasAttribute('data-param') && i >= 0) {
@@ -861,7 +2391,7 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
 
   function fileName(){
     var base = norm(state.flow.nome || 'fluxo').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'fluxo';
-    return base + '.sql';
+    return (mode === 'upd' ? 'atualizar-' : '') + base + '.sql';
   }
   function copySql(){
     var txt = $('sql').textContent;
@@ -875,13 +2405,400 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     }
   }
   function downloadSql(){
-    if (validate(state).errors.length) { alert('Corrija os erros da validação antes de baixar.'); return; }
-    var blob = new Blob(['﻿' + buildSql(state)], {type:'text/plain;charset=utf-8'});
+    if (currentValidation().errors.length) { alert('Corrija os erros da validação antes de baixar.'); return; }
+    var blob = new Blob(['﻿' + currentSql()], {type:'text/plain;charset=utf-8'});
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName();
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
   }
-  function flash(msg){ var m = $('msgs'); var d = document.createElement('div'); d.className = 'o'; d.textContent = msg; m.insertBefore(d, m.firstChild); setTimeout(function(){ if (d.parentNode) d.parentNode.removeChild(d); }, 2000); }
+  // ---------- Apagar fluxo ----------
+  var del = {flows:[], selected:{}};
+  function delMode(){ var r = document.querySelector('input[name="del-mode"]:checked'); return r ? r.value : 'apagar'; }
+  function delSelected(){ return del.flows.filter(function(f){ return del.selected[f.id]; }); }
+  // Painel "Carregar fluxo existente": consulta só com IdFluxo e IdServico válidos.
+  function renderLoad(){
+    var f = $('load-idfluxo').value.trim(), s = $('load-idservico').value.trim(), q = buildLoadQuery(f, s), faltas = [];
+    if (!f) faltas.push('Informe o IdFluxo.'); else if (!isGuid(f)) faltas.push('IdFluxo não é um GUID válido.');
+    if (!s) faltas.push('Informe o IdServico.'); else if (!isGuid(s)) faltas.push('IdServico não é um GUID válido.');
+    $('load-ids-msg').innerHTML = faltas.length ? faltas.map(function(m){ return '<div class="e">✕ ' + esc(m) + '</div>'; }).join('') : '<div class="o">✓ Consulta gerada abaixo.</div>';
+    $('load-query').textContent = q || '-- Informe IdFluxo e IdServico (GUIDs válidos) para gerar a consulta.';
+    $('load-copy-query').disabled = !q; $('load-paste').disabled = !q; $('load-apply').disabled = !q;
+  }
+  ['load-idfluxo', 'load-idservico'].forEach(function(id){ $(id).addEventListener('input', renderLoad); });
+
+  // ---------- Atualizar fluxo: painel de carga ----------
+  function renderUpdLoad(){
+    var f = $('upd-idfluxo').value.trim(), s = $('upd-idservico').value.trim(), q = buildLoadQuery(f, s), faltas = [];
+    if (!f) faltas.push('Informe o IdFluxo.'); else if (!isGuid(f)) faltas.push('IdFluxo não é um GUID válido.');
+    if (!s) faltas.push('Informe o IdServico.'); else if (!isGuid(s)) faltas.push('IdServico não é um GUID válido.');
+    $('upd-ids-msg').innerHTML = faltas.length ? faltas.map(function(m){ return '<div class="e">✕ ' + esc(m) + '</div>'; }).join('') : '<div class="o">✓ Consulta gerada abaixo.</div>';
+    $('upd-query').textContent = q || '-- Informe IdFluxo e IdServico (GUIDs válidos) para gerar a consulta.';
+    $('upd-copy-query').disabled = !q; $('upd-paste').disabled = !q; $('upd-apply').disabled = !q;
+    var o = docs.upd.orig;
+    $('upd-discard').disabled = !o;
+    $('upd-loaded').hidden = !o;
+    $('upd-loaded').innerHTML = o ? 'Fluxo carregado: <strong>' + esc(o.nome) + '</strong> <span class="mono">(' + esc(up(o.id)) + ')</span> · ' + (o.passos || []).length + ' passo(s), ' + (o.condicoes || []).length + ' condição(ões). Edite abaixo.' : '';
+  }
+  ['upd-idfluxo', 'upd-idservico'].forEach(function(id){ $(id).addEventListener('input', renderUpdLoad); });
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-act^="upd-"]');
+    if (!b) return;
+    switch (b.getAttribute('data-act')) {
+      case 'upd-toggle': var body = $('upd-load-body'); body.hidden = !body.hidden; b.textContent = body.hidden ? 'Mostrar' : 'Recolher'; break;
+      case 'upd-copy-query': var q = buildLoadQuery($('upd-idfluxo').value.trim(), $('upd-idservico').value.trim()); if (q) copyText(q, 'upd-ids-msg'); break;
+      case 'upd-apply':
+        var f = $('upd-idfluxo').value.trim(), s = $('upd-idservico').value.trim();
+        if (!buildLoadQuery(f, s)) { alert('Informe IdFluxo e IdServico válidos primeiro.'); break; }
+        var r = parseLoadedFlow($('upd-paste').value);
+        if (r.error) { alert(r.error); break; }
+        if (r.data.id !== up(f) || r.data.servico !== up(s)) { alert('O resultado colado é de outro fluxo/serviço (' + r.data.id + ' / ' + r.data.servico + '). Rode a consulta gerada nesta tela.'); break; }
+        if (docs.upd.orig && updateChanges(docs.upd).length && !confirm('Descartar as alterações em andamento e carregar "' + (r.data.nome || r.data.id) + '"?')) break;
+        loadFlowForUpdate(docs.upd, r.data);
+        $('upd-paste').value = ''; $('upd-load-body').hidden = true; $('upd-toggle').textContent = 'Mostrar';
+        setEditorMode('upd'); renderUpdLoad();
+        flash('Fluxo "' + (r.data.nome || r.data.id) + '" carregado para atualização.');
+        break;
+      case 'upd-example':
+        if (docs.upd.orig && updateChanges(docs.upd).length && !confirm('Descartar as alterações em andamento e carregar o exemplo?')) break;
+        var ex = parseLoadedFlow(JSON.stringify(exampleFlowJson())).data;
+        $('upd-idfluxo').value = ex.id; $('upd-idservico').value = ex.servico; $('upd-paste').value = '';
+        loadFlowForUpdate(docs.upd, ex);
+        $('upd-load-body').hidden = true; $('upd-toggle').textContent = 'Mostrar';
+        setEditorMode('upd'); renderUpdLoad();
+        flash('Exemplo carregado: edite um passo, um parâmetro ou as condições e veja o script de atualização.');
+        break;
+      case 'upd-reset':
+        if (!confirm('Limpar tudo no Atualizar fluxo (fluxo carregado, alterações e IDs)?')) break;
+        docs.upd = newUpdState(docs.novo.catalog);
+        $('upd-idfluxo').value = ''; $('upd-idservico').value = ''; $('upd-paste').value = '';
+        $('upd-load-body').hidden = false; $('upd-toggle').textContent = 'Recolher';
+        setEditorMode('upd'); renderUpdLoad(); window.scrollTo(0, 0);
+        break;
+      case 'upd-discard':
+        if (!docs.upd.orig || !confirm('Desfazer todas as alterações e voltar ao fluxo como está no banco (da última consulta)?')) break;
+        loadFlowForUpdate(docs.upd, docs.upd.orig); setEditorMode('upd'); renderUpdLoad(); break;
+    }
+  });
+  document.addEventListener('change', function(ev){
+    var t = ev.target;
+    if (t.hasAttribute && t.hasAttribute('data-rm') && mode === 'upd') { var r = state.removed[+t.getAttribute('data-rm')]; if (r) { r.modo = t.value; renderAll(); } }
+    if (t.id === 'cond-add-col' && t.value) { state.condCols = state.condCols || []; state.condCols.push(t.value); renderAll(); }
+  });
+
+  function delIds(){ return {fluxo:$('del-idfluxo').value.trim(), servico:$('del-idservico').value.trim()}; }
+  // Consulta só existe com IdFluxo e IdServico válidos; sem eles, mostra o que falta e bloqueia a cópia.
+  function renderDeleteQuery(){
+    var ids = delIds(), q = buildDeleteQuery(ids.fluxo, ids.servico), faltas = [];
+    if (!ids.fluxo) faltas.push('Informe o IdFluxo.'); else if (!isGuid(ids.fluxo)) faltas.push('IdFluxo não é um GUID válido.');
+    if (!ids.servico) faltas.push('Informe o IdServico.'); else if (!isGuid(ids.servico)) faltas.push('IdServico não é um GUID válido.');
+    $('del-ids-msg').innerHTML = faltas.length ? faltas.map(function(m){ return '<div class="e">✕ ' + esc(m) + '</div>'; }).join('') : '<div class="o">✓ Consulta gerada abaixo.</div>';
+    $('del-query').textContent = q || '-- Informe IdFluxo e IdServico (GUIDs válidos) para gerar a consulta.';
+    $('del-copy-query').disabled = !q;
+    $('del-paste').disabled = !q;
+    document.querySelector('[data-act="del-load"]').disabled = !q;
+  }
+  function renderDelete(){
+    renderDeleteQuery();
+    var box = $('del-flows');
+    if (!del.flows.length) { box.innerHTML = '<p class="muted">Carregue o resultado da consulta.</p>'; renderDeleteOutputs(); return; }
+    box.innerHTML = del.flows.map(function(f){
+      var u = flowUsage(f), reasons = usageReasons(u);
+      var rows = f.steps.slice().sort(function(a, b){ return a.ordem - b.ordem; }).map(function(s){
+        function n(v, hot){ return '<td class="n' + (v && hot ? ' hot' : '') + '">' + v + '</td>'; }
+        return '<tr><td class="n">' + s.ordem + '</td><td>' + esc(s.passo) + '</td><td class="muted">' + esc(s.acao) + '</td>' +
+          n(s.qtdParam) + n(s.qtdRet) + n(s.qtdDoc) + n(s.qtdPerg) + n(s.qtdResp, true) + n(s.qtdAcomp, true) + '</tr>';
+      }).join('');
+      return '<div class="flow-card' + (u.inUse ? ' used' : '') + '">' +
+        '<h4><label class="check" style="padding:0"><input type="checkbox" data-del-sel="' + f.id + '"' + (del.selected[f.id] ? ' checked' : '') + '> ' + esc(f.nome || '(sem nome)') + '</label>' +
+          '<span class="tag' + (f.ativo ? '' : ' warn') + '">' + (f.ativo ? 'ativo' : 'inativo') + '</span>' +
+          (u.inUse ? '<span class="tag warn">já usado</span>' : '<span class="tag">nunca usado</span>') + '</h4>' +
+        '<div class="mono muted" style="margin-top:4px">' + f.id + ' · serviço ' + esc(f.servico) + '</div>' +
+        '<div style="margin-top:4px;font-size:13px">' + u.steps + ' passo(s) · ' + u.cond + ' condição(ões) · ' + u.param + ' parâmetro(s)' +
+          (u.ret ? ' · ' + u.ret + ' retorno(s)' : '') + (u.doc ? ' · ' + u.doc + ' documento(s)' : '') + (u.perg ? ' · ' + u.perg + ' pergunta(s)' : '') + '</div>' +
+        (reasons.length ? '<div class="msgs" style="margin-top:6px"><div class="w">! ' + esc(reasons.join('; ')) + '</div></div>' : '') +
+        (f.steps.length ? '<table class="mini"><tr><th>#</th><th>Passo</th><th>Ação</th><th>Parâm.</th><th>Retornos</th><th>Docs</th><th>Perguntas</th><th>Respostas</th><th>Acompanh.</th></tr>' + rows + '</table>' : '<p class="muted">Fluxo sem passos.</p>') +
+        '</div>';
+    }).join('');
+    renderDeleteOutputs();
+  }
+  function renderDeleteOutputs(){
+    var flows = delSelected(), mode = delMode(), r = validateDelete(flows, mode), ids = delIds();
+    if (del.flows.length) { var mismatch = checkSnapshot(del.flows, ids.fluxo, ids.servico); if (mismatch) r.errors.unshift(mismatch); }
+    else r.errors = ['Informe IdFluxo e IdServico, rode a consulta gerada e cole o resultado.'];
+    var html = r.errors.map(function(e){ return '<div class="e">✕ ' + esc(e) + '</div>'; }).join('') +
+               r.warnings.map(function(w){ return '<div class="w">! ' + esc(w) + '</div>'; }).join('');
+    if (!r.errors.length) html = '<div class="o">✓ Pronto para gerar (' + flows.length + ' fluxo(s), ' + (mode === 'apagar' ? 'apagar' : 'desativar') + ')</div>' + html;
+    $('del-msgs').innerHTML = html;
+    $('del-sql').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : buildDeleteSql(flows, mode);
+  }
+  function delFileName(){
+    var f = delSelected(), base = f.length === 1 ? norm(f[0].nome).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : f.length + '-fluxos';
+    return (delMode() === 'apagar' ? 'apagar-' : 'desativar-') + (base || 'fluxo') + '.sql';
+  }
+  function copyText(txt, box){
+    function done(){ flash('Copiado.', box); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+    function fallback(){
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { alert('Não foi possível copiar; selecione o texto manualmente.'); }
+      document.body.removeChild(ta);
+    }
+  }
+  function downloadText(name, txt){
+    var blob = new Blob(['﻿' + txt], {type:'text/plain;charset=utf-8'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  }
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-act^="del-"]');
+    if (!b) return;
+    switch (b.getAttribute('data-act')) {
+      case 'del-load':
+        var ids = delIds();
+        if (!buildDeleteQuery(ids.fluxo, ids.servico)) { alert('Informe IdFluxo e IdServico válidos primeiro.'); break; }
+        var r = parseDeleteSnapshot($('del-paste').value);
+        if (r.error) { alert(r.error); break; }
+        var mm = checkSnapshot(r.flows, ids.fluxo, ids.servico);
+        if (mm) { alert(mm); break; }
+        del.flows = r.flows; del.selected = {};
+        if (r.flows.length === 1) del.selected[r.flows[0].id] = true;
+        renderDelete(); break;
+      case 'del-clear': $('del-paste').value = ''; del.flows = []; del.selected = {}; renderDelete(); break;
+      case 'del-example':
+        if (del.flows.length && !confirm('Substituir pelo exemplo?')) break;
+        $('del-idfluxo').value = EX_FLOW; $('del-idservico').value = EX_SERVICE;
+        var ex = parseDeleteSnapshot(exampleDeleteText());
+        del.flows = ex.flows; del.selected = {}; del.selected[EX_FLOW] = true; $('del-paste').value = '';
+        document.querySelector('input[name="del-mode"][value="apagar"]').checked = true;
+        renderDelete(); break;
+      case 'del-reset':
+        if (!confirm('Limpar tudo no Apagar fluxo?')) break;
+        $('del-idfluxo').value = ''; $('del-idservico').value = ''; $('del-paste').value = '';
+        del.flows = []; del.selected = {};
+        document.querySelector('input[name="del-mode"][value="apagar"]').checked = true;
+        renderDelete(); window.scrollTo(0, 0); break;
+      case 'del-copy-query': var dq = buildDeleteQuery(delIds().fluxo, delIds().servico); if (dq) copyText(dq, 'del-msgs'); break;
+      case 'del-copy': copyText($('del-sql').textContent, 'del-msgs'); break;
+      case 'del-download':
+        if (validateDelete(delSelected(), delMode()).errors.length) { alert('Corrija os erros da validação antes de baixar.'); break; }
+        downloadText(delFileName(), buildDeleteSql(delSelected(), delMode())); break;
+    }
+  });
+  ['del-idfluxo', 'del-idservico'].forEach(function(id){
+    $(id).addEventListener('input', function(){ renderDeleteQuery(); renderDeleteOutputs(); });
+  });
+  document.addEventListener('change', function(ev){
+    var t = ev.target;
+    if (t.hasAttribute && t.hasAttribute('data-del-sel')) { del.selected[t.getAttribute('data-del-sel')] = t.checked; renderDeleteOutputs(); }
+    else if (t.name === 'del-mode') renderDeleteOutputs();
+  });
+
+  // ---------- Condicionais por fluxo (simulador) ----------
+  var COND_KEY = 'GestorDeFluxos.cond.v1';
+  var cond = loadCond();
+  function loadCond(){
+    try {
+      var s = JSON.parse(localStorage.getItem(COND_KEY));
+      if (s && Array.isArray(s.rows)) {
+        var base = newScenario();
+        s.sc = Object.assign(base, s.sc || {});
+        s.sc.values = Object.assign(newScenario().values, (s.sc && s.sc.values) || {});
+        return s;
+      }
+    } catch (e) {}
+    return {servico:'', fluxo:'', rows:[], sc:newScenario()};
+  }
+  function saveCond(){ try { localStorage.setItem(COND_KEY, JSON.stringify(cond)); } catch (e) {} }
+
+  function renderCondForm(){
+    $('cond-idservico').value = cond.servico || '';
+    $('cond-idfluxo').value = cond.fluxo || '';
+    $('cond-tipo').innerHTML = CHECKIN_TYPES_SIM.map(function(t){ return '<option' + (t === cond.sc.tipo ? ' selected' : '') + '>' + t + '</option>'; }).join('');
+    $('cond-escape').checked = !!cond.sc.escape;
+    $('cond-escapeid').value = cond.sc.escapeId || '';
+    $('cond-escapeid').disabled = !cond.sc.escape;
+    $('cond-agend').checked = !!cond.sc.temAgendamento;
+    $('cond-hagend').value = cond.sc.horaAgendamento || '';
+    $('cond-hcheckin').value = cond.sc.horaCheckin || '';
+    renderAtrasoField();
+    $('cond-fields').innerHTML = SIM_FIELDS.map(function(f){
+      var off = f.appt && !cond.sc.temAgendamento;
+      return '<div><label for="sim-' + f.k + '"' + (f.hint ? ' title="' + esc(f.hint) + '"' : '') + '>' + esc(f.label) + (f.hint ? ' ⓘ' : '') + '</label>' +
+        '<input id="sim-' + f.k + '" data-sim="' + f.k + '" list="sim-list-' + f.k + '" autocomplete="off" value="' + esc(cond.sc.values[f.k]) + '"' +
+        (off ? ' disabled placeholder="sem agendamento: NULL"' : '') + '></div>';
+    }).join('');
+    // Sugestões: valores que existem nas condições carregadas (EscapeId: primeiro os do cliente, depois os do enum)
+    var escSeen = {}, escOpts = [];
+    cond.rows.forEach(function(r){ if (r.c.EscapeId && !escSeen[r.c.EscapeId]) { escSeen[r.c.EscapeId] = true; escOpts.push(r.c.EscapeId); } });
+    escOpts.sort();
+    ESCAPE_TYPES.forEach(function(e){ if (!escSeen[e]) escOpts.push(e); });
+    $('sim-lists').innerHTML = '<datalist id="cond-escape-list">' + escOpts.map(function(v){ return '<option value="' + esc(v) + '">'; }).join('') + '</datalist>' +
+      SIM_FIELDS.map(function(f){
+      var seen = {}, opts = [];
+      cond.rows.forEach(function(r){ var v = r.c[f.col]; if (v !== null && v !== '' && !seen[v]) { seen[v] = true; opts.push(v); } });
+      opts.sort(function(a, b){ return String(a).localeCompare(String(b), 'pt-BR', {numeric:true}); });
+      return '<datalist id="sim-list-' + f.k + '">' + opts.map(function(v){ return '<option value="' + esc(v) + '">'; }).join('') + '</datalist>';
+    }).join('');
+  }
+  // Atraso: calculado pelos horários quando os dois existem; o limite só vale em check-in com agendamento.
+  function renderAtrasoField(){
+    var sc = cond.sc, aplica = sc.temAgendamento && sc.tipo === 'CHECKIN';
+    var porHorario = parseHM(sc.horaAgendamento) !== null && parseHM(sc.horaCheckin) !== null;
+    ['cond-hagend', 'cond-hcheckin'].forEach(function(id){ $(id).disabled = !aplica; });
+    $('cond-atraso').disabled = !aplica || porHorario;
+    $('cond-atraso').value = porHorario ? String(scenarioAtraso(sc)) : sc.atraso;
+    var a = scenarioAtraso(sc);
+    $('cond-atraso-hint').textContent = !aplica ? 'O limite de atraso só vale em check-in (CHECKIN) com agendamento.' :
+      porHorario ? 'Check-in ' + Math.abs(a) + ' min ' + (a < 0 ? 'ANTES' : a > 0 ? 'DEPOIS' : 'exatamente no horário') + (a === 0 ? '' : ' do compromisso') + ' (atraso = ' + a + ').' :
+      'Preencha os dois horários para calcular o atraso, ou digite o atraso em minutos (negativo = adiantado).';
+  }
+  function renderCondQuery(){
+    var s = (cond.servico || '').trim(), f = (cond.fluxo || '').trim(), q = buildCondQuery(s), msgs = [];
+    if (f && !isGuid(f)) msgs.push(['e', 'IdFluxo não é um GUID válido (ou deixe vazio).']);
+    if (!s) msgs.push(['e', 'Informe o IdServico.']); else if (!isGuid(s)) msgs.push(['e', 'IdServico não é um GUID válido.']);
+    if (!msgs.length) msgs.push(['o', 'Consulta gerada abaixo.']);
+    $('cond-ids-msg').innerHTML = msgs.map(function(m){ return '<div class="' + m[0] + '">' + (m[0] === 'e' ? '✕ ' : '✓ ') + esc(m[1]) + '</div>'; }).join('');
+    $('cond-query').textContent = q || '-- Informe o IdServico (GUID válido) para gerar a consulta.';
+    $('cond-copy-query').disabled = !q; $('cond-paste').disabled = !q; $('cond-load').disabled = !q;
+    var nf = {}; cond.rows.forEach(function(r){ nf[r.flowId] = true; });
+    $('cond-loaded').textContent = cond.rows.length ? cond.rows.length + ' condição(ões) de ' + Object.keys(nf).length + ' fluxo(s) carregada(s).' : '';
+  }
+  function condChips(r){
+    var out = [];
+    COND_QUERY_COLUMNS.slice(8).forEach(function(k){ if (r.c[k] !== null) out.push(k + ' = ' + (r.c[k] === '' ? "''" : r.c[k])); });
+    if (r.c.EscapeId !== null) out.push('EscapeId = ' + r.c.EscapeId);
+    out.push('Prioridade ' + r.prio);
+    out.push('LimiteAtraso ' + (r.c.LimiteAtraso === null ? 'NULL (0)' : r.limite));
+    return '<div class="chips">' + out.map(function(t){ return '<span class="chip">' + esc(t) + '</span>'; }).join('') + '</div>';
+  }
+  function renderCondResult(){
+    var box = $('cond-result');
+    if (!cond.rows.length) { box.innerHTML = '<p class="muted">Informe o IdServico, rode a consulta e carregue as condições. Depois preencha o cenário: o resultado atualiza a cada campo.</p>'; return; }
+    var s = simulate(cond.rows, cond.sc), mark = up(cond.fluxo || '');
+    var html = '<div class="res-sum">' + cond.rows.length + ' condição(ões) carregada(s) · <strong>' + s.ranked.length + ' atendem</strong> · ' + s.excluded.length + ' não atendem' +
+      (s.ranked.length ? ' · mais específica com ' + s.maxSpec + ' parâmetro(s)' : '') +
+      (s.delayApplied ? ' · atraso considerado: <strong>' + s.atraso + ' min</strong>' +
+        (parseHM(cond.sc.horaAgendamento) !== null && parseHM(cond.sc.horaCheckin) !== null ? ' (compromisso ' + esc(cond.sc.horaAgendamento) + ', check-in ' + esc(cond.sc.horaCheckin) + ')' : '') : '') + '</div>';
+    // Bloqueio por atraso (PosBlockStartFlow): o fluxo escolhido não aceita mais o check-in -> escape LIMIT_DELAY
+    if (s.limitDelay) {
+      var ld = s.limitDelay, lw = ld.escape.ranked[0];
+      html += '<div class="res-card win" style="border-left-color:var(--warn);background:var(--warn-bg)"><h4>⚠ Destino final: ' +
+        (lw ? esc(lw.row.flowName) + ' <span class="tag">escape LIMIT_DELAY</span>' : 'nenhum fluxo de escape LIMIT_DELAY') + '</h4>' +
+        '<div class="res-note" style="color:var(--text)">O FindFlow escolhe <strong>' + esc(ld.flow) + '</strong>, mas ele ' + esc(limitText(cond.sc, ld.limite)) +
+        ' e o check-in foi ' + (parseHM(cond.sc.horaCheckin) !== null ? 'às ' + esc(cond.sc.horaCheckin) : 'com atraso de ' + s.atraso + ' min') +
+        '. Logo depois de escolher, o Controller redireciona para o escape de atraso (PosBlockStartFlow).' +
+        (lw ? '' : ' Este cliente não tem fluxo de escape LIMIT_DELAY que atenda: o Controller registra a falha e não redireciona.') + '</div>' +
+        (lw ? '<div class="mono muted" style="margin-top:4px">' + lw.row.flowId + '</div>' + condChips(lw.row) : '') + '</div>';
+      html += '<h4 style="margin:14px 0 8px;font-size:13px;color:var(--muted)">Escolha do FindFlow (antes do bloqueio por atraso)</h4>';
+    }
+    if (s.fallbackDelay) html += '<div class="msgs"><div class="w">! Nenhum fluxo mais específico está dentro do limite de atraso (atraso de ' + s.atraso + ' min): o FindFlow escolhe pela prioridade entre todos eles.</div></div>';
+    if (cond.sc.escape && !blankToNull(cond.sc.escapeId)) {
+      var escIds = {}; cond.rows.forEach(function(r){ if (r.c.FlagEscape && r.c.EscapeId) escIds[r.c.EscapeId] = true; });
+      html += '<div class="msgs"><div class="w">! Informe o EscapeId: no escape o Controller sempre envia qual é. Sem ele só passam condições de escape com EscapeId NULL.' +
+        (Object.keys(escIds).length ? ' Neste cliente: ' + esc(Object.keys(escIds).sort().join(', ')) + '.' : '') + '</div></div>';
+    }
+    if (isGuid(mark)) {
+      var pos = -1; s.ranked.forEach(function(m, i){ if (pos < 0 && m.row.flowId === mark) pos = i; });
+      var mine = cond.rows.filter(function(r){ return r.flowId === mark; });
+      if (!mine.length) html += '<div class="msgs"><div class="w">O fluxo informado (' + mark + ') não tem condições neste serviço.</div></div>';
+      else {
+        html += '<div class="res-card mark"><h4>Fluxo informado: ' + esc(mine[0].flowName) + '</h4>' +
+          '<div class="res-note" style="color:var(--text)">' + (pos === 0 ? '✓ É o <strong>escolhido</strong> neste cenário.' : pos > 0 ? 'Atende, mas está na <strong>posição ' + (pos + 1) + '</strong> (não é o escolhido).' : 'Não atende a este cenário.') + '</div>' +
+          mine.map(function(r, k){
+            var e = evalCondition(r, cond.sc);
+            return '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)"><strong>Condição ' + (k + 1) + '</strong> exige: ' + esc(conditionRequirements(r).join(' · ')) +
+              '<div class="res-note" style="color:' + (e.ok ? 'var(--ok)' : 'var(--warn)') + '">' + (e.ok ? '✓ Casa com o cenário.' : '✕ ' + esc(e.reason)) + '</div>' +
+              '<button class="small" style="margin-top:6px" data-act="cond-use" data-n="' + r.n + '">Usar no cenário</button></div>';
+          }).join('') + '</div>';
+      }
+    }
+    if (!s.ranked.length) html += '<div class="msgs"><div class="e">✕ Nenhum fluxo atende a este cenário: o Controller não encontraria fluxo.</div></div>';
+    s.ranked.forEach(function(m, i){
+      html += '<div class="res-card' + (m.chosen ? ' win' : '') + (m.row.flowId === mark ? ' mark' : '') + '">' +
+        '<h4><span class="res-pos">' + (i + 1) + '</span>' + esc(m.row.flowName || '(sem nome)') +
+        (m.chosen ? (s.limitDelay ? ' <span class="tag warn">escolhido pelo FindFlow → redirecionado ao escape de atraso</span>' : ' <span class="tag">será escolhido</span>') : '') +
+        ' <span class="tag">' + m.spec + ' parâmetro(s)</span></h4>' +
+        '<div class="mono muted" style="margin-top:4px">' + m.row.flowId + '</div>' + condChips(m.row) +
+        (m.window ? '<div class="res-note" style="color:' + (m.inWindow ? 'var(--ok)' : 'var(--warn)') + '">' + (m.inWindow ? '✓ ' : '✕ ') + esc(m.window) + '</div>' : '') +
+        (m.note ? '<div class="res-note">' + esc(m.note) + '</div>' : '') + '</div>';
+      if (i === 0 && s.ranked.length > 1) html += '<h4 style="margin:14px 0 8px;font-size:13px;color:var(--muted)">Próximas opções</h4>';
+    });
+    if (s.excluded.length) {
+      html += '<details style="margin-top:12px"><summary style="font-size:13px">Não atendem (' + s.excluded.length + ')</summary>' +
+        s.excluded.map(function(e){
+          return '<div class="res-card' + (e.row.flowId === mark ? ' mark' : '') + '"><h4>' + esc(e.row.flowName || '(sem nome)') + '</h4>' +
+            '<div class="res-note" style="color:var(--warn)">' + esc(e.reason) + '</div>' + condChips(e.row) + '</div>';
+        }).join('') + '</details>';
+    }
+    box.innerHTML = html;
+  }
+  function renderCond(){ renderCondForm(); renderCondQuery(); renderCondResult(); }
+
+  ['cond-idfluxo', 'cond-idservico'].forEach(function(id){
+    $(id).addEventListener('input', function(){ cond.servico = $('cond-idservico').value.trim(); cond.fluxo = $('cond-idfluxo').value.trim(); renderCondQuery(); renderCondResult(); saveCond(); });
+  });
+  // Cenário: atualiza o resultado a cada alteração
+  document.addEventListener('input', function(ev){
+    var t = ev.target, sc = cond.sc;
+    if (t.hasAttribute && t.hasAttribute('data-sim')) sc.values[t.getAttribute('data-sim')] = t.value;
+    else if (t.id === 'cond-escapeid') sc.escapeId = t.value;
+    else if (t.id === 'cond-atraso') sc.atraso = t.value;
+    else if (t.id === 'cond-hagend') { sc.horaAgendamento = t.value; renderAtrasoField(); }
+    else if (t.id === 'cond-hcheckin') { sc.horaCheckin = t.value; renderAtrasoField(); }
+    else return;
+    renderCondResult(); saveCond();
+  });
+  document.addEventListener('change', function(ev){
+    var t = ev.target, sc = cond.sc;
+    if (t.id === 'cond-tipo') sc.tipo = t.value;
+    else if (t.id === 'cond-escape') sc.escape = t.checked;
+    else if (t.id === 'cond-agend') sc.temAgendamento = t.checked;
+    else return;
+    renderCondForm(); renderCondResult(); saveCond();
+  });
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-act^="cond-"]');
+    if (!b) return;
+    switch (b.getAttribute('data-act')) {
+      case 'cond-copy-query': var cq = buildCondQuery(cond.servico); if (cq) copyText(cq, 'cond-ids-msg'); break;
+      case 'cond-load':
+        var r = parseCondSnapshot($('cond-paste').value);
+        if (r.error) { alert(r.error); break; }
+        cond.rows = r.rows; $('cond-paste').value = ''; saveCond(); renderCond(); break;
+      case 'cond-clear': cond.rows = []; $('cond-paste').value = ''; saveCond(); renderCond(); break;
+      case 'cond-reset': cond.sc = newScenario(); saveCond(); renderCond(); break;
+      case 'cond-example':
+        if (cond.rows.length && !confirm('Substituir as condições carregadas e o cenário pelo exemplo?')) break;
+        cond = {servico:EX_SERVICE, fluxo:EX_FLOW, rows:parseCondSnapshot(exampleCondText()).rows, sc:exampleScenario()};
+        $('cond-paste').value = ''; saveCond(); renderCond(); break;
+      case 'cond-resetall':
+        if (!confirm('Limpar tudo em Condicionais por fluxo (IDs, condições carregadas e cenário)?')) break;
+        cond = {servico:'', fluxo:'', rows:[], sc:newScenario()};
+        $('cond-paste').value = ''; saveCond(); renderCond(); window.scrollTo(0, 0); break;
+      case 'cond-use':
+        var n = +b.getAttribute('data-n'), row = cond.rows.filter(function(r){ return r.n === n; })[0];
+        if (row) { cond.sc = scenarioFromRow(row, cond.sc); saveCond(); renderCond(); flash('Cenário preenchido com a condição do fluxo "' + row.flowName + '".', 'cond-ids-msg'); }
+        break;
+    }
+  });
+
+  // ---------- Navegação entre telas ----------
+  var TITLES = {home:'', novo:'· Criar novo fluxo', apagar:'· Apagar fluxo', cond:'· Condicionais por fluxo', upd:'· Atualizar fluxo'};
+  function route(){
+    var h = location.hash || '';
+    var view = h.indexOf('#/apagar') === 0 ? 'apagar' : h.indexOf('#/condicionais') === 0 ? 'cond' : h.indexOf('#/atualizar') === 0 ? 'upd' :
+               (h.indexOf('#/novo') === 0 || h === '#exemplo') ? 'novo' : 'home';
+    if (view === 'novo' || view === 'upd') setEditorMode(view);
+    if (view === 'upd') { renderUpdLoad(); var hasFlow = !!docs.upd.orig; $('upd-load-body').hidden = hasFlow; $('upd-toggle').textContent = hasFlow ? 'Mostrar' : 'Recolher'; }
+    ['home', 'novo', 'apagar', 'cond', 'upd'].forEach(function(v){ $('view-' + v).hidden = v !== view; });
+    $('view-title').textContent = TITLES[view];
+    $('btn-home').style.visibility = view === 'home' ? 'hidden' : 'visible';
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+
+  function flash(msg, boxId){ var m = $(boxId || 'msgs'); var d = document.createElement('div'); d.className = 'o'; d.textContent = msg; m.insertBefore(d, m.firstChild); setTimeout(function(){ if (d.parentNode) d.parentNode.removeChild(d); }, 2000); }
   function showTests(){
     var res = runTests(), fail = res.filter(function(r){ return !r.ok; });
     $('selftest-box').hidden = false;
@@ -891,9 +2808,12 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
   }
 
   fillDatalists();
-  // Abrir com "#exemplo" no fim do endereço carrega o exemplo (se não houver passos).
+  // Abrir com "#exemplo" no fim do endereço carrega o exemplo do escape acompanhante (se não houver passos).
   if (location.hash === '#exemplo' && !state.steps.length) buildExample(state);
   renderAll();
+  renderDelete();
+  renderCond();
+  route();
 })();
 </script>
 </body>
