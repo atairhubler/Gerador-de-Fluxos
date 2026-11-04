@@ -113,6 +113,52 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
 .cond{border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
 .params{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px;margin-top:10px}
 .hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+.param-btns{display:flex;gap:6px;align-items:flex-start}
+/* Prévia da senha: o papel é sempre branco com texto preto, mesmo no tema escuro */
+.ticket-wrap{display:flex;justify-content:center;padding:18px;background:var(--card);border-radius:8px;overflow:auto}
+.ticket{background:#fff;color:#000;box-shadow:0 2px 12px rgba(0,0,0,.3);flex:0 0 auto}
+.ticket p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.ticket .img{border:1px dashed #999;color:#666;display:flex;align-items:center;justify-content:center;font:11px/1.2 sans-serif;text-align:center}
+.ticket .err{color:#b42318;font:12px sans-serif}
+table.mini input{padding:3px 6px}
+/* Diagrama */
+.diag-wrap{max-width:1600px;margin:12px auto 0;padding:0 20px}
+.diag{position:relative}
+.diag-svg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:3}
+.diag-svg path{fill:none;stroke-width:2.2;opacity:.85}
+.diag-svg path.fixo,.diag-svg path.param{stroke:var(--accent)}
+.diag-svg path.config,.diag-svg path.connect{stroke:var(--warn);stroke-dasharray:5 4}
+.diag.focus .diag-svg path{opacity:.1}
+.diag.focus .diag-svg path.hl{opacity:1;stroke-width:3.2}
+.lane-group{margin:6px 0 10px 48px;font-size:14px;color:var(--label)}
+.lane{position:relative;border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;background:var(--card);padding:10px 12px;margin:0 0 14px 48px}
+.lane.esc{border-left-color:var(--warn)}
+.lane.orphan{opacity:.6;border-left-color:var(--border)}
+.lane.hl{box-shadow:0 0 0 2px var(--accent)}
+.lane.mark{box-shadow:0 0 0 3px var(--ok)}
+.tag.okt{background:var(--ok-bg);color:var(--ok)}
+.dstep.skip{opacity:.35;border-style:dashed}
+.dstep.chosen{border-color:var(--warn);box-shadow:0 0 0 2px var(--warn)}
+.dec-flow{margin:0 0 10px;padding:10px 12px;border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;background:var(--card)}
+.dec-flow.esc{border-left-color:var(--warn)}
+.dec-flow h4{margin:0 0 8px;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px 14px}
+.dec-grid select{padding:5px 8px}
+.lane-end{margin-top:8px;font-size:13px}
+.lane-end.ok{color:var(--ok)}
+.lane-end.bad{color:var(--err)}
+.lane-end.go{color:var(--warn)}
+.lane-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.lane-steps{display:flex;flex-wrap:wrap;gap:12px 4px;align-items:stretch}
+.dstep{border:1px solid var(--border);border-radius:6px;background:var(--panel);padding:5px 8px;font-size:12.5px;max-width:210px}
+.dstep.trig{border-color:var(--accent);cursor:default}
+.dstep .a{color:var(--muted);font-size:11.5px}
+.dsep{color:var(--muted);align-self:center}
+.esc-b{display:inline-block;font-size:10.5px;padding:0 5px;border-radius:8px;margin-top:3px;background:var(--accent-weak);color:var(--accent)}
+.esc-b.config,.esc-b.connect{background:var(--warn-bg);color:var(--warn)}
+.esc-b.miss{background:var(--err-bg);color:var(--err)}
+.origins{font-size:12.5px;margin-top:8px;color:var(--muted)}
+.origins li{margin:2px 0}
 </style>
 </head>
 <body>
@@ -134,6 +180,8 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
     <a class="card" href="#/apagar"><span class="card-icon">🗑</span><h3>Apagar fluxo</h3><p>A partir de uma consulta, gera o script para apagar (ou desativar) um fluxo.</p></a>
     <a class="card" href="#/condicionais"><span class="card-icon">⇄</span><h3>Condicionais por fluxo</h3><p>Simula em qual fluxo cada cenário cai, em tempo real.</p></a>
     <a class="card" href="#/atualizar"><span class="card-icon">✎</span><h3>Atualizar fluxo</h3><p>Carrega um fluxo existente, edita e gera só as alterações.</p></a>
+    <a class="card" href="#/layout"><span class="card-icon">🎫</span><h3>Prévia de senha</h3><p>Valida o JSON do QUEUEPRINT_LAYOUT e mostra como a senha sai no papel.</p></a>
+    <a class="card" href="#/diagrama"><span class="card-icon">⇶</span><h3>Diagrama de Fluxo</h3><p>Fluxos ativos do serviço e quais passos levam a cada fluxo de escape.</p></a>
   </div>
 </div>
 
@@ -232,6 +280,16 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
       </h2>
       <pre id="sql" class="sql"></pre>
     </section>
+    <section>
+      <h2>Script de desfazer
+        <span class="btns">
+          <button data-act="undo-copy" class="small">Copiar</button>
+          <button data-act="undo-download" class="small">Baixar .sql</button>
+        </span>
+      </h2>
+      <p class="hint" style="margin-top:0">Guarde junto com o script acima <strong>antes</strong> de rodá-lo. Só rode se precisar voltar atrás.</p>
+      <pre id="undo-sql" class="sql" style="max-height:260px"></pre>
+    </section>
   </div>
 </main>
 </div>
@@ -322,8 +380,94 @@ details>summary{cursor:pointer;font-weight:600;font-size:15px}
       </h2>
       <pre id="del-sql" class="sql"></pre>
     </section>
+    <section>
+      <h2>Script de desfazer
+        <span class="btns">
+          <button data-act="del-undo-copy" id="del-undo-copy" class="small">Copiar</button>
+          <button data-act="del-undo-download" id="del-undo-download" class="small">Baixar .sql</button>
+        </span>
+      </h2>
+      <pre id="del-undo" class="sql" style="max-height:200px"></pre>
+    </section>
   </div>
 </main>
+</div>
+
+<!-- ===== Prévia de senha (QUEUEPRINT_LAYOUT) ===== -->
+<div id="view-layout" class="view" hidden>
+<div class="toolbar btns">
+  <button data-act="lay-ex-pac">Exemplo: senha do paciente</button>
+  <button data-act="lay-ex-acomp">Exemplo: ticket do acompanhante</button>
+  <button data-act="lay-reset" class="danger">Limpar tudo</button>
+</div>
+<div class="load-wrap" id="lay-src-wrap" hidden><div id="lay-src" class="origin" style="margin-top:0"></div></div>
+<main>
+  <div>
+    <section>
+      <h2>1. Layout (JSON do QUEUEPRINT_LAYOUT)
+        <span class="btns">
+          <button data-act="lay-format" class="small">Formatar</button>
+          <button data-act="lay-compact" class="small">Compactar</button>
+          <button data-act="lay-copy" class="small">Copiar</button>
+        </span>
+      </h2>
+      <textarea id="lay-json" rows="20" spellcheck="false" placeholder='{"pageSettings":{"style":{"fontSize":3}},"content":[{"section":"body","items":[...]}]}'></textarea>
+      <p class="hint">Cole o valor do parâmetro QUEUEPRINT_LAYOUT. A prévia segue as regras do QueuePrintService do Controller: #HAS, #IF, #NEWLINE#, listas #X_*#, fontes herdadas e alinhamento.</p>
+    </section>
+    <section>
+      <h2>Validação</h2>
+      <div id="lay-msgs" class="msgs"></div>
+    </section>
+    <section>
+      <h2>2. Valores das tags <span class="btns"><button data-act="lay-values-reset" class="small">Voltar aos valores de exemplo</button></span></h2>
+      <p class="hint" style="margin-top:0">Altere os valores para ver como a senha fica. "Não vem" simula a tag ausente (o Controller imprime o texto da tag; #HAS cai no texto falso).</p>
+      <div id="lay-tags"></div>
+    </section>
+  </div>
+  <div>
+    <section>
+      <h2>Prévia <span id="lay-badge"></span></h2>
+      <div id="lay-preview" class="ticket-wrap"></div>
+      <p class="hint">Papel de 85 pt com margens de 2 pt, como no Controller. Fonte e quebra de linha são aproximadas (o navegador não usa o iTextSharp); a imagem aparece como uma caixa com o nome do arquivo.</p>
+    </section>
+  </div>
+</main>
+</div>
+
+<!-- ===== Diagrama de Fluxo ===== -->
+<div id="view-diag" class="view" hidden>
+<div class="toolbar btns">
+  <button data-act="dg-example">Exemplo</button>
+  <button data-act="dg-reset" class="danger">Limpar tudo</button>
+</div>
+<div class="load-wrap">
+<section>
+  <h2>Carregar o serviço <span class="btns"><button data-act="dg-toggle" id="dg-toggle" class="small">Recolher</button></span></h2>
+  <div id="dg-load-body">
+    <div class="row"><div class="f"><label for="dg-idservico">IdServico *</label><input id="dg-idservico" class="mono" autocomplete="off" placeholder="GUID do serviço (cliente)"></div></div>
+    <p class="hint">A consulta traz <strong>todos</strong> os fluxos ativos do serviço. Para ver um fluxo só e simular as decisões, use o filtro no Diagrama.</p>
+    <div id="dg-ids-msg" class="msgs" style="margin-top:8px"></div>
+    <h2 style="margin-top:12px">Consulta <span class="btns"><button data-act="dg-copy-query" id="dg-copy-query" class="small">Copiar consulta</button></span></h2>
+    <p class="hint" style="margin-top:0">Rode no banco (só leitura). Traz só fluxos e passos <strong>ativos</strong>. O resultado vem em uma ou mais linhas: clique no <strong>cabeçalho da coluna ServicoJson</strong>, Ctrl+C e cole abaixo.</p>
+    <pre id="dg-query" class="sql" style="max-height:200px"></pre>
+    <label for="dg-paste" style="margin-top:10px">Resultado (coluna ServicoJson)</label>
+    <textarea id="dg-paste" rows="3" placeholder='{"servico":"...","fluxos":[...]}'></textarea>
+    <div class="btns" style="margin-top:8px"><button data-act="dg-load" id="dg-load" class="primary">Desenhar diagrama</button></div>
+  </div>
+</section>
+</div>
+<div class="diag-wrap">
+<section>
+  <h2>Diagrama <span class="btns"><label class="check" style="padding:0"><input type="checkbox" id="dg-arrows" checked> Mostrar setas</label></span></h2>
+  <div class="row" style="margin-bottom:8px">
+    <div class="f"><label for="dg-idfluxo">Filtrar fluxo: IdFluxo ou nome (opcional)</label><input id="dg-idfluxo" autocomplete="off" placeholder="Ex.: 1A2B3C4D-... ou parte do nome"></div>
+    <div><button data-act="dg-clear-filter" class="small" style="margin-bottom:8px">Limpar filtro</button></div>
+  </div>
+  <div id="dg-decisions"></div>
+  <div id="dg-legend" class="hint" style="margin:0 0 10px"></div>
+  <div id="dg-canvas" class="diag"></div>
+</section>
+</div>
 </div>
 
 <!-- ===== Condicionais por fluxo ===== -->
@@ -884,6 +1028,9 @@ function buildLoadQuery(idFluxo, idServico){
     '                 p.[Descrição] AS descricao, p.Ordem AS ordem, p.Opcional AS opcional, p.AtivoInativo AS ativo,',
     '                 p.IdPassoAnterior AS anterior, p.IdPassoSeguinte AS seguinte,',
     '                 (SELECT COUNT(*) FROM dbo.Acompanhamento x WHERE x.IdPasso = p.ID) AS usos,',
+    '                 (SELECT COUNT(*) FROM dbo.RetornosPorPasso x WHERE x.IdPasso = p.ID) AS retornos,',
+    '                 (SELECT COUNT(*) FROM dbo.Documentos x WHERE x.IdPasso = p.ID) AS documentos,',
+    '                 (SELECT COUNT(*) FROM dbo.PerguntasFormulario x WHERE x.IdPasso = p.ID) AS perguntas,',
     '                 (SELECT pp.Nome AS nome, CAST(pp.Valor AS NVARCHAR(MAX)) AS valor',
     '                    FROM dbo.ParametrosPorPasso pp WHERE pp.IdPasso = p.ID ORDER BY pp.Nome FOR JSON PATH, INCLUDE_NULL_VALUES) AS parametros',
     '            FROM dbo.PassosPorFluxo p LEFT JOIN dbo.Acoes a ON a.ID = p.IdAcao',
@@ -1095,6 +1242,9 @@ function validateUpdate(st){
   if (up(st.flow.servico) !== up(st.orig.servico)) errors.push('O serviço do fluxo não pode ser trocado na atualização (era ' + up(st.orig.servico) + ').');
   st.removed.forEach(function(x){
     if (x.modo === 'apagar' && x.step.origem.usos > 0) errors.push('"' + x.step.origem.descricao + '" já foi usado em ' + x.step.origem.usos + ' registro(s) de Acompanhamento: só pode ser desativado.');
+    var p = (st.orig.passos || []).filter(function(q){ return up(q.id) === x.step.origem.idPasso; })[0];
+    if (x.modo === 'apagar' && p && (toInt(p.retornos) || toInt(p.documentos) || toInt(p.perguntas)))
+      warnings.push('Apagar "' + x.step.origem.descricao + '" também apaga ' + toInt(p.retornos) + ' retorno(s), ' + toInt(p.documentos) + ' documento(s) e ' + toInt(p.perguntas) + ' pergunta(s): o script de desfazer não recria esses itens. Prefira Desativar.');
   });
   if (!updateChanges(st).length) errors.push('Nenhuma alteração em relação ao banco.');
   if (condsChanged(st) && (st.orig.condicoes || []).some(function(c){ return COND_FIELDS.some(function(f){ return c[f.k] === ''; }); }))
@@ -1411,9 +1561,13 @@ function simulate(rows, sc){
 
 // Só o FindFlow + desempate: {ranked:[{row, spec, note, chosen}], excluded:[{row, reason}], maxSpec, fallbackDelay}
 function simulateFind(rows, sc){
+  // Fluxo inativo nunca é usado: fica fora da disputa e da lista "não atendem" (só a contagem aparece).
+  var inactive = {};
+  rows.forEach(function(r){ if (!r.flowAtivo) inactive[r.flowId] = true; });
+  rows = rows.filter(function(r){ return r.flowAtivo; });
   var evals = rows.map(function(r){ var e = evalCondition(r, sc); return {row:r, ok:e.ok, reason:e.reason, spec:e.spec}; });
   var matches = evals.filter(function(e){ return e.ok; }), excluded = evals.filter(function(e){ return !e.ok; });
-  var out = {ranked:[], excluded:excluded, maxSpec:0, fallbackDelay:false, delayApplied:false};
+  var out = {ranked:[], excluded:excluded, maxSpec:0, fallbackDelay:false, delayApplied:false, inactiveFlows:Object.keys(inactive).length};
   if (!matches.length) return out;
   var maxSpec = Math.max.apply(null, matches.map(function(m){ return m.spec; }));
   out.maxSpec = maxSpec;
@@ -1444,6 +1598,599 @@ function simulateFind(rows, sc){
   out.ranked = ordered.concat(rest);
   out.ranked.forEach(function(m, i){ m.chosen = i === 0; });
   return out;
+}
+
+// ---------- Prévia do layout da senha (QUEUEPRINT_LAYOUT) ----------
+// Reproduz o QueuePrintService do Controller (iTextSharp). Medidas em pt: papel 85, margens 2, coluna 81, 3 entre seções.
+var LAYOUT_PAGE = {width:85, margin:2, column:81, gap:3};
+var LAYOUT_SECTIONS = ['header', 'body', 'footer'];
+var LAYOUT_ITEM_TYPES = ['text', 'list', 'line', 'image', 'barcode'];
+var LAYOUT_ALIGNS = ['LEFT', 'CENTER', 'RIGHT', 'JUSTIFIED', 'JUSTIFIED_ALL'];
+var LAYOUT_WEIGHTS = ['normal', 'bold', 'italic', 'oblique', 'underline', 'line-through', 'bolditalic'];
+// [tag, valor de exemplo, origem]: c = Controller, a = passo "Imprimir senha acompanhante", x = depende do adapter do cliente (GetQueueInformations)
+var LAYOUT_TAGS = [
+  ['#NOW#', '04/11/2026 09:15:02', 'c'], ['#SERVICE_NAME#', 'Clínica Exemplo', 'c'], ['#LOGO#', 'logo.png', 'c'], ['#QUEUE_CODE#', 'A015', 'c'],
+  ['#QUEUE_NAME#', 'RECEPÇÃO 2º ANDAR', 'c'], ['#TOTEM_NAME#', 'TOTEM-01', 'c'], ['#PATIENT_ID#', '123456', 'c'], ['#PATIENT_NAME#', 'Maria', 'c'],
+  ['#PATIENT_INTERNALID#', '998877', 'c'], ['#APPOINTMENT_ID_0#', '55501', 'c'], ['#APPOINTMENT_PROCEDURE_0#', 'CONSULTA', 'c'], ['#APPOINTMENT_TIME_0#', '09:30', 'c'],
+  ['#REGISTRATION_ID#', '7781234', 'c'], ['#APPOINTMENT_DATE#', '04/11/2026 09:30', 'c'], ['#DOCUMENT_SIGNED_NAME_0#', 'TERMO DE CONSENTIMENTO', 'c'],
+  ['#DOCUMENT_SIGNED_RESULT_0#', 'True', 'c'], ['#APPOINTMENT_ISRETURN#', 'False', 'c'], ['#WEBCHECKIN_ISDONE#', 'False', 'c'], ['#WEBCHECKIN_HASFILE#', 'False', 'c'],
+  ['#PATIENT_ISELEGIBLE#', 'True', 'c'],
+  ['#COMPANION_NAME#', 'João', 'a'], ['#ENTRANCE_ID#', '00001003', 'a'], ['#PRINT_BARCODE#', 'True', 'a'],
+  ['#PATIENT_BIRTHDATE#', '20/11/1990', 'x'], ['#PATIENT_AGE#', '35', 'x'], ['#PATIENT_SEX#', 'F', 'x'], ['#PRINTED_AT#', '04/11/2026 09:15', 'x'],
+  ['#LOCATION_NAME#', '3º ANDAR', 'x'], ['#LOCATION_FROM#', '2º ANDAR', 'x'], ['#PROFESSIONAL_NAME#', 'DRA. EXEMPLO', 'x'], ['#APPOINTMENT_TIME_LABEL#', '09h30', 'x'],
+  ['#APPOINTMENT_LOCATION_0#', 'SALA 3', 'x'], ['#APPOINTMENT_PRESCRIPTION_0#', 'PR123', 'x'], ['#APPOINTMENT_ACCESS_0#', 'AN456', 'x'],
+  ['#NETWORK_USER#', 'usuario', 'x'], ['#NETWORK_PASS#', 'senha', 'x'], ['#DELIVERY_DATE#', '10/11/2026', 'x'], ['#PAYMENT_STATUS#', 'PAGO', 'x'],
+  ['#IS_PAID#', 'True', 'x'], ['#REGISTRATION_IS_AUTHORIZED#', 'SIM', 'x']];
+var LAYOUT_TAG_ORIGIN = {c:'Controller', a:'passo do acompanhante (e alguns adapters)', x:'depende do adapter do cliente'};
+var LAYOUT_CONTROL_TAGS = ['#NEWLINE#', '#BREAK#'];
+var TAG_RE = /#[A-Za-z0-9_]+#/;
+
+function layoutSampleData(){ var d = {}; LAYOUT_TAGS.forEach(function(t){ d[t[0]] = t[1]; }); return d; }
+// Tag indexada (#X_0#, #X_*#) é comparada pela base com _0.
+function layoutTagKey(t){ return String(t).replace(/_(\d+|\*)#$/, '_0#'); }
+function layoutTagInfo(t){ var k = layoutTagKey(t); for (var i = 0; i < LAYOUT_TAGS.length; i++) if (LAYOUT_TAGS[i][0] === k) return LAYOUT_TAGS[i]; return null; }
+
+// Argumentos de #HAS(...)# / #IF(...)#: só vírgulas fora de #TAG# e de parênteses separam. 1º = antes da 1ª vírgula, 3º = depois da última,
+// 2º = o que sobra (pode ter vírgulas). Sempre 3 argumentos (SplitArguments do Controller).
+function layoutSplitArgs(s){
+  var cuts = [], inTag = false, depth = 0;
+  for (var i = 0; i < s.length; i++) {
+    var ch = s[i];
+    if (ch === '#') inTag = !inTag;
+    else if (!inTag && ch === '(') depth++;
+    else if (!inTag && ch === ')') depth = Math.max(0, depth - 1);
+    else if (ch === ',' && !inTag && depth === 0) cuts.push(i);
+  }
+  if (!cuts.length) return [s.trim(), '', ''];
+  if (cuts.length === 1) return [s.slice(0, cuts[0]).trim(), s.slice(cuts[0] + 1).trim(), ''];
+  return [s.slice(0, cuts[0]).trim(), s.slice(cuts[0] + 1, cuts[cuts.length - 1]).trim(), s.slice(cuts[cuts.length - 1] + 1).trim()];
+}
+function layoutSplitArgsCuts(s){ var n = 0, inTag = false, depth = 0; for (var i = 0; i < s.length; i++) { var ch = s[i]; if (ch === '#') inTag = !inTag; else if (!inTag && ch === '(') depth++; else if (!inTag && ch === ')') depth = Math.max(0, depth - 1); else if (ch === ',' && !inTag && depth === 0) n++; } return n; }
+function hasKey(d, k){ return Object.prototype.hasOwnProperty.call(d, k); }
+// Condição do #IF: True/Yes/1, False/No/0, comparação (== != >= <= > <; numérica se os dois lados forem números); senão, só se for uma chave.
+function layoutEvalCond(c, data){
+  c = String(c).trim();
+  var l = c.toLowerCase();
+  if (l === 'true' || l === 'yes' || l === '1') return true;
+  if (l === 'false' || l === 'no' || l === '0') return false;
+  var ops = ['==', '!=', '>=', '<=', '>', '<'];
+  for (var i = 0; i < ops.length; i++) {
+    var p = c.indexOf(ops[i]);
+    if (p > 0) {
+      var a = c.slice(0, p).trim().replace(/['"]/g, ''), b = c.slice(p + ops[i].length).trim().replace(/['"]/g, '');
+      var num = /^-?\d+([.,]\d+)?$/.test(a) && /^-?\d+([.,]\d+)?$/.test(b), x = num ? parseFloat(a.replace(',', '.')) : a.toLowerCase(), y = num ? parseFloat(b.replace(',', '.')) : b.toLowerCase();
+      switch (ops[i]) { case '==': return x === y; case '!=': return x !== y; case '>=': return x >= y; case '<=': return x <= y; case '>': return x > y; default: return x < y; }
+    }
+  }
+  return hasKey(data, c);
+}
+// ResolveTags do Controller: repete (IF, depois HAS, depois tags simples) até o texto parar de mudar. Tag sem valor fica como está.
+function layoutResolve(input, data){
+  if (input == null || input === '' || !data || !Object.keys(data).length) return input;
+  var cur = String(input), prev, guard = 0;
+  do {
+    prev = cur;
+    cur = cur.replace(/#IF\((.*?)\)#/g, function(m, inner){ var a = layoutSplitArgs(inner); return layoutEvalCond(layoutResolve(a[0], data), data) ? layoutResolve(a[1], data) : layoutResolve(a[2], data); });
+    cur = cur.replace(/#HAS\((.*?)\)#/g, function(m, inner){
+      var a = layoutSplitArgs(inner), c = String(layoutResolve(a[0], data) || '');
+      var yes = hasKey(data, c) || (c.trim() !== '' && !TAG_RE.test(c));
+      return layoutResolve(yes ? a[1] : a[2], data) || '';
+    });
+    cur = cur.replace(/#[A-Za-z0-9_]+#/g, function(t){ return hasKey(data, t) ? String(data[t]) : t; });
+  } while (cur !== prev && ++guard < 20);
+  return cur;
+}
+// "list": a 1ª #BASE_*# define as linhas (0..maior índice existente). Sem chave da base: o Controller pula o item (null).
+function layoutResolveList(tpl, data){
+  var m = /#([A-Za-z0-9_]+)_\*#/.exec(tpl || '');
+  if (!m) return null;
+  var max = -1, pre = '#' + m[1] + '_';
+  Object.keys(data).forEach(function(k){ var x = /_(\d+)#$/.exec(k); if (k.indexOf(pre) === 0 && x) max = Math.max(max, +x[1]); });
+  if (max < 0) return null;
+  var rows = [];
+  for (var i = 0; i <= max; i++) rows.push(tpl.replace(/#([A-Za-z0-9_]+)_\*#/g, function(t, b){ var k = '#' + b + '_' + i + '#'; return hasKey(data, k) ? k : t; }));
+  return rows;
+}
+// Fonte herdada: página -> seção -> item. Sem "style" usa a do pai; com "style", cada chave ausente vem do pai.
+function layoutFont(node, parent){
+  var p = parent || {family:'Helvetica', size:3, weight:'normal', color:'#000000'}, s = node && node.style;
+  if (!s || typeof s !== 'object') return p;
+  return {family:s.fontFamily != null ? String(s.fontFamily) : p.family, size:s.fontSize != null && !isNaN(parseFloat(s.fontSize)) ? parseFloat(s.fontSize) : p.size,
+          weight:s.fontWeight != null ? String(s.fontWeight) : p.weight, color:s.color != null ? String(s.color) : p.color};
+}
+function layoutAlign(item){
+  var a = item && item.style && item.style.align;
+  if (a == null || a === '') return 'CENTER';
+  a = String(a).toUpperCase();
+  return LAYOUT_ALIGNS.indexOf(a) >= 0 ? a : 'LEFT';
+}
+// Monta os parágrafos de cada seção como o Controller (sem desenhar). Devolve {sections:{header,body,footer}, skipped:[...]}.
+function layoutModel(cfg, data){
+  var out = {sections:{header:[], body:[], footer:[]}, skipped:[]};
+  var pageFont = layoutFont(cfg.pageSettings || null, null);
+  (cfg.content || []).forEach(function(sec, si){
+    var type = sec && sec.section;
+    if (LAYOUT_SECTIONS.indexOf(type) < 0) return;
+    var secFont = layoutFont(sec, pageFont), paras = [];
+    (sec.items || []).forEach(function(item, ii){
+      var where = type + ' item ' + (ii + 1), font = layoutFont(item, secFont), align = layoutAlign(item), st = item.style || {};
+      var t = item.type, v = item.value == null ? '' : String(item.value);
+      if (t === 'image') paras.push({kind:'image', name:layoutResolve(v, data), align:align, maxW:st.maxWidth, maxH:st.maxHeight});
+      else if (t === 'barcode') {
+        var bv = String(layoutResolve(v, data) || '').trim();
+        if (!bv || TAG_RE.test(bv)) { out.skipped.push(where + ': código de barras não sai (valor vazio ou tag sem valor: "' + bv + '")'); return; }
+        paras.push({kind:'barcode', value:bv, align:align, barHeight:st.barHeight != null ? +st.barHeight : 40, moduleWidth:st.moduleWidth != null ? +st.moduleWidth : 0.7});
+      } else if (t === 'text') {
+        String(layoutResolve(v, data)).split('#NEWLINE#').forEach(function(line){ paras.push({kind:'text', text:line, font:font, align:align}); });
+      } else if (t === 'list') {
+        var rows = layoutResolveList(v, data);
+        if (!rows) { out.skipped.push(where + ': lista não sai (nenhuma chave da base #..._*# nos dados)'); return; }
+        rows.forEach(function(r){ String(layoutResolve(r, data)).split('#NEWLINE#').forEach(function(line){ paras.push({kind:'text', text:line, font:font, align:align}); }); });
+      } else if (t === 'line') {
+        var sep = st.separator != null && String(st.separator) !== '' ? String(st.separator)[0] : ' ', size = st.size != null ? +st.size : 3;
+        paras.push({kind:'line', ch:sep, count:Math.max(1, Math.floor(LAYOUT_PAGE.column / (size * 0.556))), size:size, color:st.color || '#000000'});
+      }
+    });
+    out.sections[type] = paras; // seção repetida: vale a última (o Controller sobrescreve)
+  });
+  return out;
+}
+// Validação + tags + modelo. Devolve {errors, warnings, tags:{known, unknown}, hasBarcode, model}.
+function layoutCheck(text, data){
+  var r = {errors:[], warnings:[], tags:{known:[], unknown:[]}, hasBarcode:false, model:null};
+  var t = String(text || '').trim();
+  if (!t) { r.errors.push('Cole o JSON do layout.'); return r; }
+  var cfg;
+  try { cfg = JSON.parse(t); }
+  catch (e) {
+    var pos = /position (\d+)/.exec(e.message), where = '';
+    if (pos) { var before = t.slice(0, +pos[1]).split('\n'); where = ' (linha ' + before.length + ', coluna ' + (before[before.length - 1].length + 1) + ')'; }
+    r.errors.push('JSON inválido' + where + ': ' + e.message);
+    return r;
+  }
+  if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) { r.errors.push('O layout precisa ser um objeto JSON { "pageSettings": ..., "content": [...] }.'); return r; }
+  if (!Array.isArray(cfg.content)) { r.errors.push('Falta "content" (lista de seções). Sem ele o Controller imprime só "Error".'); return r; }
+  var seen = {};
+  cfg.content.forEach(function(sec, si){
+    var name = sec && sec.section, p = 'Seção ' + (si + 1) + (name ? ' (' + name + ')' : '');
+    if (LAYOUT_SECTIONS.indexOf(name) < 0) { r.warnings.push(p + ': "section" deve ser header, body ou footer; esta seção é ignorada.'); return; }
+    if (seen[name]) r.warnings.push(p + ': seção "' + name + '" repetida; o Controller usa só a última.');
+    seen[name] = true;
+    if (!Array.isArray(sec.items)) { r.errors.push(p + ': falta "items" (lista). O Controller imprime "Error" no lugar desta seção.'); return; }
+    sec.items.forEach(function(item, ii){
+      var q = p + ', item ' + (ii + 1);
+      if (!item || typeof item !== 'object') { r.errors.push(q + ': item inválido.'); return; }
+      if (item.type == null) { r.errors.push(q + ': falta "type". O Controller imprime "Error" no lugar desta seção.'); return; }
+      if (LAYOUT_ITEM_TYPES.indexOf(item.type) < 0) r.warnings.push(q + ': type "' + item.type + '" não existe (text, list, line, image, barcode); o item é ignorado.');
+      if (item.type === 'barcode') r.hasBarcode = true;
+      if (item.type === 'line' && !(item.style && item.style.separator)) r.warnings.push(q + ': linha sem "separator" usa espaço: fica invisível.');
+      if (item.type !== 'line' && item.value == null) r.warnings.push(q + ': sem "value".');
+      var st = item.style;
+      if (st && typeof st === 'object') {
+        if (st.fontSize != null && isNaN(parseFloat(st.fontSize))) r.warnings.push(q + ': fontSize "' + st.fontSize + '" não é número.');
+        if (st.align != null && LAYOUT_ALIGNS.indexOf(String(st.align).toUpperCase()) < 0) r.warnings.push(q + ': align "' + st.align + '" não existe; o Controller usa LEFT.');
+        if (st.fontWeight != null && String(st.fontWeight).toLowerCase().split(/[\s,]+/).some(function(w){ return w && LAYOUT_WEIGHTS.indexOf(w) < 0; }))
+          r.warnings.push(q + ': fontWeight "' + st.fontWeight + '" tem valor desconhecido (use normal, bold, italic, underline).');
+      }
+      var v = item.value == null ? '' : String(item.value);
+      // #HAS/#IF mal fechados, vírgulas a mais e HAS/IF dentro de IF
+      var re = /#(HAS|IF)\(/g, m;
+      while ((m = re.exec(v))) {
+        var end = v.indexOf(')#', m.index);
+        if (end < 0) { r.warnings.push(q + ': #' + m[1] + '( sem o fechamento ")#": sai como texto.'); continue; }
+        var inner = v.slice(m.index + m[0].length, end);
+        if (m[1] === 'IF' && /#(HAS|IF)\(/.test(inner)) r.warnings.push(q + ': #HAS/#IF dentro de #IF não funciona no Controller (o #IF termina no primeiro ")#").');
+        if (layoutSplitArgsCuts(inner) > 2) r.warnings.push(q + ': #' + m[1] + ' com mais de 2 vírgulas: o Controller junta o excedente no texto verdadeiro (texto falso = o que vem depois da última vírgula).');
+      }
+      (v.match(/#[A-Za-z0-9_*]+#/g) || []).forEach(function(tag){
+        if (LAYOUT_CONTROL_TAGS.indexOf(tag) >= 0) return;
+        var bucket = layoutTagInfo(tag) ? r.tags.known : r.tags.unknown;
+        if (bucket.indexOf(tag) < 0) bucket.push(tag);
+      });
+    });
+  });
+  if (r.tags.unknown.length) r.warnings.push('Tag(s) que a ferramenta não conhece: ' + r.tags.unknown.join(', ') + '. Se o adapter do cliente não mandar, saem impressas como texto.');
+  r.model = layoutModel(cfg, data || layoutSampleData());
+  r.model.skipped.forEach(function(s){ r.warnings.push(s); });
+  if (!seen.body) r.errors.push('Falta a seção "body": o Controller não gera a senha sem corpo.');
+  else if (!r.model.sections.body.length) r.errors.push('O "body" ficou vazio com estes valores: o Controller falha ao gerar a senha.');
+  return r;
+}
+// Code 128 (para desenhar a prévia): conjunto C para dígitos em número par, senão B. Devolve a sequência de larguras (barra/espaço).
+var CODE128 = ('212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 ' +
+  '221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 ' +
+  '231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 ' +
+  '314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 ' +
+  '111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 ' +
+  '114131 311141 411131 211412 211214 211232 2331112').split(' ');
+function code128Widths(value){
+  var v = String(value), codes;
+  if (/^\d+$/.test(v) && v.length % 2 === 0) { codes = [105]; for (var i = 0; i < v.length; i += 2) codes.push(+v.substr(i, 2)); }
+  else { codes = [104]; for (var j = 0; j < v.length; j++) { var c = v.charCodeAt(j) - 32; codes.push(c >= 0 && c < 95 ? c : 0); } }
+  var sum = codes[0]; for (var k = 1; k < codes.length; k++) sum += codes[k] * k;
+  codes.push(sum % 103); codes.push(106);
+  return codes.map(function(c){ return CODE128[c]; }).join('');
+}
+
+// ---------- Scripts de desfazer ----------
+// Criar: localiza o fluxo criado por serviço + nome (os IDs nascem no NEWID() do script). Já usado em check-ins: só desativa.
+function buildCreateUndoSql(st, now){
+  now = now || new Date();
+  var L = [], nome = String(st.flow.nome || '').trim(), n = (st.steps || []).length;
+  L.push('-- ============================================================');
+  L.push('-- Gestor de Fluxos: DESFAZER a criação de "' + oneLine(nome) + '"');
+  L.push('-- Gerado em ' + fmtDate(now) + '. Guarde junto com o script de criação e só rode se precisar voltar atrás.');
+  L.push('-- Localiza o fluxo pelo serviço + nome (se você renomeou depois de criar, ajuste @Nome).');
+  L.push('-- Se o fluxo já foi usado em check-ins, ele só é DESATIVADO (apagar perderia o histórico).');
+  L.push('-- ============================================================');
+  L.push('SET NOCOUNT ON;');
+  L.push('SET XACT_ABORT ON;');
+  L.push('');
+  L.push("DECLARE @IdServico UNIQUEIDENTIFIER = '" + up(st.flow.servico) + "';");
+  L.push('DECLARE @Nome NVARCHAR(100) = ' + nstr(nome) + ';');
+  L.push('');
+  L.push('-- 1) Conferências (antes de alterar)');
+  L.push('IF NOT EXISTS (SELECT 1 FROM dbo.Fluxos WHERE IdServico = @IdServico AND Nome = @Nome)');
+  L.push('    THROW 50030, ' + nstr('Fluxo "' + oneLine(nome) + '" não encontrado neste serviço: nada a desfazer.') + ', 1;');
+  L.push('IF (SELECT COUNT(*) FROM dbo.Fluxos WHERE IdServico = @IdServico AND Nome = @Nome) > 1');
+  L.push('    THROW 50031, ' + nstr('Há mais de um fluxo com este nome neste serviço. Desfaça pela tela "Apagar fluxo", escolhendo o IdFluxo.') + ', 1;');
+  L.push('DECLARE @F UNIQUEIDENTIFIER = (SELECT ID FROM dbo.Fluxos WHERE IdServico = @IdServico AND Nome = @Nome);');
+  L.push('IF (SELECT COUNT(*) FROM dbo.PassosPorFluxo WHERE IdFluxo = @F) <> ' + n);
+  L.push('    THROW 50032, ' + nstr('O fluxo encontrado não tem os ' + n + ' passo(s) criados (foi alterado depois?). Confira e use a tela "Apagar fluxo".') + ', 1;');
+  L.push('DECLARE @Usado BIT = CASE WHEN EXISTS (SELECT 1 FROM dbo.Acompanhamento ac INNER JOIN dbo.PassosPorFluxo p ON p.ID = ac.IdPasso WHERE p.IdFluxo = @F)');
+  L.push('                            OR EXISTS (SELECT 1 FROM dbo.Checkin WHERE IdFluxoInicial = @F)');
+  L.push('                            OR EXISTS (SELECT 1 FROM dbo.RespostasFormulario r INNER JOIN dbo.PerguntasFormulario pf ON pf.IdPergunta = r.IdPergunta INNER JOIN dbo.PassosPorFluxo p ON p.ID = pf.IdPasso WHERE p.IdFluxo = @F)');
+  L.push('                       THEN 1 ELSE 0 END;');
+  L.push('');
+  L.push('-- 2) Desfazer (tudo ou nada)');
+  L.push('BEGIN TRAN;');
+  L.push('IF @Usado = 1');
+  L.push('    UPDATE dbo.Fluxos SET AtivoInativo = 0 WHERE ID = @F;');
+  L.push('ELSE');
+  L.push('BEGIN');
+  var join = ' INNER JOIN dbo.PassosPorFluxo p ON p.ID = x.IdPasso WHERE p.IdFluxo = @F;';
+  ['DELETE x FROM dbo.ParametrosPorPasso x' + join, 'DELETE x FROM dbo.RetornosPorPasso x' + join, 'DELETE x FROM dbo.PerguntasFormulario x' + join,
+   'DELETE x FROM dbo.Documentos x' + join, 'UPDATE x SET IdPasso = NULL FROM dbo.PerguntaFormulario x' + join,
+   'DELETE FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @F;', 'DELETE FROM dbo.PassosPorFluxo WHERE IdFluxo = @F;',
+   'DELETE FROM dbo.Fluxos WHERE ID = @F AND IdServico = @IdServico;'].forEach(function(x){ L.push('    ' + x); });
+  L.push('END');
+  L.push('COMMIT;');
+  L.push('');
+  L.push('-- 3) Conferência');
+  L.push("SELECT @F AS IdFluxo, CASE WHEN @Usado = 1 THEN N'Desativado (já tinha sido usado em check-ins)' ELSE N'Apagado' END AS Resultado;");
+  return L.join('\r\n');
+}
+
+// Atualizar: volta o fluxo ao estado da consulta (st.orig). Passos apagados voltam com o ID original; passos incluídos são apagados
+// (ou desativados, se já foram usados); parâmetros alterados e condições voltam aos valores originais.
+function buildUpdateUndoSql(st, now){
+  now = now || new Date();
+  var o = st.orig, L = [], origSteps = o.passos || [], byId = {};
+  origSteps.forEach(function(p){ byId[up(p.id)] = p; });
+  var apagados = (st.removed || []).filter(function(r){ return r.modo === 'apagar'; }).map(function(r){ return byId[r.step.origem.idPasso]; }).filter(Boolean);
+  var inicial = origSteps.filter(function(p){ return !isGuid(p.anterior); })[0] || origSteps[0];
+  L.push('-- ============================================================');
+  L.push('-- Gestor de Fluxos: DESFAZER a atualização de "' + oneLine(o.nome) + '" (' + up(o.id) + ')');
+  L.push('-- Gerado em ' + fmtDate(now) + '. Volta o fluxo ao estado da consulta usada no "Atualizar fluxo".');
+  L.push('-- Guarde junto com o script de atualização e só rode se precisar voltar atrás.');
+  apagados.forEach(function(p){
+    var extra = [p.retornos, p.documentos, p.perguntas];
+    if (extra.every(function(x){ return x === 0; })) return;
+    L.push('-- ATENÇÃO: o passo "' + oneLine(p.descricao) + '" foi apagado' + (extra.some(function(x){ return x == null; }) ? '; se ele tinha retornos, documentos ou perguntas,' :
+      ' com ' + p.retornos + ' retorno(s), ' + p.documentos + ' documento(s) e ' + p.perguntas + ' pergunta(s);') + ' esses itens NÃO voltam com este script.');
+  });
+  L.push('-- ============================================================');
+  L.push('SET NOCOUNT ON;');
+  L.push('SET XACT_ABORT ON;');
+  L.push('');
+  L.push("DECLARE @IDFLUXO UNIQUEIDENTIFIER = '" + up(o.id) + "';");
+  L.push('');
+  L.push('-- 1) Conferências (antes de alterar)');
+  L.push("IF NOT EXISTS (SELECT 1 FROM dbo.Fluxos WHERE ID = @IDFLUXO AND IdServico = '" + up(o.servico) + "')");
+  L.push('    THROW 50040, ' + nstr('Fluxo não encontrado neste serviço: ' + up(o.id)) + ', 1;');
+  L.push('');
+  L.push('-- 2) Desfazer (tudo ou nada)');
+  L.push('BEGIN TRAN;');
+  L.push('');
+  L.push('UPDATE dbo.Fluxos SET Nome = ' + nstr(o.nome || '') + ', AtivoInativo = ' + (o.ativo ? 1 : 0) + ' WHERE ID = @IDFLUXO;');
+  if (apagados.length) {
+    L.push('');
+    L.push('-- Passos apagados pela atualização: voltam com o ID original (encadeamento acertado logo abaixo)');
+    apagados.forEach(function(p){
+      L.push("IF NOT EXISTS (SELECT 1 FROM dbo.PassosPorFluxo WHERE ID = '" + up(p.id) + "')");
+      L.push('    INSERT INTO dbo.PassosPorFluxo (ID, IdFluxo, IdPassoAnterior, IdPassoSeguinte, [Descrição], IdAcao, Ordem, Opcional, AtivoInativo)');
+      L.push("    VALUES ('" + up(p.id) + "', @IDFLUXO, NULL, NULL, " + nstr(p.descricao || '') + ", '" + up(p.acaoId) + "', NULL, 0, 0);");
+    });
+  }
+  L.push('');
+  L.push('-- Passos que existiam: valores originais (descrição, ação, ordem, opcional, ativo e encadeamento)');
+  function ref(v){ return isGuid(v) ? "'" + up(v) + "'" : 'NULL'; }
+  origSteps.forEach(function(p){
+    L.push('UPDATE dbo.PassosPorFluxo SET [Descrição] = ' + nstr(p.descricao || '') + ", IdAcao = '" + up(p.acaoId) + "', Ordem = " + (p.ordem == null ? 'NULL' : toInt(p.ordem)) +
+      ', Opcional = ' + (p.opcional ? 1 : 0) + ', AtivoInativo = ' + (p.ativo ? 1 : 0) + ', IdPassoAnterior = ' + ref(p.anterior) + ', IdPassoSeguinte = ' + ref(p.seguinte) +
+      " WHERE ID = '" + up(p.id) + "';  -- " + oneLine(p.descricao));
+  });
+  L.push('');
+  L.push('-- Passos incluídos pela atualização (não existiam): apagados; se já foram usados em check-ins, só desativados');
+  L.push('DECLARE @Novos TABLE (ID UNIQUEIDENTIFIER PRIMARY KEY, Usado BIT);');
+  L.push('INSERT INTO @Novos (ID, Usado)');
+  L.push('SELECT p.ID, CASE WHEN EXISTS (SELECT 1 FROM dbo.Acompanhamento ac WHERE ac.IdPasso = p.ID)');
+  L.push('                   OR EXISTS (SELECT 1 FROM dbo.RespostasFormulario r INNER JOIN dbo.PerguntasFormulario pf ON pf.IdPergunta = r.IdPergunta WHERE pf.IdPasso = p.ID) THEN 1 ELSE 0 END');
+  L.push('FROM dbo.PassosPorFluxo p WHERE p.IdFluxo = @IDFLUXO' + (origSteps.length ? ' AND p.ID NOT IN (' + origSteps.map(function(p){ return "'" + up(p.id) + "'"; }).join(', ') + ')' : '') + ';');
+  L.push('UPDATE p SET AtivoInativo = 0, Ordem = NULL, IdPassoSeguinte = NULL, IdPassoAnterior = ' + (inicial ? "'" + up(inicial.id) + "'" : 'p.IdPassoAnterior') +
+    ' FROM dbo.PassosPorFluxo p INNER JOIN @Novos n ON n.ID = p.ID WHERE n.Usado = 1;');
+  var nj = ' INNER JOIN @Novos n ON n.ID = x.IdPasso WHERE n.Usado = 0;';
+  L.push('DELETE x FROM dbo.ParametrosPorPasso x' + nj);
+  L.push('DELETE x FROM dbo.RetornosPorPasso x' + nj);
+  L.push('DELETE x FROM dbo.PerguntasFormulario x' + nj);
+  L.push('DELETE x FROM dbo.Documentos x' + nj);
+  L.push('UPDATE x SET IdPasso = NULL FROM dbo.PerguntaFormulario x' + nj);
+  L.push('DELETE p FROM dbo.PassosPorFluxo p INNER JOIN @Novos n ON n.ID = p.ID WHERE n.Usado = 0;');
+  // Parâmetros: só dos passos que a atualização mexeu (alterados) e dos que voltaram depois de apagados
+  var touched = {};
+  apagados.forEach(function(p){ touched[up(p.id)] = true; });
+  (st.steps || []).forEach(function(s){
+    if (!s.origem) return;
+    var d = paramDiff(s);
+    if (d.replace || d.del.length || d.upd.length || d.ins.length) touched[s.origem.idPasso] = true;
+  });
+  var tIds = origSteps.filter(function(p){ return touched[up(p.id)]; });
+  if (tIds.length) {
+    L.push('');
+    L.push('-- Parâmetros originais dos passos alterados');
+    tIds.forEach(function(p){
+      L.push('-- ' + oneLine(p.descricao));
+      L.push("DELETE FROM dbo.ParametrosPorPasso WHERE IdPasso = '" + up(p.id) + "';");
+      (p.parametros || []).forEach(function(x){ L.push('INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso) VALUES (' + sqlStr(x.nome) + ', ' + (x.valor == null ? 'NULL' : nstr(x.valor)) + ", '" + up(p.id) + "');"); });
+    });
+  }
+  if (condsChanged(st)) {
+    L.push('');
+    L.push('-- Condições originais');
+    L.push('DELETE FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @IDFLUXO;');
+    (o.condicoes || []).forEach(function(c){ condInsertLines(condFromDb(c)).forEach(function(x){ L.push(x); }); });
+  }
+  L.push('');
+  L.push('COMMIT;');
+  L.push('');
+  L.push('-- 3) Conferência (depois do COMMIT)');
+  L.push('SELECT p.Ordem, p.[Descrição], a.Nome AS Acao, p.Opcional, p.AtivoInativo, p.ID, p.IdPassoAnterior, p.IdPassoSeguinte');
+  L.push('FROM dbo.PassosPorFluxo p INNER JOIN dbo.Acoes a ON a.ID = p.IdAcao');
+  L.push('WHERE p.IdFluxo = @IDFLUXO ORDER BY CASE WHEN p.Ordem IS NULL THEN 1 ELSE 0 END, p.Ordem;');
+  L.push('SELECT * FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @IDFLUXO;');
+  return L.join('\r\n');
+}
+
+// Apagar fluxo: só a desativação tem desfazer (volta o AtivoInativo de antes). Apagar não tem: devolve null.
+function buildDeleteUndoSql(flows, mode, now){
+  if (mode === 'apagar') return null;
+  now = now || new Date();
+  var L = [];
+  L.push('-- ============================================================');
+  L.push('-- Gestor de Fluxos: DESFAZER a desativação de ' + flows.length + ' fluxo(s)');
+  L.push('-- Gerado em ' + fmtDate(now) + '. Volta o AtivoInativo que cada fluxo tinha na consulta.');
+  L.push('-- ============================================================');
+  L.push('SET NOCOUNT ON;');
+  L.push('SET XACT_ABORT ON;');
+  L.push('BEGIN TRAN;');
+  flows.forEach(function(f){ L.push('UPDATE dbo.Fluxos SET AtivoInativo = ' + (f.ativo ? 1 : 0) + " WHERE ID = '" + f.id + "' AND IdServico = '" + up(f.servico) + "';  -- " + oneLine(f.nome)); });
+  L.push('COMMIT;');
+  L.push('SELECT ID, Nome, AtivoInativo FROM dbo.Fluxos WHERE ID IN (' + flows.map(function(f){ return "'" + f.id + "'"; }).join(', ') + ');');
+  return L.join('\r\n');
+}
+
+// ---------- Diagrama de Fluxo ----------
+// Só fluxos e passos ATIVOS (inativos nunca são usados). Parâmetros: só os que desviam o fluxo (os layouts grandes ficam de fora).
+var DIAGRAM_PARAMS = ['DIRECTSFLOW', 'REDIRECT_TO_SCAPE', 'REDIRECT_TO_SCAPE_TYPE', 'REDIRECT_TO_ESCAPE_RESPONSES'];
+function buildDiagramQuery(idServico){
+  if (!isGuid(idServico)) return null;
+  return [
+    '-- Consulta para o "Diagrama de Fluxo" (só leitura): fluxos ATIVOS do serviço, passos ATIVOS e condições.',
+    '-- O JSON vem em PEDAÇOS de 4000 caracteres: clique no cabeçalho da coluna ServicoJson (seleciona todas as linhas), Ctrl+C e cole na página.',
+    'SET NOCOUNT ON;',
+    "DECLARE @IdServico UNIQUEIDENTIFIER = '" + up(idServico) + "';",
+    'DECLARE @j NVARCHAR(MAX);',
+    '',
+    'SET @j = (',
+    '  SELECT @IdServico AS servico,',
+    '         (SELECT f.ID AS id, f.Nome AS nome,',
+    '                 (SELECT p.ID AS id, p.Ordem AS ordem, p.[Descrição] AS descricao, a.Nome AS acao,',
+    '                         (SELECT pp.Nome AS nome, CAST(pp.Valor AS NVARCHAR(4000)) AS valor FROM dbo.ParametrosPorPasso pp',
+    "                           WHERE pp.IdPasso = p.ID AND UPPER(LTRIM(RTRIM(pp.Nome))) IN (" + DIAGRAM_PARAMS.map(function(x){ return "'" + x + "'"; }).join(', ') + ') FOR JSON PATH) AS parametros',
+    '                    FROM dbo.PassosPorFluxo p LEFT JOIN dbo.Acoes a ON a.ID = p.IdAcao',
+    '                   WHERE p.IdFluxo = f.ID AND p.AtivoInativo = 1 ORDER BY p.Ordem FOR JSON PATH) AS passos,',
+    '                 (SELECT c.* FROM dbo.CondicionaisPorFluxo c WHERE c.IdFluxo = f.ID FOR JSON PATH, INCLUDE_NULL_VALUES) AS condicoes',
+    '            FROM dbo.Fluxos f',
+    '           WHERE f.IdServico = @IdServico AND f.AtivoInativo = 1',
+    '           ORDER BY f.Nome FOR JSON PATH, INCLUDE_NULL_VALUES) AS fluxos',
+    '  FOR JSON PATH, WITHOUT_ARRAY_WRAPPER, INCLUDE_NULL_VALUES',
+    ');',
+    '',
+    'SELECT SUBSTRING(@j, n.i * 4000 + 1, 4000) AS ServicoJson',
+    '  FROM (SELECT TOP ((DATALENGTH(@j) / 2 + 3999) / 4000) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS i',
+    '          FROM sys.all_columns a CROSS JOIN sys.all_columns b) n',
+    ' ORDER BY n.i;'
+  ].join('\r\n');
+}
+function parseDiagram(text){
+  var t = String(text || '').split(/\r?\n/).filter(function(l){ return l !== '' && !/^\s*servicojson\s*$/i.test(l); }).join('').trim();
+  if (!t) return {error:'Nada foi colado.'};
+  var a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a < 0 || b < a) return {error:'Não encontrei o JSON completo. Copie TODAS as linhas da coluna ServicoJson (clique no cabeçalho da coluna e Ctrl+C).'};
+  var data;
+  try { data = JSON.parse(t.slice(a, b + 1)); } catch (e) { return {error:'O JSON está incompleto ou inválido: copie todas as linhas da coluna ServicoJson. Detalhe: ' + e.message}; }
+  if (!data || !isGuid(data.servico)) return {error:'O JSON não parece ser do diagrama (falta "servico"). Use a consulta gerada nesta tela.'};
+  data.servico = up(data.servico);
+  data.fluxos = data.fluxos || [];
+  return {data:data};
+}
+// Ação (nome sem acento, minúsculo) -> escapes que ela pode abrir. fixo = sempre que falha; config = só com a customização ligada.
+var ACTION_ESCAPES = {
+  'liberacao de acesso': [['REQUEST_ACCESS_RESPONSE_FAIL', 'fixo', 'se a liberação de acesso falhar']],
+  'liberacao de acesso acompanhante': [['REQUEST_ACCESS_RESPONSE_FAIL', 'fixo', 'se a liberação de um acompanhante falhar']],
+  'gerar senha': [['INSERTINQUEUE_FAIL', 'fixo', 'se falhar ao inserir na fila']],
+  'selecao de fila': [['INSERTINQUEUE_FAIL', 'fixo', 'se falhar ao inserir na fila']],
+  'elegibilidade': [['ELEGIBILITY_FAIL', 'config', 'se não for elegível e CHECKINFLOW_ELEGIBILITY_FAIL_TO_ESCAPE = true']],
+  'geracao de atendimento': [['REGISTRATION_FAIL', 'config', 'se falhar e CHECKINFLOW_REGISTRATION_FAIL_TO_ESCAPE = true']],
+  'solicitar token': [['AUTHORIZATIONTOKEN_FAIL', 'config', 'se falhar e CHECKINFLOW_AUTHORIZATIONTOKEN_FAIL_TO_ESCAPE = true']],
+  'registrar alerta': [['ALERT_FAIL', 'config', 'se falhar e CHECKINFLOW_ALERT_FAIL_TO_ESCAPE = true']],
+  'imprimir qrcode': [['QRCODEPRINT_FAIL', 'config', 'se falhar e CHECKINFLOW_QRCODEPRINT_FAIL_TO_ESCAPE = true']]
+};
+// "Direcionar fluxo": o Connect decide pelo directsflow (padrão COMPANION). Escapes que os adapters devolvem hoje.
+var DIRECTSFLOW_ESCAPES = {COMPANION:['COMPANION_INIT', 'COMPANION_INIT_NAME'], MINIMUM_AGE_14:['PATIENT_WITH_AUTHORIZATION']};
+function stepParam(step, name){
+  var p = (step.parametros || []).filter(function(x){ return String(x.nome || '').trim().toUpperCase() === name; })[0];
+  return p && p.valor != null ? String(p.valor) : null;
+}
+// Escapes que um passo pode abrir: [{escape, kind, label}]
+function stepEscapeTriggers(step){
+  var out = [], an = norm(step.acao);
+  (ACTION_ESCAPES[an] || []).forEach(function(e){ out.push({escape:e[0], kind:e[1], label:e[2]}); });
+  if (an === 'direcionar fluxo') {
+    var d = String(stepParam(step, 'DIRECTSFLOW') || 'COMPANION').trim().toUpperCase();
+    (DIRECTSFLOW_ESCAPES[d] || []).forEach(function(e){ out.push({escape:e, kind:'connect', label:'decidido pelo Connect (directsflow=' + d + ')'}); });
+  }
+  // Desvio por parâmetro (CheckRedirectToScapeFlow): REDIRECT_TO_ESCAPE_RESPONSES = "valor|ESCAPE;valor2|ESCAPE2"
+  if (isTrue(stepParam(step, 'REDIRECT_TO_SCAPE'))) {
+    var info = String(stepParam(step, 'REDIRECT_TO_SCAPE_TYPE') || '?').trim();
+    String(stepParam(step, 'REDIRECT_TO_ESCAPE_RESPONSES') || '').split(';').forEach(function(pair){
+      var k = pair.split('|');
+      if (k.length >= 2 && k[1].trim()) out.push({escape:k[1].trim().toUpperCase(), kind:'param', label:info + ' = ' + k[0].trim()});
+    });
+  }
+  return out;
+}
+// Modelo do diagrama: fluxos normais e de escape, ligações passo -> escape e origens de cada escape.
+function buildDiagramModel(data){
+  var flows = (data.fluxos || []).map(function(f){
+    var conds = f.condicoes || [], escIds = [];
+    conds.forEach(function(c){ var e = c.FlagEscape === true || c.FlagEscape === 1 || c.FlagEscape === '1'; if (e && c.EscapeId && escIds.indexOf(String(c.EscapeId).trim().toUpperCase()) < 0) escIds.push(String(c.EscapeId).trim().toUpperCase()); });
+    var isEscape = conds.some(function(c){ return c.FlagEscape === true || c.FlagEscape === 1 || c.FlagEscape === '1'; });
+    return {id:up(f.id), nome:f.nome || '', conds:conds, escapeIds:escIds, isEscape:isEscape, origins:[],
+      passos:(f.passos || []).slice().sort(function(a, b){ return (a.ordem || 0) - (b.ordem || 0); }).map(function(p){
+        return {id:up(p.id), ordem:p.ordem, descricao:p.descricao || '', acao:p.acao || '', triggers:stepEscapeTriggers(p), missing:[]};
+      })};
+  });
+  var escapes = flows.filter(function(f){ return f.isEscape; }), links = [];
+  function targets(e){ return escapes.filter(function(f){ return f.escapeIds.indexOf(e) >= 0; }); }
+  flows.forEach(function(f){
+    f.passos.forEach(function(p){
+      p.triggers.forEach(function(t){
+        var ts = targets(t.escape);
+        if (!ts.length) { if ((t.kind === 'fixo' || t.kind === 'param') && p.missing.indexOf(t.escape) < 0) p.missing.push(t.escape); return; }
+        ts.forEach(function(e){
+          links.push({from:f.id, step:p.id, to:e.id, escape:t.escape, kind:t.kind, label:t.label});
+          e.origins.push({flow:f.nome, step:p.descricao || p.acao, escape:t.escape, kind:t.kind, label:t.label});
+        });
+      });
+    });
+  });
+  escapes.forEach(function(e){
+    if (e.escapeIds.indexOf('LIMIT_DELAY') >= 0) e.origins.push({system:true, escape:'LIMIT_DELAY', kind:'sistema', label:'no início, se o check-in passar do horário do compromisso + LimiteAtraso do fluxo escolhido'});
+    e.orphan = !e.origins.length;
+  });
+  return {servico:data.servico, normal:flows.filter(function(f){ return !f.isEscape; }), escapes:escapes, links:links};
+}
+
+// Filtro do diagrama por IdFluxo (exato) ou nome (contém, sem acento/maiúscula). Mantém os fluxos encontrados e os ligados a eles:
+// escapes que eles abrem (em cadeia), o escape de atraso (LIMIT_DELAY vale para qualquer fluxo normal) e os fluxos que levam a eles.
+// Devolve {matched:[ids], visible:{id:true}} ou null quando o filtro está vazio.
+function diagramFilter(m, text){
+  var q = String(text || '').trim();
+  if (!q) return null;
+  var all = m.normal.concat(m.escapes), nq = norm(q);
+  var matched = all.filter(function(f){ return isGuid(q) ? f.id === up(q) : norm(f.nome).indexOf(nq) >= 0; }).map(function(f){ return f.id; });
+  var visible = {};
+  matched.forEach(function(id){ visible[id] = true; });
+  // para baixo, em cadeia: escapes abertos pelos fluxos visíveis
+  var queue = matched.slice();
+  while (queue.length) {
+    var cur = queue.shift();
+    m.links.forEach(function(l){ if (l.from === cur && !visible[l.to]) { visible[l.to] = true; queue.push(l.to); } });
+  }
+  // escape de atraso: aberto pelo sistema depois de escolher qualquer fluxo normal
+  if (matched.some(function(id){ return m.normal.some(function(f){ return f.id === id; }); }))
+    m.escapes.forEach(function(e){ if (e.escapeIds.indexOf('LIMIT_DELAY') >= 0) visible[e.id] = true; });
+  // para cima, um nível: fluxos cujos passos levam aos fluxos encontrados
+  m.links.forEach(function(l){ if (matched.indexOf(l.to) >= 0) visible[l.from] = true; });
+  return {matched:matched, visible:visible};
+}
+
+// ---------- Caminho do paciente no diagrama (decisões) ----------
+// Qual fluxo de escape o FindFlow escolheria: as condições do escape precisam casar com as do fluxo de origem (mesmo cenário do check-in).
+// Campo NULL no escape vale para qualquer valor; valor igual = casa; diferente = não casa; escape exige valor que a origem não fixa = "possível".
+var ESCAPE_COMPAT_FIELDS = ['TipoCheckin', 'Unidade', 'AmbulatorioId', 'Convenio', 'PrimeiroProcedimento', 'Medico', 'TipoConvenio', 'Especialidade', 'TipoAgenda', 'Agenda', 'TipoProcedimento', 'IdadeMin', 'IdadeMax'];
+function condVal(v){ return v == null || String(v).trim() === '' ? null : String(v).trim().toLowerCase(); }
+function isEscapeCond(c){ return c && (c.FlagEscape === true || c.FlagEscape === 1 || c.FlagEscape === '1'); }
+// 2 = casa com certeza, 1 = possível (depende do cenário), 0 = não casa
+function condCompat(src, esc){
+  var r = 2;
+  for (var i = 0; i < ESCAPE_COMPAT_FIELDS.length; i++) {
+    var f = ESCAPE_COMPAT_FIELDS[i], ev = condVal(esc[f]);
+    if (ev === null) continue;
+    var sv = condVal(src ? src[f] : null);
+    if (sv === null) r = 1; else if (sv !== ev) return 0;
+  }
+  return r;
+}
+// Fluxos de escape candidatos para um EscapeId a partir de um fluxo, na ordem do FindFlow (casa > possível, mais específico, menor prioridade, Id).
+function escapeTargets(m, srcFlow, escapeId){
+  var srcConds = srcFlow.conds && srcFlow.conds.length ? srcFlow.conds : [null], out = [];
+  m.escapes.forEach(function(f){
+    var best = null;
+    f.conds.forEach(function(e){
+      if (!isEscapeCond(e) || String(e.EscapeId || '').trim().toUpperCase() !== escapeId) return;
+      var spec = SPECIFICITY_COLS.filter(function(k){ return condVal(e[k]) !== null; }).length, prio = toInt(e.Prioridade);
+      srcConds.forEach(function(c){
+        var k = condCompat(c, e);
+        if (!k) return;
+        if (!best || k > best.compat || (k === best.compat && (spec > best.spec || (spec === best.spec && prio < best.prio)))) best = {flow:f, compat:k, spec:spec, prio:prio};
+      });
+    });
+    if (best) out.push(best);
+  });
+  return out.sort(function(a, b){ return (b.compat - a.compat) || (b.spec - a.spec) || (a.prio - b.prio) || (a.flow.id < b.flow.id ? -1 : 1); });
+}
+// Pontos de decisão de um fluxo: um por passo que pode desviar (+ o atraso no início, só para o fluxo normal em que o check-in começa).
+function flowDecisionPoints(flow, isStart){
+  var pts = [];
+  if (isStart && !flow.isEscape) pts.push({key:'start:' + flow.id, stepIndex:-1, label:'Início do check-in (limite de atraso)',
+    options:[{t:'Dentro do limite de atraso → segue'}, {t:'Fora do limite de atraso → LIMIT_DELAY', escape:'LIMIT_DELAY', kind:'sistema'}]});
+  flow.passos.forEach(function(p, i){
+    if (!p.triggers.length) return;
+    var kinds = p.triggers.map(function(t){ return t.kind; }), only = kinds.every(function(k){ return k === kinds[0]; }) ? kinds[0] : '';
+    var segue = only === 'param' ? 'Outra resposta (ou sem resposta) → segue' : only === 'fixo' ? 'Sucesso → segue' :
+      only === 'config' ? 'Sucesso (ou customização desligada) → segue' : only === 'connect' ? 'Connect devolve NONE → segue' : 'Nenhum desvio → segue';
+    pts.push({key:p.id, stepIndex:i, label:(i + 1) + '. ' + (p.descricao || p.acao), options:[{t:segue}].concat(p.triggers.map(function(t){
+      var txt = t.kind === 'param' ? 'Resposta ' + t.label + ' → ' + t.escape : t.kind === 'connect' ? 'Connect devolve ' + t.escape + ' → ' + t.escape :
+        t.kind === 'config' ? 'Falha com customização ligada → ' + t.escape : 'Falha → ' + t.escape;
+      return {t:txt, escape:t.escape, kind:t.kind, label:t.label};
+    }))});
+  });
+  return pts;
+}
+// Caminho a partir de um fluxo com as decisões escolhidas ({chave: índice da opção}). Ao abrir um escape o Controller troca de fluxo:
+// os passos seguintes do fluxo atual não rodam. Devolve os trechos [{flow, points, stopAt, choice, target, compat, alternatives, end}].
+function diagramPath(m, startId, decisions){
+  decisions = decisions || {};
+  var byId = {}; m.normal.concat(m.escapes).forEach(function(f){ byId[f.id] = f; });
+  var segs = [], cur = byId[startId], first = true, seen = {};
+  while (cur && segs.length < 12) {
+    seen[cur.id] = true;
+    var pts = flowDecisionPoints(cur, first), seg = {flow:cur, points:pts, stopAt:null, choice:null, target:null, compat:0, alternatives:[], end:null};
+    for (var i = 0; i < pts.length; i++) {
+      var opt = pts[i].options[toInt(decisions[pts[i].key])] || pts[i].options[0];
+      if (opt.escape) { seg.stopAt = pts[i].stepIndex; seg.choice = {point:pts[i], option:opt}; break; }
+    }
+    segs.push(seg);
+    if (!seg.choice) { seg.end = 'fim'; break; }
+    var ts = escapeTargets(m, cur, seg.choice.option.escape);
+    if (!ts.length) { seg.end = 'semEscape'; break; }
+    seg.target = ts[0].flow; seg.compat = ts[0].compat; seg.alternatives = ts.slice(1).map(function(x){ return x.flow; });
+    if (seen[seg.target.id]) { seg.end = 'repete'; break; }
+    cur = seg.target; first = false;
+  }
+  return segs;
 }
 
 // ---------- Dados de exemplo das telas (fictícios) ----------
@@ -1492,6 +2239,33 @@ function exampleCondText(){
     L('0000E1E1-0000-4000-8000-000000000006', 'Exemplo Fluxo Webcheckin', 'Webcheckin', '0', null, '1', '5000')].join('\r\n');
 }
 function exampleScenario(){ var sc = newScenario(); sc.values.unidade = '1'; sc.values.convenio = '20'; sc.horaAgendamento = '10:00'; sc.horaCheckin = '09:40'; return sc; }
+// Layouts de exemplo: senha do paciente (sem código de barras, orienta ir à recepção) e ticket do acompanhante (com código de barras).
+function exampleLayout(kind){
+  function T(v, size, bold, extra){ var s = {}; if (size) s.fontSize = size; if (bold) s.fontWeight = 'bold'; Object.assign(s, extra || {}); return {type:'text', style:s, value:v}; }
+  var head = [{type:'image', value:'#LOGO#'}, T('CLÍNICA EXEMPLO', 6, true)];
+  var body = kind === 'acompanhante'
+    ? head.concat([T('ACOMPANHANTE', 7, true), T('#COMPANION_NAME#', 9, true), T('Acompanhante de: #PATIENT_NAME#', 5), T('#LOCATION_NAME#', 11, true),
+        {type:'barcode', style:{align:'center', barHeight:40}, value:'#HAS(#ENTRANCE_ID#,#ENTRANCE_ID#, )#'}, T('#ENTRANCE_ID#', 5)])
+    : head.concat([T('Seja bem-vindo!', 7), T('#PATIENT_NAME#', 9, true), T('#HAS(#PATIENT_BIRTHDATE#,Dt Nasc: #PATIENT_BIRTHDATE# - #PATIENT_AGE# anos, )#', 5),
+        T('#QUEUE_CODE#', 15, true), T('#QUEUE_NAME#', 4), T('#APPOINTMENT_TIME_LABEL#', 10, true), T('Dirija-se à recepção e apresente esta senha', 8, true)]);
+  return JSON.stringify({pageSettings:{style:{fontSize:3, fontWeight:'normal'}}, content:[{section:'body', items:body}, {section:'footer', items:[{type:'text', value:'Impresso em #NOW#'}]}]}, null, 2);
+}
+// Serviço de exemplo para o diagrama (formato do ServicoJson).
+function exampleDiagramJson(){
+  var n = 0;
+  function P(desc, acao, params){ n++; return {id:'0000E4E4-0000-4000-8000-' + ('000000000000' + n).slice(-12), ordem:0, descricao:desc, acao:acao || desc, parametros:params || null}; }
+  function F(k, nome, passos, conds){ passos.forEach(function(p, i){ p.ordem = i + 1; }); return {id:'0000E5E5-0000-4000-8000-00000000000' + k, nome:nome, passos:passos, condicoes:conds}; }
+  function C(esc, escId, extra){ return Object.assign({TipoCheckin:'Checkin', FlagEscape:esc, EscapeId:escId || null, Prioridade:1, LimiteAtraso:esc ? 5000 : -15}, extra || {}); }
+  return {servico:EX_SERVICE, fluxos:[
+    F(1, 'Fluxo Básico', [P('Inicio'), P('Elegibilidade'), P('Dor no peito?', 'Pergunta', [{nome:'REDIRECT_TO_SCAPE', valor:'true'}, {nome:'REDIRECT_TO_SCAPE_TYPE', valor:'CHEST_PAIN'}, {nome:'REDIRECT_TO_ESCAPE_RESPONSES', valor:'SIM|CHEST_PAIN'}]),
+      P('Acompanhantes', 'Direcionar fluxo', [{nome:'directsflow', valor:'COMPANION'}]), P('Liberação de acesso'), P('Imprimir Senha'), P('Fim')], [C(false, null)]),
+    F(2, 'Fluxo Convênio 20', [P('Inicio'), P('Gerar Senha'), P('Imprimir Senha'), P('Fim')], [C(false, null, {Convenio:'20'})]),
+    F(3, 'Escape Acompanhante', [P('Inicio'), P('Liberação de acesso acompanhante'), P('Imprimir Senha'), P('Imprimir senha acompanhante'), P('Fim')], [C(true, 'COMPANION_INIT_NAME')]),
+    F(4, 'Escape Falha na Liberação', [P('Inicio'), P('Imprimir Senha'), P('Fim')], [C(true, 'REQUEST_ACCESS_RESPONSE_FAIL')]),
+    F(5, 'Escape Atraso', [P('Inicio'), P('Tela de Atraso'), P('Fim')], [C(true, 'LIMIT_DELAY')]),
+    F(6, 'Escape Dor no Peito', [P('Inicio'), P('Encaminhamento'), P('Fim')], [C(true, 'CHEST_PAIN')]),
+    F(7, 'Escape Documento Não Assinado', [P('Inicio'), P('Fim')], [C(true, 'DOCUMENT_RESPONSIBILITY_NOT_SIGNED')])]};
+}
 
 // ---------- Autotestes (rodam no botão "Autoteste" e fora do navegador) ----------
 var TESTS = [
@@ -1911,6 +2685,141 @@ var TESTS = [
     eq(st.steps.map(function(s){ return s.descricao; }).join('|'), 'Inicio|Atualizar Cadastro|Atualizar Endereço|Gerar Atendimento|Fim');
     eq(st.conds.length, 1); eq(st.conds[0].FlagEscape, false);
     eq(validate(st).errors.length, 0);
+  }],
+  ['layout: #HAS, #IF, tag ausente e #NEWLINE# como no Controller', function(){
+    var d = {'#A#':'Ana', '#V#':'', '#N#':'5', '#T#':'True'};
+    eq(layoutResolve('#HAS(#A#,Oi #A#, )#', d), 'Oi Ana');
+    eq(layoutResolve('[#HAS(#V#,tem, )#]', d), '[]');
+    eq(layoutResolve('#HAS(#X#,tem,não tem)#', d), 'não tem');
+    eq(layoutResolve('#IF(#T#,sim,não)#', d), 'sim');
+    eq(layoutResolve('#IF(#A#,sim,não)#', d), 'não'); // texto qualquer não é verdadeiro no #IF
+    eq(layoutResolve('#IF(#N# > 3,maior,menor)#', d), 'maior');
+    eq(layoutResolve('#IF(#N# == 10,igual,diferente)#', d), 'diferente');
+    eq(layoutResolve('Olá #FOO#', d), 'Olá #FOO#');
+    eq(layoutResolve('a#NEWLINE#b', d), 'a#NEWLINE#b');
+    eq(layoutResolve('#HAS(#A#,x,y,z)#', d), 'x,y'); // vírgula a mais vai para o texto verdadeiro
+  }],
+  ['layout: lista expande #X_*# pelas chaves existentes', function(){
+    var rows = layoutResolveList('#AP_*# - #HORA_*#', {'#AP_0#':'A', '#AP_1#':'B', '#HORA_0#':'9h'});
+    eq(rows.length, 2); eq(layoutResolve(rows[1], {'#AP_1#':'B'}), 'B - #HORA_*#');
+    eq(layoutResolveList('#SEM_*#', {'#AP_0#':'A'}), null);
+  }],
+  ['layout: validação, tags desconhecidas e código de barras', function(){
+    var r = layoutCheck(exampleLayout('paciente'));
+    eq(r.errors.length, 0); eq(r.hasBarcode, false); ok(r.tags.known.indexOf('#QUEUE_CODE#') >= 0);
+    r = layoutCheck(exampleLayout('acompanhante'));
+    eq(r.errors.length, 0); eq(r.hasBarcode, true);
+    eq(r.model.sections.body.filter(function(p){ return p.kind === 'barcode'; })[0].value, '00001003');
+    var semId = layoutSampleData(); delete semId['#ENTRANCE_ID#'];
+    r = layoutCheck(exampleLayout('acompanhante'), semId);
+    eq(r.model.sections.body.filter(function(p){ return p.kind === 'barcode'; }).length, 0); has(r.warnings.join('|'), 'código de barras não sai');
+    r = layoutCheck('{"content":[{"section":"body","items":[{"type":"text","value":"#LOCATON_NAME#","style":{"align":"meio"}}]}]}');
+    has(r.warnings.join('|'), '#LOCATON_NAME#'); has(r.warnings.join('|'), 'usa LEFT');
+    r = layoutCheck('{"content":[{"section":"body",\n"items":[}]}'); has(r.errors[0], 'JSON inválido');
+    r = layoutCheck('{"content":[{"section":"footer","items":[{"type":"text","value":"x"}]}]}'); has(r.errors.join('|'), 'body');
+    r = layoutCheck('{"content":[{"section":"body","items":[{"type":"text","value":"#IF(#A#,#HAS(#B#,1,2)#,3)#"}]}]}'); has(r.warnings.join('|'), 'dentro de #IF');
+  }],
+  ['layout: fonte herdada e alinhamento padrão', function(){
+    var m = layoutModel(JSON.parse('{"pageSettings":{"style":{"fontSize":4}},"content":[{"section":"body","style":{"fontWeight":"bold"},"items":[{"type":"text","value":"a"},{"type":"text","style":{"fontSize":9,"align":"right"},"value":"b"}]}]}'), {});
+    var a = m.sections.body[0], b = m.sections.body[1];
+    eq(a.font.size, 4); eq(a.font.weight, 'bold'); eq(a.align, 'CENTER'); eq(b.font.size, 9); eq(b.font.weight, 'bold'); eq(b.align, 'RIGHT');
+  }],
+  ['layout: Code 128 com padrões de 11 módulos', function(){
+    eq(CODE128.length, 107);
+    CODE128.slice(0, 106).forEach(function(p){ eq(p.split('').reduce(function(s, x){ return s + +x; }, 0), 11); });
+    var w = code128Widths('00001003'); eq(w.length, 6 * 6 + 7); // início + 4 pares + verificador (6 larguras cada) + fim (7)
+  }],
+  ['desfazer criação: localiza por serviço + nome e só desativa se já usado', function(){
+    var st = newState(); st.flow = {servico:'00006700-A728-40D5-0000-C00000000000', nome:"Fluxo D'Teste", ativo:true};
+    st.steps = [newStep({acaoId:'AA7A6C3E-FBC5-EA11-81B0-02BDB92CFAA1', descricao:'Inicio'}), newStep({acaoId:'F7C41CDF-31BA-EA11-81B0-02BDB92CFAA1', descricao:'Fim'})];
+    var sql = buildCreateUndoSql(st);
+    has(sql, "DECLARE @Nome NVARCHAR(100) = N'Fluxo D''Teste';"); has(sql, 'IF (SELECT COUNT(*) FROM dbo.PassosPorFluxo WHERE IdFluxo = @F) <> 2');
+    var order = ['THROW 50030', 'THROW 50031', 'THROW 50032', 'BEGIN TRAN;', 'IF @Usado = 1', 'UPDATE dbo.Fluxos SET AtivoInativo = 0', 'DELETE x FROM dbo.ParametrosPorPasso',
+      'DELETE FROM dbo.PassosPorFluxo WHERE IdFluxo = @F;', 'DELETE FROM dbo.Fluxos WHERE ID = @F', 'COMMIT;'];
+    var last = -1; order.forEach(function(t){ var p = sql.indexOf(t); ok(p > last, 'fora de ordem ou ausente: ' + t); last = p; });
+  }],
+  ['desfazer atualização: volta passos, parâmetros e condições ao original', function(){
+    var st = newUpdState(); loadFlowForUpdate(st, updSample());
+    st.steps[1].params[1].valor = 'Novo texto';                       // altera parâmetro do Encaminhamento
+    var rm = removeStepForUpdate(st, 2); st.removed[0].modo = 'apagar'; // apaga "Confirmar Dados"
+    st.steps.splice(2, 0, newStep({acaoId:'D7906953-439B-4927-B704-31A5F8D381EC', descricao:'Imprimir Senha'})); // passo novo
+    st.conds[0].Unidade = '2';
+    var sql = buildUpdateUndoSql(st);
+    has(sql, "VALUES ('BBBBBBBB-0000-0000-0000-000000000003', @IDFLUXO, NULL, NULL, N'Confirmar Dados'");
+    has(sql, "UPDATE dbo.PassosPorFluxo SET [Descrição] = N'Confirmar Dados', IdAcao = '37B17DC9-241E-EC11-AAC4-0213AAF9DDFA', Ordem = 3, Opcional = 1, AtivoInativo = 1, IdPassoAnterior = 'BBBBBBBB-0000-0000-0000-000000000002', IdPassoSeguinte = 'BBBBBBBB-0000-0000-0000-000000000004'");
+    has(sql, "AND p.ID NOT IN ('BBBBBBBB-0000-0000-0000-000000000001', 'BBBBBBBB-0000-0000-0000-000000000002', 'BBBBBBBB-0000-0000-0000-000000000003', 'BBBBBBBB-0000-0000-0000-000000000004')");
+    has(sql, "IdPassoAnterior = 'BBBBBBBB-0000-0000-0000-000000000001' FROM dbo.PassosPorFluxo p INNER JOIN @Novos n");
+    has(sql, "INSERT INTO dbo.ParametrosPorPasso (Nome, Valor, IdPasso) VALUES ('Mensagem', N'Aguarde', 'BBBBBBBB-0000-0000-0000-000000000002');");
+    not(sql, "WHERE IdPasso = 'BBBBBBBB-0000-0000-0000-000000000001'"); // passo sem alteração de parâmetros não é mexido
+    has(sql, 'DELETE FROM dbo.CondicionaisPorFluxo WHERE IdFluxo = @IDFLUXO;'); has(sql, "'1'"); // condição original (Unidade 1)
+    has(sql, 'esses itens NÃO voltam'); // amostra antiga sem as contagens: avisa
+    var order = ['THROW 50040', 'BEGIN TRAN;', 'UPDATE dbo.Fluxos', 'INSERT INTO dbo.PassosPorFluxo', 'UPDATE dbo.PassosPorFluxo SET', 'DECLARE @Novos', 'DELETE p FROM dbo.PassosPorFluxo', '-- Parâmetros originais', '-- Condições originais', 'COMMIT;'];
+    var last = -1; order.forEach(function(t){ var p = sql.indexOf(t); ok(p > last, 'fora de ordem ou ausente: ' + t); last = p; });
+  }],
+  ['desfazer apagar/desativar: só a desativação tem desfazer', function(){
+    var f = {id:'AAAAAAAA-0000-0000-0000-000000000001', nome:'X', servico:'00006700-A728-40D5-0000-C00000000000', ativo:true};
+    eq(buildDeleteUndoSql([f], 'apagar'), null);
+    has(buildDeleteUndoSql([f], 'desativar'), "UPDATE dbo.Fluxos SET AtivoInativo = 1 WHERE ID = 'AAAAAAAA-0000-0000-0000-000000000001'");
+  }],
+  ['diagrama: consulta só de ativos e leitura em pedaços', function(){
+    eq(buildDiagramQuery(''), null);
+    var q = buildDiagramQuery(EX_SERVICE); has(q, 'f.AtivoInativo = 1'); has(q, 'p.AtivoInativo = 1'); has(q, "'REDIRECT_TO_ESCAPE_RESPONSES'");
+    var txt = JSON.stringify(exampleDiagramJson()), parts = ['ServicoJson'];
+    for (var i = 0; i < txt.length; i += 700) parts.push(txt.slice(i, i + 700));
+    var r = parseDiagram(parts.join('\r\n')); eq(r.error, undefined); eq(r.data.fluxos.length, 7);
+  }],
+  ['diagrama: ligações de passos para escapes, origens e órfãos', function(){
+    var m = buildDiagramModel(exampleDiagramJson());
+    eq(m.normal.length, 2); eq(m.escapes.length, 5);
+    function esc(name){ return m.escapes.filter(function(e){ return e.nome === name; })[0]; }
+    eq(esc('Escape Acompanhante').origins[0].kind, 'connect');
+    eq(esc('Escape Falha na Liberação').origins.length, 2); // liberação do paciente e do acompanhante
+    eq(esc('Escape Dor no Peito').origins[0].label, 'CHEST_PAIN = SIM');
+    ok(esc('Escape Atraso').origins[0].system); eq(esc('Escape Documento Não Assinado').orphan, true);
+    var conv = m.normal.filter(function(f){ return f.nome === 'Fluxo Convênio 20'; })[0];
+    eq(conv.passos[1].missing[0], 'INSERTINQUEUE_FAIL'); // gera senha e o serviço não tem esse escape
+    var basico = m.normal[0]; eq(basico.passos[1].missing.length, 0); // elegibilidade depende de customização: sem selo
+  }],
+  ['diagrama: filtro por IdFluxo ou nome mostra o fluxo e os ligados a ele', function(){
+    var m = buildDiagramModel(exampleDiagramJson());
+    function names(r){ return m.normal.concat(m.escapes).filter(function(f){ return r.visible[f.id]; }).map(function(f){ return f.nome; }).join('|'); }
+    eq(diagramFilter(m, '  '), null);
+    var r = diagramFilter(m, 'convenio 20'); // sem acento e minúsculo
+    eq(r.matched.length, 1); eq(names(r), 'Fluxo Convênio 20|Escape Atraso');
+    r = diagramFilter(m, '0000e5e5-0000-4000-8000-000000000001'); // Fluxo Básico pelo Id
+    eq(names(r), 'Fluxo Básico|Escape Acompanhante|Escape Falha na Liberação|Escape Atraso|Escape Dor no Peito');
+    r = diagramFilter(m, 'Escape Falha'); // escape: mostra quem leva a ele
+    eq(names(r), 'Fluxo Básico|Escape Acompanhante|Escape Falha na Liberação');
+    eq(diagramFilter(m, 'não existe').matched.length, 0);
+  }],
+  ['diagrama: caminho pelas decisões (sem desvio, pergunta, atraso, falha em cadeia, sem escape)', function(){
+    var m = buildDiagramModel(exampleDiagramJson()), B = '0000E5E5-0000-4000-8000-000000000001', C = '0000E5E5-0000-4000-8000-000000000002';
+    var basico = m.normal.filter(function(f){ return f.id === B; })[0];
+    eq(flowDecisionPoints(basico, true).map(function(p){ return p.label; }).join('|'), 'Início do check-in (limite de atraso)|2. Elegibilidade|3. Dor no peito?|4. Acompanhantes|5. Liberação de acesso');
+    var s = diagramPath(m, B, {}); eq(s.length, 1); eq(s[0].end, 'fim');
+    s = diagramPath(m, B, {'0000E4E4-0000-4000-8000-000000000003':1}); // Dor no peito? = SIM
+    eq(s.length, 2); eq(s[0].stopAt, 2); eq(s[1].flow.nome, 'Escape Dor no Peito'); eq(s[1].end, 'fim');
+    var d = {}; d['start:' + B] = 1; s = diagramPath(m, B, d); eq(s[0].stopAt, -1); eq(s[1].flow.nome, 'Escape Atraso');
+    // Acompanhantes -> Escape Acompanhante; lá, a liberação do acompanhante falha -> Escape Falha na Liberação
+    var esc = m.escapes.filter(function(f){ return f.nome === 'Escape Acompanhante'; })[0];
+    d = {'0000E4E4-0000-4000-8000-000000000004':2}; d[esc.passos[1].id] = 1;
+    s = diagramPath(m, B, d); eq(s.map(function(x){ return x.flow.nome; }).join('|'), 'Fluxo Básico|Escape Acompanhante|Escape Falha na Liberação');
+    var conv = m.normal.filter(function(f){ return f.id === C; })[0];
+    d = {}; d[conv.passos[1].id] = 1; s = diagramPath(m, C, d); eq(s[0].end, 'semEscape'); eq(s[0].choice.option.escape, 'INSERTINQUEUE_FAIL');
+  }],
+  ['diagrama: escape de destino casa com as condições da origem (ambulatório, tipo de check-in)', function(){
+    function F(id, nome, conds, isEsc){ return {id:id, nome:nome, conds:conds, isEscape:isEsc, escapeIds:[], passos:[]}; }
+    function E(id, nome, extra){ return F(id, nome, [Object.assign({FlagEscape:true, EscapeId:'PREFERENCIAL_SERVICE', TipoCheckin:'Walkin', Unidade:'1', Prioridade:1}, extra)], true); }
+    var src = F('S', 'PA', [{FlagEscape:false, TipoCheckin:'Walkin', Unidade:'1', AmbulatorioId:'3', Prioridade:1}], false);
+    var m = {normal:[src], escapes:[E('P4', 'Normal PDT', {AmbulatorioId:'4'}), E('P3', 'Normal PA', {AmbulatorioId:'3'}), E('U', 'Unknown', {TipoCheckin:'UNKNOWN', AmbulatorioId:null}),
+      E('N', 'Sem ambulatório', {AmbulatorioId:null})], links:[]};
+    var t = escapeTargets(m, src, 'PREFERENCIAL_SERVICE');
+    eq(t.map(function(x){ return x.flow.nome; }).join('|'), 'Normal PA|Sem ambulatório'); // PDT (ambulatório 4) e Unknown não casam
+    eq(t[0].compat, 2);
+  }],
+  ['simulador: fluxo inativo é desconsiderado (nem aparece em "não atendem")', function(){
+    var R = simRows([['A1', 'Ativo', 1, {}], ['B1', 'Inativo', 1, {}]]); R[1].flowAtivo = false;
+    var s = simulate(R, newScenario()); eq(s.ranked.length, 1); eq(s.excluded.length, 0); eq(s.inactiveFlows, 1);
   }]
 ];
 // Fluxo de exemplo (formato do FluxoJson) para os testes do Atualizar.
@@ -2062,7 +2971,8 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
         return '<div class="param-row">' +
           '<input class="mono" placeholder="Nome (até 50)" data-param="nome" data-uid="' + s.uid + '" data-j="' + j + '" value="' + esc(p.nome) + '">' +
           '<textarea rows="' + (String(p.valor || '').length > 80 ? 4 : 1) + '" placeholder="Valor" data-param="valor" data-uid="' + s.uid + '" data-j="' + j + '">' + esc(p.valor) + '</textarea>' +
-          '<button class="small danger" data-act="del-param" data-uid="' + s.uid + '" data-j="' + j + '" title="Remover parâmetro">✕</button></div>';
+          '<div class="param-btns">' + (/LAYOUT/i.test(p.nome || '') ? '<button class="small" data-act="param-preview" data-uid="' + s.uid + '" data-j="' + j + '" title="Validar e ver como a senha sai">Prévia</button>' : '') +
+          '<button class="small danger" data-act="del-param" data-uid="' + s.uid + '" data-j="' + j + '" title="Remover parâmetro">✕</button></div></div>';
       }).join('');
       var summary = [];
       if (s.collapsed) {
@@ -2146,6 +3056,7 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
 
   function currentValidation(){ return mode === 'upd' ? validateUpdate(state) : validate(state); }
   function currentSql(){ return mode === 'upd' ? buildUpdateSql(state) : buildSql(state); }
+  function currentUndoSql(){ return mode === 'upd' ? buildUpdateUndoSql(state) : buildCreateUndoSql(state); }
   function renderRemoved(){
     if (mode !== 'upd') return;
     var box = $('removed');
@@ -2211,6 +3122,7 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     $('preview').innerHTML = head + flowChg + (items ? '<ol class="preview">' + items + '</ol>' : '<p class="muted">Sem passos.</p>') + removedHtml;
 
     $('sql').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : currentSql();
+    $('undo-sql').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : currentUndoSql();
     save();
   }
 
@@ -2379,6 +3291,15 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
         state = newState(); docs.novo = state; docs.upd.catalog = state.catalog; renderAll(); break;
       case 'copy': copySql(); break;
       case 'download': downloadSql(); break;
+      case 'undo-copy': copyText($('undo-sql').textContent, 'msgs'); break;
+      case 'undo-download':
+        if (currentValidation().errors.length) { alert('Corrija os erros da validação antes de baixar.'); break; }
+        downloadText(fileName().replace(/\.sql$/, '') + '-DESFAZER.sql', currentUndoSql()); break;
+      case 'param-preview':
+        if (i < 0) break;
+        var pj = +b.getAttribute('data-j'), pp = state.steps[i].params[pj];
+        openLayoutFromParam({mode:mode, uid:uid, j:pj, passo:i + 1, nome:pp.nome, original:pp.valor || ''});
+        break;
       case 'selftest': showTests(); break;
     }
   });
@@ -2594,6 +3515,10 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     if (!r.errors.length) html = '<div class="o">✓ Pronto para gerar (' + flows.length + ' fluxo(s), ' + (mode === 'apagar' ? 'apagar' : 'desativar') + ')</div>' + html;
     $('del-msgs').innerHTML = html;
     $('del-sql').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : buildDeleteSql(flows, mode);
+    var undo = r.errors.length ? null : buildDeleteUndoSql(flows, mode);
+    $('del-undo').textContent = r.errors.length ? '-- Corrija os erros da validação para gerar o script.' : undo ||
+      '-- "Apagar" não tem script de desfazer: o fluxo, os passos e as configurações deixam de existir.\r\n-- Se quiser poder voltar atrás, use "Desativar".';
+    $('del-undo-copy').disabled = $('del-undo-download').disabled = !undo;
   }
   function delFileName(){
     var f = delSelected(), base = f.length === 1 ? norm(f[0].nome).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : f.length + '-fluxos';
@@ -2647,6 +3572,10 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
       case 'del-download':
         if (validateDelete(delSelected(), delMode()).errors.length) { alert('Corrija os erros da validação antes de baixar.'); break; }
         downloadText(delFileName(), buildDeleteSql(delSelected(), delMode())); break;
+      case 'del-undo-copy': copyText($('del-undo').textContent, 'del-msgs'); break;
+      case 'del-undo-download':
+        var du = buildDeleteUndoSql(delSelected(), delMode());
+        if (du) downloadText(delFileName().replace(/\.sql$/, '') + '-DESFAZER.sql', du); break;
     }
   });
   ['del-idfluxo', 'del-idservico'].forEach(function(id){
@@ -2746,6 +3675,7 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     if (!cond.rows.length) { box.innerHTML = '<p class="muted">Informe o IdServico, rode a consulta e carregue as condições. Depois preencha o cenário: o resultado atualiza a cada campo.</p>'; return; }
     var s = simulate(cond.rows, cond.sc), mark = up(cond.fluxo || '');
     var html = '<div class="res-sum">' + cond.rows.length + ' condição(ões) carregada(s) · <strong>' + s.ranked.length + ' atendem</strong> · ' + s.excluded.length + ' não atendem' +
+      (s.inactiveFlows ? ' · ' + s.inactiveFlows + ' fluxo(s) inativo(s) desconsiderado(s)' : '') +
       (s.ranked.length ? ' · mais específica com ' + s.maxSpec + ' parâmetro(s)' : '') +
       (s.delayApplied ? ' · atraso considerado: <strong>' + s.atraso + ' min</strong>' +
         (parseHM(cond.sc.horaAgendamento) !== null && parseHM(cond.sc.horaCheckin) !== null ? ' (compromisso ' + esc(cond.sc.horaAgendamento) + ', check-in ' + esc(cond.sc.horaCheckin) + ')' : '') : '') +
@@ -2864,15 +3794,348 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     }
   });
 
+  // ---------- Prévia de senha (QUEUEPRINT_LAYOUT) ----------
+  var LAY_KEY = 'GestorDeFluxos.layout.v1';
+  var lay = loadLay();
+  function loadLay(){
+    try { var s = JSON.parse(localStorage.getItem(LAY_KEY)); if (s && typeof s.json === 'string') { s.values = s.values || {}; s.absent = s.absent || {}; return s; } } catch (e) {}
+    return {json:'', values:{}, absent:{}, src:null};
+  }
+  function saveLay(){ try { localStorage.setItem(LAY_KEY, JSON.stringify(lay)); } catch (e) {} }
+  // Valores usados na prévia: exemplos + o que o usuário digitou; "não vem" remove a tag.
+  function layData(){
+    var d = layoutSampleData();
+    Object.keys(lay.values).forEach(function(k){ d[k] = lay.values[k]; });
+    Object.keys(lay.absent).forEach(function(k){ if (lay.absent[k]) delete d[k]; });
+    return d;
+  }
+  function openLayoutFromParam(src){
+    lay.src = src; lay.json = src.original; saveLay();
+    location.hash = '#/layout';
+  }
+  function layFont(f){
+    var w = String(f.weight || '').toLowerCase(), fam = String(f.family || '').toLowerCase();
+    return 'font-size:' + (f.size * LS) + 'px;line-height:1.5;font-family:' + (fam.indexOf('courier') >= 0 ? 'Courier New,monospace' : fam.indexOf('times') >= 0 ? 'Times New Roman,serif' : 'Helvetica,Arial,sans-serif') +
+      ';font-weight:' + (w.indexOf('bold') >= 0 ? 700 : 400) + ';font-style:' + (w.indexOf('italic') >= 0 || w.indexOf('oblique') >= 0 ? 'italic' : 'normal') +
+      ';text-decoration:' + (w.indexOf('underline') >= 0 ? 'underline' : w.indexOf('line-through') >= 0 ? 'line-through' : 'none') + ';color:' + esc(f.color || '#000');
+  }
+  var LS = 4; // pixels por pt na prévia
+  function layJustify(a){ return a === 'LEFT' ? 'flex-start' : a === 'RIGHT' ? 'flex-end' : 'center'; }
+  function layParas(list){
+    return list.map(function(p){
+      if (p.kind === 'text') return '<p style="' + layFont(p.font) + ';text-align:' + (p.align === 'JUSTIFIED' || p.align === 'JUSTIFIED_ALL' ? 'justify' : p.align.toLowerCase()) + '">' + (p.text === '' ? '&nbsp;' : esc(p.text)) + '</p>';
+      if (p.kind === 'line') return '<p style="text-align:center;font-size:' + (p.size * LS) + 'px;line-height:1.5;color:' + esc(p.color) + ';white-space:pre;overflow:hidden">' + esc(new Array(p.count + 1).join(p.ch)) + '</p>';
+      if (p.kind === 'image') {
+        var w = Math.min(p.maxW ? +p.maxW : 40, LAYOUT_PAGE.column), h = p.maxH ? +p.maxH : 14;
+        return '<div style="display:flex;justify-content:' + layJustify(p.align) + ';margin-top:' + (3 * LS) + 'px"><div class="img" style="width:' + (w * LS) + 'px;height:' + (h * LS) + 'px">imagem<br>' + esc(p.name || '(sem nome)') + '</div></div>';
+      }
+      if (p.kind === 'barcode') {
+        var bars = code128Widths(p.value), mods = 0, x = 0, rects = '';
+        for (var i = 0; i < bars.length; i++) mods += +bars[i];
+        var wpt = Math.min(mods * p.moduleWidth, LAYOUT_PAGE.column), unit = wpt * LS / mods, hpx = p.barHeight * p.moduleWidth * LS;
+        for (var k = 0; k < bars.length; k++) { var bw = +bars[k] * unit; if (k % 2 === 0) rects += '<rect x="' + x.toFixed(2) + '" y="0" width="' + bw.toFixed(2) + '" height="' + hpx.toFixed(1) + '"/>'; x += bw; }
+        return '<div style="display:flex;justify-content:' + layJustify(p.align) + ';margin-top:' + (3 * LS) + 'px" title="Code 128: ' + esc(p.value) + '"><svg width="' + (wpt * LS).toFixed(1) + '" height="' + hpx.toFixed(1) + '" fill="#000">' + rects + '</svg></div>';
+      }
+      return '';
+    }).join('');
+  }
+  function renderLayout(){
+    $('lay-json').value = lay.json || '';
+    var src = lay.src;
+    $('lay-src-wrap').hidden = !src;
+    if (src) $('lay-src').innerHTML = 'Editando o parâmetro <strong>' + esc(src.nome) + '</strong> do passo ' + src.passo + ' (' + (src.mode === 'upd' ? 'Atualizar fluxo' : 'Criar novo fluxo') + '). ' +
+      '<button class="small primary" data-act="lay-apply">Aplicar no passo e voltar</button> <button class="small" data-act="lay-back">Voltar sem aplicar</button>';
+    renderLayoutResult();
+  }
+  // keepTable = true: não redesenha a tabela de tags (o usuário está digitando um valor nela).
+  function renderLayoutResult(keepTable){
+    var r = layoutCheck(lay.json, layData());
+    var html = r.errors.map(function(e){ return '<div class="e">✕ ' + esc(e) + '</div>'; }).join('') + r.warnings.map(function(w){ return '<div class="w">! ' + esc(w) + '</div>'; }).join('');
+    if (!r.errors.length && lay.json.trim()) html = '<div class="o">✓ Layout válido' + (r.warnings.length ? ' (confira os avisos)' : '') + '</div>' + html;
+    $('lay-msgs').innerHTML = html;
+    $('lay-badge').innerHTML = !lay.json.trim() || !r.model && r.errors.length ? '' : r.hasBarcode ? '<span class="tag">com código de barras</span>' : '<span class="tag warn">sem código de barras</span>';
+    // Tabela de tags usadas no layout
+    var used = r.tags.known.concat(r.tags.unknown).map(layoutTagKey).filter(function(t, i, a){ return a.indexOf(t) === i; });
+    if (!keepTable) $('lay-tags').innerHTML = used.length ? '<table class="mini"><tr><th>Tag</th><th>Valor na prévia</th><th>Não vem</th><th>Origem</th></tr>' + used.map(function(t){
+      var info = layoutTagInfo(t), d = layData(), v = hasKey(d, t) ? d[t] : '';
+      return '<tr><td class="mono">' + esc(t) + '</td><td><input data-lay-val="' + esc(t) + '" value="' + esc(v) + '"' + (lay.absent[t] || (!info && !hasKey(lay.values, t)) ? ' placeholder="(não vem)"' : '') + '></td>' +
+        '<td style="text-align:center"><input type="checkbox" data-lay-absent="' + esc(t) + '"' + (lay.absent[t] || (!info && !hasKey(lay.values, t)) ? ' checked' : '') + '></td>' +
+        '<td class="muted">' + esc(info ? LAYOUT_TAG_ORIGIN[info[2]] : 'desconhecida') + '</td></tr>';
+    }).join('') + '</table>' : '<p class="muted">Nenhuma tag no layout.</p>';
+    if (!r.model) { $('lay-preview').innerHTML = '<p class="muted">' + (lay.json.trim() ? 'Corrija o JSON para ver a prévia.' : 'Cole um layout ou use um exemplo.') + '</p>'; return; }
+    var m = r.model.sections, pad = LAYOUT_PAGE.margin * LS, gap = LAYOUT_PAGE.gap * LS;
+    $('lay-preview').innerHTML = '<div class="ticket" style="width:' + (LAYOUT_PAGE.width * LS) + 'px;padding:' + pad + 'px">' +
+      (m.header.length ? '<div style="margin-bottom:' + gap + 'px">' + layParas(m.header) + '</div>' : '') +
+      (m.body.length ? layParas(m.body) : '<p class="err">body vazio: o Controller falha</p>') +
+      (m.footer.length ? '<div style="margin-top:' + gap + 'px">' + layParas(m.footer) + '</div>' : '') + '</div>';
+  }
+  $('lay-json').addEventListener('input', function(){ lay.json = $('lay-json').value; saveLay(); renderLayoutResult(); });
+  document.addEventListener('input', function(ev){
+    var t = ev.target;
+    if (!t.hasAttribute || !t.hasAttribute('data-lay-val')) return;
+    var k = t.getAttribute('data-lay-val');
+    lay.values[k] = t.value; delete lay.absent[k];
+    var cb = document.querySelector('[data-lay-absent="' + k + '"]'); if (cb) cb.checked = false;
+    saveLay(); renderLayoutResult(true);
+  });
+  document.addEventListener('change', function(ev){
+    var t = ev.target;
+    if (!t.hasAttribute || !t.hasAttribute('data-lay-absent')) return;
+    var k = t.getAttribute('data-lay-absent');
+    if (t.checked) lay.absent[k] = true; else { delete lay.absent[k]; if (!hasKey(lay.values, k) && !layoutTagInfo(k)) lay.values[k] = ''; }
+    saveLay(); renderLayoutResult();
+  });
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-act^="lay-"]');
+    if (!b) return;
+    switch (b.getAttribute('data-act')) {
+      case 'lay-ex-pac': case 'lay-ex-acomp':
+        if (lay.json.trim() && !lay.src && !confirm('Substituir o layout atual pelo exemplo?')) break;
+        if (lay.src && !confirm('Você está editando um parâmetro de passo. Trocar pelo exemplo (o passo só muda se você aplicar)?')) break;
+        lay.json = exampleLayout(b.getAttribute('data-act') === 'lay-ex-pac' ? 'paciente' : 'acompanhante'); saveLay(); renderLayout(); break;
+      case 'lay-reset':
+        if (!confirm('Limpar o layout e os valores das tags?')) break;
+        lay = {json:'', values:{}, absent:{}, src:null}; saveLay(); renderLayout(); break;
+      case 'lay-values-reset': lay.values = {}; lay.absent = {}; saveLay(); renderLayoutResult(); break;
+      case 'lay-format': case 'lay-compact':
+        try { var obj = JSON.parse(lay.json); lay.json = b.getAttribute('data-act') === 'lay-format' ? JSON.stringify(obj, null, 2) : JSON.stringify(obj); saveLay(); renderLayout(); }
+        catch (e) { alert('O JSON está inválido: corrija antes de formatar.'); }
+        break;
+      case 'lay-copy': copyText(lay.json, 'lay-msgs'); break;
+      case 'lay-back': var back = lay.src; lay.src = null; saveLay(); location.hash = back && back.mode === 'upd' ? '#/atualizar' : '#/novo'; break;
+      case 'lay-apply':
+        var s = lay.src, doc = s && docs[s.mode], idx = -1;
+        if (doc) doc.steps.forEach(function(x, k){ if (x.uid === s.uid) idx = k; });
+        var prm = idx >= 0 ? doc.steps[idx].params[s.j] : null;
+        if (!prm) { alert('O passo ou o parâmetro não existe mais no editor (foi removido?). Copie o JSON e cole no parâmetro.'); break; }
+        var val = lay.json, a = null, o = null;
+        try { a = JSON.parse(val); } catch (e) { if (!confirm('O JSON está inválido. Aplicar assim mesmo?')) break; }
+        try { o = JSON.parse(s.original); } catch (e) {}
+        // Sem mudança de conteúdo: mantém o texto original (não vira "alterado" no Atualizar). Com mudança: grava compacto.
+        if (a !== null) val = o !== null && JSON.stringify(a) === JSON.stringify(o) ? s.original : JSON.stringify(a);
+        prm.valor = val;
+        lay.src = null; saveLay();
+        location.hash = s.mode === 'upd' ? '#/atualizar' : '#/novo';
+        if (s.mode === mode) { state = docs[mode]; renderAll(); }
+        flash('Layout aplicado no passo ' + s.passo + '.');
+        break;
+    }
+  });
+
+  // ---------- Diagrama de Fluxo ----------
+  var DG_KEY = 'GestorDeFluxos.diag.v1';
+  var dg = (function(){ try { var s = JSON.parse(localStorage.getItem(DG_KEY)); if (s && typeof s === 'object') return s; } catch (e) {} return {fluxo:'', servico:'', data:null}; })();
+  dg.decisions = dg.decisions || {};
+  function saveDg(){ try { localStorage.setItem(DG_KEY, JSON.stringify({fluxo:dg.fluxo || '', servico:dg.servico, data:dg.data, decisions:dg.decisions || {}})); } catch (e) {} }
+  function renderDiagQuery(){
+    var s = (dg.servico || '').trim(), q = buildDiagramQuery(s), msgs = [];
+    if (document.activeElement !== $('dg-idfluxo')) $('dg-idfluxo').value = dg.fluxo || '';
+    $('dg-idservico').value = dg.servico || '';
+    msgs.push(!s ? '<div class="e">✕ Informe o IdServico.</div>' : !isGuid(s) ? '<div class="e">✕ IdServico não é um GUID válido.</div>' : '<div class="o">✓ Consulta gerada abaixo.</div>');
+    $('dg-ids-msg').innerHTML = msgs.join('');
+    $('dg-query').textContent = q || '-- Informe o IdServico (GUID válido) para gerar a consulta.';
+    $('dg-copy-query').disabled = !q; $('dg-paste').disabled = !q; $('dg-load').disabled = !q;
+  }
+  var KIND_TXT = {fixo:'sempre que falha', param:'por parâmetro do passo', config:'depende de customização', connect:'decidido pelo Connect', sistema:'automático'};
+  var SVG_DEFS = '<svg class="diag-svg" id="dg-svg"><defs><marker id="dg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted);stroke:none"/></marker></defs></svg>';
+  function condsList(f){
+    return f.conds.map(function(c){
+      var cells = Object.keys(c).filter(function(k){ return k !== 'IdFluxo' && k !== 'ID' && c[k] !== null && c[k] !== ''; }).map(function(k){ return k + ' = ' + c[k]; });
+      return '<li>' + esc(cells.join(' · ')) + '</li>';
+    }).join('');
+  }
+  function laneHead(f, extra){
+    return '<div class="lane-head" data-dhead="' + f.id + '"><strong>' + esc(f.nome || '(sem nome)') + '</strong>' + (extra || '') +
+        f.escapeIds.map(function(e){ return '<span class="tag warn">' + esc(e) + '</span>'; }).join('') +
+        '<button class="small" data-act="dg-conds" data-flow="' + f.id + '">Condições (' + f.conds.length + ')</button></div>' +
+      '<ul class="hint dg-conds" data-conds="' + f.id + '" hidden style="padding-left:18px;margin:0 0 8px">' + (condsList(f) || '<li>sem condições</li>') + '</ul>';
+  }
+  // Modo caminho: um fluxo filtrado + decisões. Mostra só os fluxos por onde o paciente passa.
+  function renderPath(full, startId){
+    var segs = diagramPath(full, startId, dg.decisions), links = [];
+    $('dg-legend').innerHTML = 'Escolha o que aconteceu em cada decisão: o diagrama mostra só os fluxos por onde o paciente passa. Quando um passo abre um escape, o Controller troca de fluxo e os passos seguintes não rodam (apagados). ' +
+      'O escape de destino é o que o FindFlow escolheria pelas condições do fluxo (tipo de check-in, unidade, ambulatório…).';
+    $('dg-decisions').innerHTML = '<div class="row" style="margin:0 0 8px;align-items:center"><strong style="font-size:14px">Decisões</strong><span class="grow"></span>' +
+      '<button class="small" data-act="dg-dec-reset">Todas em "segue"</button></div>' + segs.map(function(s, k){
+      var chosenIdx = s.choice ? s.points.indexOf(s.choice.point) : -1;
+      return '<div class="dec-flow' + (s.flow.isEscape ? ' esc' : '') + '"><h4>' + (k + 1) + '. ' + esc(s.flow.nome) + (s.flow.isEscape ? ' <span class="tag warn">escape</span>' : '') + '</h4>' +
+        (s.points.length ? '<div class="dec-grid">' + s.points.map(function(p, i){
+          var sel = toInt(dg.decisions[p.key]), off = chosenIdx >= 0 && i > chosenIdx;
+          return '<div><label title="' + esc(p.label) + '">' + esc(p.label) + '</label><select data-dg-dec="' + esc(p.key) + '"' + (off ? ' disabled title="Não executa: o paciente já foi para um escape antes deste passo"' : '') + '>' +
+            p.options.map(function(o, j){ return '<option value="' + j + '"' + (j === sel ? ' selected' : '') + '>' + esc(o.t) + '</option>'; }).join('') + '</select></div>';
+        }).join('') + '</div>' : '<p class="hint" style="margin:0">Este fluxo não tem decisões que desviam: segue até o Fim.</p>') + '</div>';
+    }).join('');
+    var shown = {}, html = '';
+    segs.forEach(function(s, k){
+      if (shown[s.flow.id]) return;
+      shown[s.flow.id] = true;
+      var f = s.flow, stop = s.stopAt;
+      var steps = f.passos.map(function(p, i){
+        var skip = stop !== null && (stop === -1 || i > stop), chosen = stop === i;
+        return (i ? '<span class="dsep">›</span>' : '') + '<div class="dstep' + (skip ? ' skip' : '') + (chosen ? ' chosen' : '') + '" data-dstep="' + p.id + '"' + (skip ? ' title="Não executa: o paciente foi para o escape"' : '') + '>' +
+          '<strong>' + (i + 1) + '.</strong> ' + esc(p.descricao || p.acao) + (p.acao && norm(p.acao) !== norm(p.descricao) ? '<div class="a">' + esc(p.acao) + '</div>' : '') +
+          (chosen ? '<div><span class="esc-b ' + s.choice.option.kind + '">→ ' + esc(s.choice.option.escape) + '</span></div>' : '') + '</div>';
+      }).join('');
+      var end;
+      if (s.end === 'fim') end = '<div class="lane-end ok">✓ Nenhuma decisão desvia: segue até o Fim deste fluxo.</div>';
+      else if (s.end === 'semEscape') end = '<div class="lane-end bad">✕ ' + (stop === -1 ? 'O atraso' : 'O passo ' + (stop + 1)) + ' abre <strong>' + esc(s.choice.option.escape) +
+        '</strong>, mas o serviço não tem fluxo de escape ativo que case com este fluxo: o Controller marca o passo com falha ("Not Found Escape") e não redireciona.</div>';
+      else {
+        end = '<div class="lane-end go">→ ' + (stop === -1 ? 'Fora do limite de atraso' : 'No passo ' + (stop + 1)) + ', abre <strong>' + esc(s.choice.option.escape) + '</strong> e vai para <strong>' + esc(s.target.nome) + '</strong>' +
+          (s.end === 'repete' ? ' (já está no caminho acima)' : '') +
+          (s.compat === 1 ? ' · <span class="muted">possível: o escape exige critérios que este fluxo não fixa (depende do check-in)</span>' : '') +
+          (s.alternatives.length ? ' · <span class="muted">também casaria: ' + esc(s.alternatives.map(function(a){ return a.nome; }).join(', ')) + '</span>' : '') + '</div>';
+        links.push({step:stop === -1 ? 'head:' + f.id : f.passos[stop].id, to:s.target.id, kind:s.choice.option.kind, escape:s.choice.option.escape, label:s.choice.option.t});
+      }
+      html += '<div class="lane' + (f.isEscape ? ' esc' : '') + (k === 0 ? ' mark' : '') + '" data-dflow="' + f.id + '">' + laneHead(f, k === 0 ? '<span class="tag okt">fluxo filtrado</span>' : '<span class="tag">' + (k + 1) + 'º no caminho</span>') +
+        '<div class="lane-steps">' + (steps || '<span class="muted">sem passos ativos</span>') + '</div>' + end + '</div>';
+    });
+    $('dg-canvas').innerHTML = SVG_DEFS + '<h3 class="lane-group">Caminho do paciente (' + Object.keys(shown).length + ' fluxo(s))</h3>' + html;
+    dg.model = {links:links};
+    drawDiagramArrows();
+  }
+  function renderDiagram(){
+    var box = $('dg-canvas');
+    $('dg-legend').innerHTML = 'Seta azul contínua: o passo abre o escape sempre que falha ou pela resposta configurada nos parâmetros (REDIRECT_TO_ESCAPE_RESPONSES). ' +
+      'Seta laranja tracejada: depende de customização do serviço ou da resposta do Connect. Passe o mouse num passo para destacar as setas dele. Fluxos e passos inativos não aparecem.';
+    if (!dg.data) { $('dg-decisions').innerHTML = ''; box.innerHTML = '<p class="muted">Informe o IdServico, rode a consulta e cole o resultado (ou use o Exemplo).</p>'; return; }
+    var m = buildDiagramModel(dg.data);
+    // Filtro (IdFluxo ou nome): um fluxo encontrado = modo caminho, com as decisões; vários = escolher um.
+    var flt = diagramFilter(m, dg.fluxo), q = String(dg.fluxo || '').trim();
+    if (flt && flt.matched.length === 1) { renderPath(m, flt.matched[0]); return; }
+    var markMsg = '';
+    if (!flt) $('dg-decisions').innerHTML = '<p class="hint" style="margin:0 0 10px">Filtre um fluxo (IdFluxo ou nome) para escolher as decisões e ver o caminho do paciente.</p>';
+    else if (!flt.matched.length) {
+      $('dg-decisions').innerHTML = '<div class="msgs"><div class="w">! Nenhum fluxo ativo deste serviço com ' + (isGuid(q) ? 'o IdFluxo ' : 'o nome contendo ') + '"' + esc(q) + '"' +
+        (isGuid(q) ? ' (está inativo ou é de outro serviço)' : '') + '.</div></div>';
+      box.innerHTML = ''; dg.model = null; return;
+    } else {
+      var all = m.normal.concat(m.escapes);
+      $('dg-decisions').innerHTML = '<div class="msgs"><div class="o">' + flt.matched.length + ' fluxos com "' + esc(q) + '". Escolha um para ver as decisões: ' +
+        flt.matched.map(function(id){ var f = all.filter(function(x){ return x.id === id; })[0]; return '<button class="small" data-act="dg-pick" data-id="' + id + '">' + esc(f.nome) + '</button>'; }).join(' ') + '</div></div>';
+      m = {normal:m.normal.filter(function(f){ return flt.visible[f.id]; }), escapes:m.escapes.filter(function(f){ return flt.visible[f.id]; }),
+           links:m.links.filter(function(l){ return flt.visible[l.from] && flt.visible[l.to]; })};
+    }
+    var mark = flt ? flt.matched : [];
+    function lane(f){
+      var conds = f.conds.map(function(c){
+        var cells = Object.keys(c).filter(function(k){ return k !== 'IdFluxo' && k !== 'ID' && c[k] !== null && c[k] !== ''; }).map(function(k){ return k + ' = ' + c[k]; });
+        return '<li>' + esc(cells.join(' · ')) + '</li>';
+      }).join('');
+      var steps = f.passos.map(function(p, i){
+        var linked = m.links.filter(function(l){ return l.step === p.id; });
+        var badges = linked.map(function(l){ return '<span class="esc-b ' + l.kind + '" title="' + esc(l.label) + '">→ ' + esc(l.escape) + '</span>'; }).join(' ') +
+          p.missing.map(function(e){ return ' <span class="esc-b miss" title="Este passo pode abrir o escape, mas o serviço não tem fluxo de escape ativo com esse EscapeId">' + esc(e) + ': sem fluxo de escape</span>'; }).join('');
+        return (i ? '<span class="dsep">›</span>' : '') + '<div class="dstep' + (linked.length ? ' trig' : '') + '" data-dstep="' + p.id + '"><strong>' + (i + 1) + '.</strong> ' + esc(p.descricao || p.acao) +
+          (p.acao && norm(p.acao) !== norm(p.descricao) ? '<div class="a">' + esc(p.acao) + '</div>' : '') + (badges ? '<div>' + badges + '</div>' : '') + '</div>';
+      }).join('');
+      var origins = '';
+      if (f.isEscape) origins = '<div class="origins">' + (f.orphan ? 'Nenhum passo ativo deste serviço abre este escape (pode vir de outro mecanismo).' :
+        'Aberto por:<ul style="margin:2px 0 0;padding-left:18px">' + f.origins.map(function(o){
+          return '<li>' + (o.system ? 'Sistema: ' + esc(o.label) : esc(o.flow) + ' › <strong>' + esc(o.step) + '</strong> (' + esc(o.label) + ')') + ' <span class="esc-b ' + o.kind + '">' + esc(KIND_TXT[o.kind]) + '</span></li>';
+        }).join('') + '</ul>') + '</div>';
+      var isMark = mark.indexOf(f.id) >= 0;
+      return '<div class="lane' + (f.isEscape ? ' esc' : '') + (f.orphan ? ' orphan' : '') + (isMark ? ' mark' : '') + '" data-dflow="' + f.id + '">' +
+        '<div class="lane-head" data-dhead="' + f.id + '"><strong>' + esc(f.nome || '(sem nome)') + '</strong>' +
+          (isMark ? '<span class="tag okt">fluxo filtrado</span>' : '') +
+          f.escapeIds.map(function(e){ return '<span class="tag warn">' + esc(e) + '</span>'; }).join('') +
+          '<button class="small" data-act="dg-conds" data-flow="' + f.id + '">Condições (' + f.conds.length + ')</button></div>' +
+        '<ul class="hint dg-conds" data-conds="' + f.id + '" hidden style="padding-left:18px;margin:0 0 8px">' + (conds || '<li>sem condições</li>') + '</ul>' +
+        '<div class="lane-steps">' + (steps || '<span class="muted">sem passos ativos</span>') + '</div>' + origins + '</div>';
+    }
+    box.innerHTML = markMsg + SVG_DEFS +
+      '<h3 class="lane-group">Fluxos normais (' + m.normal.length + ')</h3>' + (m.normal.map(lane).join('') || '<p class="muted" style="margin-left:48px">Nenhum.</p>') +
+      '<h3 class="lane-group">Fluxos de escape (' + m.escapes.length + ')</h3>' + (m.escapes.map(lane).join('') || '<p class="muted" style="margin-left:48px">Nenhum.</p>');
+    dg.model = m;
+    drawDiagramArrows();
+  }
+  // Setas: do passo, descem pela margem esquerda até o cabeçalho do fluxo de escape (cada ligação numa "trilha" da margem).
+  function drawDiagramArrows(){
+    var box = $('dg-canvas'), svg = $('dg-svg'), m = dg.model;
+    if (!svg || !m) return;
+    Array.prototype.slice.call(svg.querySelectorAll('path.lk')).forEach(function(p){ p.parentNode.removeChild(p); });
+    if (!$('dg-arrows').checked || box.offsetParent === null) return;
+    var base = box.getBoundingClientRect();
+    svg.setAttribute('width', base.width); svg.setAttribute('height', box.scrollHeight);
+    m.links.forEach(function(l, i){
+      var s = l.step.indexOf('head:') === 0 ? box.querySelector('[data-dhead="' + l.step.slice(5) + '"]') : box.querySelector('[data-dstep="' + l.step + '"]'), h = box.querySelector('[data-dhead="' + l.to + '"]');
+      if (!s || !h) return;
+      var a = s.getBoundingClientRect(), b = h.getBoundingClientRect();
+      var x1 = a.left - base.left + a.width / 2, y1 = a.bottom - base.top, x2 = b.left - base.left - 6, y2 = b.top - base.top + b.height / 2;
+      var gx = 6 + (i % 9) * 4, yb = y1 + 5 + (i % 3) * 2;
+      var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', 'M' + x1 + ',' + y1 + ' V' + yb + ' H' + gx + ' V' + y2 + ' H' + x2);
+      p.setAttribute('class', 'lk ' + l.kind); p.setAttribute('marker-end', 'url(#dg-arrow)');
+      p.setAttribute('data-from', l.step); p.setAttribute('data-to', l.to);
+      var t = document.createElementNS('http://www.w3.org/2000/svg', 'title'); t.textContent = l.escape + ': ' + l.label; p.appendChild(t);
+      svg.appendChild(p);
+    });
+  }
+  window.addEventListener('resize', function(){ if (!$('view-diag').hidden) drawDiagramArrows(); });
+  $('dg-arrows').addEventListener('change', drawDiagramArrows);
+  // Destaque: passo -> suas setas e escapes; cabeçalho de escape -> setas que chegam nele.
+  $('dg-canvas').addEventListener('mouseover', function(ev){
+    var box = $('dg-canvas'), st = ev.target.closest && ev.target.closest('[data-dstep]'), hd = ev.target.closest && ev.target.closest('[data-dhead]');
+    box.querySelectorAll('.hl').forEach(function(x){ x.classList.remove('hl'); });
+    var sel = st ? '[data-from="' + st.getAttribute('data-dstep') + '"]' : hd ? '[data-to="' + hd.getAttribute('data-dhead') + '"]' : null;
+    var hits = sel ? box.querySelectorAll('path' + sel) : [];
+    box.classList.toggle('focus', hits.length > 0);
+    Array.prototype.forEach.call(hits, function(p){ p.classList.add('hl'); var ln = box.querySelector('[data-dflow="' + p.getAttribute('data-to') + '"]'); if (ln && st) ln.classList.add('hl'); });
+  });
+  $('dg-canvas').addEventListener('mouseleave', function(){ var box = $('dg-canvas'); box.classList.remove('focus'); box.querySelectorAll('.hl').forEach(function(x){ x.classList.remove('hl'); }); });
+  $('dg-idservico').addEventListener('input', function(){ dg.servico = $('dg-idservico').value.trim(); saveDg(); renderDiagQuery(); });
+  $('dg-idfluxo').addEventListener('input', function(){ dg.fluxo = $('dg-idfluxo').value.trim(); saveDg(); renderDiagQuery(); renderDiagram(); });
+  document.addEventListener('change', function(ev){
+    var t = ev.target;
+    if (!t.hasAttribute || !t.hasAttribute('data-dg-dec')) return;
+    dg.decisions[t.getAttribute('data-dg-dec')] = +t.value; saveDg(); renderDiagram();
+  });
+  function gotoMarkedFlow(){ var el = document.querySelector('#dg-canvas .lane.mark'); if (el) el.scrollIntoView({behavior:'smooth', block:'center'}); }
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-act^="dg-"]');
+    if (!b) return;
+    switch (b.getAttribute('data-act')) {
+      case 'dg-toggle': var body = $('dg-load-body'); body.hidden = !body.hidden; b.textContent = body.hidden ? 'Mostrar' : 'Recolher'; drawDiagramArrows(); break;
+      case 'dg-copy-query': var q = buildDiagramQuery(dg.servico); if (q) copyText(q, 'dg-ids-msg'); break;
+      case 'dg-load':
+        var r = parseDiagram($('dg-paste').value);
+        if (r.error) { alert(r.error); break; }
+        if (r.data.servico !== up(dg.servico)) { alert('O resultado colado é de outro serviço (' + r.data.servico + '). Rode a consulta gerada nesta tela.'); break; }
+        dg.data = r.data; $('dg-paste').value = ''; saveDg();
+        $('dg-load-body').hidden = true; $('dg-toggle').textContent = 'Mostrar';
+        renderDiagram(); gotoMarkedFlow(); break;
+      case 'dg-example':
+        if (dg.data && !confirm('Substituir o diagrama pelo exemplo?')) break;
+        dg = {fluxo:'', servico:EX_SERVICE, data:exampleDiagramJson(), decisions:{}}; saveDg(); $('dg-paste').value = ''; $('dg-idfluxo').value = '';
+        $('dg-load-body').hidden = true; $('dg-toggle').textContent = 'Mostrar';
+        renderDiagQuery(); renderDiagram(); break;
+      case 'dg-goto': gotoMarkedFlow(); break;
+      case 'dg-clear-filter': dg.fluxo = ''; $('dg-idfluxo').value = ''; saveDg(); renderDiagram(); break;
+      case 'dg-pick': dg.fluxo = b.getAttribute('data-id'); $('dg-idfluxo').value = dg.fluxo; saveDg(); renderDiagram(); break;
+      case 'dg-dec-reset': dg.decisions = {}; saveDg(); renderDiagram(); break;
+      case 'dg-reset':
+        if (!confirm('Limpar o diagrama, o IdFluxo e o IdServico?')) break;
+        dg = {fluxo:'', servico:'', data:null, decisions:{}}; saveDg(); $('dg-paste').value = ''; $('dg-idfluxo').value = '';
+        $('dg-load-body').hidden = false; $('dg-toggle').textContent = 'Recolher';
+        renderDiagQuery(); renderDiagram(); break;
+      case 'dg-conds':
+        var ul = document.querySelector('[data-conds="' + b.getAttribute('data-flow') + '"]'); if (ul) { ul.hidden = !ul.hidden; drawDiagramArrows(); }
+        break;
+    }
+  });
+
   // ---------- Navegação entre telas ----------
-  var TITLES = {home:'', novo:'· Criar novo fluxo', apagar:'· Apagar fluxo', cond:'· Condicionais por fluxo', upd:'· Atualizar fluxo'};
+  var TITLES = {home:'', novo:'· Criar novo fluxo', apagar:'· Apagar fluxo', cond:'· Condicionais por fluxo', upd:'· Atualizar fluxo', layout:'· Prévia de senha', diag:'· Diagrama de Fluxo'};
   function route(){
     var h = location.hash || '';
     var view = h.indexOf('#/apagar') === 0 ? 'apagar' : h.indexOf('#/condicionais') === 0 ? 'cond' : h.indexOf('#/atualizar') === 0 ? 'upd' :
+               h.indexOf('#/layout') === 0 ? 'layout' : h.indexOf('#/diagrama') === 0 ? 'diag' :
                (h.indexOf('#/novo') === 0 || h === '#exemplo') ? 'novo' : 'home';
     if (view === 'novo' || view === 'upd') setEditorMode(view);
     if (view === 'upd') { renderUpdLoad(); var hasFlow = !!docs.upd.orig; $('upd-load-body').hidden = hasFlow; $('upd-toggle').textContent = hasFlow ? 'Mostrar' : 'Recolher'; }
-    ['home', 'novo', 'apagar', 'cond', 'upd'].forEach(function(v){ $('view-' + v).hidden = v !== view; });
+    if (view === 'layout') renderLayout();
+    ['home', 'novo', 'apagar', 'cond', 'upd', 'layout', 'diag'].forEach(function(v){ $('view-' + v).hidden = v !== view; });
+    if (view === 'diag') { renderDiagQuery(); if (dg.data) { $('dg-load-body').hidden = true; $('dg-toggle').textContent = 'Mostrar'; } renderDiagram(); }
     $('view-title').textContent = TITLES[view];
     $('btn-home').style.visibility = view === 'home' ? 'hidden' : 'visible';
     window.scrollTo(0, 0);
