@@ -1254,23 +1254,29 @@ var SIM_FIELDS = [
 var SPECIFICITY_COLS = ['Convenio','PrimeiroProcedimento','Medico','IdadeMin','IdadeMax','TipoProcedimento','TipoConvenio','AmbulatorioId','Especialidade','TipoAgenda','Agenda'];
 var CHECKIN_TYPES_SIM = ['CHECKIN','WEBCHECKIN','WALKIN','TICKET','UNKNOWN'];
 
+// Colunas obrigatórias no resultado colado; as demais podem não existir em bancos mais antigos (viram NULL).
+var COND_REQUIRED_COLUMNS = ['IdFluxo', 'Fluxo', 'FluxoAtivo', 'TipoCheckin', 'FlagEscape', 'Prioridade'];
+
 function buildCondQuery(idServico){
   if (!isGuid(idServico)) return null;
+  // Cada coluna de condição só é lida se existir neste banco (COL_LENGTH); se não existir, sai NULL com o mesmo nome.
+  // Assim o resultado tem sempre as mesmas 21 colunas, na mesma ordem, em qualquer banco.
+  var cols = COND_QUERY_COLUMNS.slice(3).map(function(col){
+    return "    + N', ' + CASE WHEN COL_LENGTH('dbo.CondicionaisPorFluxo', '" + col + "') IS NULL THEN N'NULL' ELSE N'c.[" + col + "]' END + N' AS [" + col + "]'";
+  });
   return [
     '-- Consulta para "Condicionais por fluxo" (só leitura): todas as condições dos fluxos do serviço.',
+    '-- Funciona mesmo em bancos sem alguma coluna (ex.: Agenda): a coluna que não existe sai como NULL.',
     '-- Copie a grade inteira COM cabeçalho (clique no canto superior esquerdo da grade e Ctrl+Shift+C).',
     'SET NOCOUNT ON;',
     "DECLARE @IdServico UNIQUEIDENTIFIER = '" + up(idServico) + "';",
+    'DECLARE @sql NVARCHAR(MAX) = N\'SELECT f.ID AS IdFluxo, f.Nome AS Fluxo, f.AtivoInativo AS FluxoAtivo\''
+  ].concat(cols).concat([
+    "    + N' FROM dbo.Fluxos f INNER JOIN dbo.CondicionaisPorFluxo c ON c.IdFluxo = f.ID'",
+    "    + N' WHERE f.IdServico = @IdServico ORDER BY f.Nome, c.Prioridade;';",
     '',
-    'SELECT f.ID AS IdFluxo, f.Nome AS Fluxo, f.AtivoInativo AS FluxoAtivo,',
-    '       c.TipoCheckin, c.FlagEscape, c.EscapeId, c.Prioridade, c.LimiteAtraso,',
-    '       c.Unidade, c.Convenio, c.Medico, c.PrimeiroProcedimento, c.TipoPrimeiroProcedimento, c.TipoProcedimento, c.TipoConvenio,',
-    '       c.IdadeMin, c.IdadeMax, c.AmbulatorioId, c.Especialidade, c.TipoAgenda, c.Agenda',
-    'FROM dbo.Fluxos f',
-    'INNER JOIN dbo.CondicionaisPorFluxo c ON c.IdFluxo = f.ID',
-    'WHERE f.IdServico = @IdServico',
-    'ORDER BY f.Nome, c.Prioridade;'
-  ].join('\r\n');
+    "EXEC sp_executesql @sql, N'@IdServico UNIQUEIDENTIFIER', @IdServico = @IdServico;"
+  ]).join('\r\n');
 }
 
 // Lê a grade colada. "NULL" vira null; célula vazia vira '' (no SQL, '' NÃO é NULL e muda o resultado).
@@ -1280,14 +1286,18 @@ function parseCondSnapshot(text){
   var idx = {}, start = 0, first = lines[0].split('\t').map(function(c){ return c.trim().toLowerCase(); });
   if (first.indexOf('idfluxo') >= 0) { first.forEach(function(c, i){ idx[c] = i; }); start = 1; }
   else COND_QUERY_COLUMNS.forEach(function(c, i){ idx[c.toLowerCase()] = i; });
-  var missing = COND_QUERY_COLUMNS.filter(function(c){ return idx[c.toLowerCase()] === undefined; });
-  if (missing.length) return {rows:[], error:'Faltam colunas no resultado colado: ' + missing.join(', ') + '. Use a consulta desta tela e copie com cabeçalho.'};
-  var rows = [];
+  var missingReq = COND_REQUIRED_COLUMNS.filter(function(c){ return idx[c.toLowerCase()] === undefined; });
+  if (missingReq.length) return {rows:[], error:'Faltam colunas obrigatórias no resultado colado: ' + missingReq.join(', ') + '. Use a consulta desta tela e copie com cabeçalho.'};
+  // Com cabeçalho: coluna de condição ausente (o banco não tem) = NULL para todas as linhas.
+  var missingOpt = start ? COND_QUERY_COLUMNS.filter(function(c){ return idx[c.toLowerCase()] === undefined; }) : [];
+  var rows = [], counts = {};
   for (var li = start; li < lines.length; li++) {
     var cells = lines[li].split('\t');
-    var raw = function(c){ var v = cells[idx[c.toLowerCase()]]; v = v == null ? '' : v.trim(); return /^null$/i.test(v) ? null : v; };
+    // Célula que nem veio (linha mais curta) = NULL; célula vazia de verdade = '' (no SQL, '' não é NULL).
+    var raw = function(c){ var v = cells[idx[c.toLowerCase()]]; if (v == null) return null; v = v.trim(); return /^null$/i.test(v) ? null : v; };
     var id = up(raw('IdFluxo'));
     if (!isGuid(id)) continue;
+    counts[cells.length] = (counts[cells.length] || 0) + 1;
     var r = {n:rows.length + 1, flowId:id, flowName:raw('Fluxo') || '', flowAtivo:isTrue(raw('FluxoAtivo')), c:{}};
     COND_QUERY_COLUMNS.slice(3).forEach(function(c){ r.c[c] = raw(c); });
     r.c.FlagEscape = isTrue(r.c.FlagEscape);
@@ -1296,7 +1306,16 @@ function parseCondSnapshot(text){
     rows.push(r);
   }
   if (!rows.length) return {rows:[], error:'Nenhuma condição reconhecida. Confira se colou o resultado da consulta (com a coluna IdFluxo).'};
-  return {rows:rows, error:null};
+  // Sem cabeçalho, as colunas são lidas pela POSIÇÃO: quantidade diferente da consulta pode deslocar os valores.
+  var warning = null, expected = COND_QUERY_COLUMNS.length;
+  if (missingOpt.length) warning = 'O resultado não tem a(s) coluna(s) ' + missingOpt.join(', ') + ' (este banco não tem): consideradas NULL, como a FindFlow deste banco também não filtra por elas.';
+  if (!start) {
+    var bad = Object.keys(counts).filter(function(k){ return +k !== expected; });
+    if (bad.length) warning = 'O resultado veio sem cabeçalho e com ' + bad.join('/') + ' coluna(s) em vez de ' + expected + ' (a consulta desta tela). ' +
+      'As colunas são lidas pela posição: as que faltam no fim viram NULL, mas se faltar coluna no meio os valores ficam deslocados. ' +
+      'Para ter certeza, rode a consulta gerada nesta tela e copie COM cabeçalho (Ctrl+Shift+C).';
+  }
+  return {rows:rows, error:null, warning:warning};
 }
 
 function sqlEq(a, b, num){
@@ -1307,11 +1326,13 @@ function blankToNull(v){ v = v == null ? '' : String(v).trim(); return v === '' 
 // "HH:MM" -> minutos do dia (ou null)
 function parseHM(v){ var m = /^\s*(\d{1,2}):(\d{2})/.exec(String(v || '')); if (!m) return null; var h = +m[1], mi = +m[2]; return h < 24 && mi < 60 ? h * 60 + mi : null; }
 function fmtHM(min){ var d = Math.floor(min / 1440), r = ((min % 1440) + 1440) % 1440; return pad2(Math.floor(r / 60)) + ':' + pad2(r % 60) + (d > 0 ? ' (+' + d + ' dia' + (d > 1 ? 's' : '') + ')' : d < 0 ? ' (dia anterior)' : ''); }
-// Atraso do cenário: com horário do agendamento e do início do check-in, é a diferença (check-in - agendamento); senão, o campo em minutos.
+// Atraso do cenário: com horário do compromisso e do início do check-in, é a diferença (check-in - compromisso); senão, o campo em minutos.
+// null = horário não informado: o limite de atraso NÃO é considerado (escolha só pelas condições).
 function scenarioAtraso(sc){
   var a = parseHM(sc.horaAgendamento), c = parseHM(sc.horaCheckin);
   if (a !== null && c !== null) return c - a;
-  return Number(String(sc.atraso || '0').trim()) || 0;
+  var v = String(sc.atraso == null ? '' : sc.atraso).trim();
+  return v === '' || isNaN(Number(v)) ? null : Number(v);
 }
 // Até que horário um limite aceita o check-in (Controller: agora < agendamento + LimiteAtraso).
 function limitText(sc, limite){
@@ -1320,7 +1341,7 @@ function limitText(sc, limite){
   return a === null ? 'limite de ' + limite + ' min' : 'aceita check-in iniciado antes de ' + fmtHM(a + limite) + ' (compromisso ' + fmtHM(a) + (limite >= 0 ? ' + ' : ' − ') + Math.abs(limite) + ' min)';
 }
 
-function newScenario(){ var s = {tipo:'CHECKIN', escape:false, escapeId:'', temAgendamento:true, atraso:'0', horaAgendamento:'', horaCheckin:'', values:{}}; SIM_FIELDS.forEach(function(f){ s.values[f.k] = ''; }); return s; }
+function newScenario(){ var s = {tipo:'CHECKIN', escape:false, escapeId:'', temAgendamento:true, atraso:'', horaAgendamento:'', horaCheckin:'', values:{}}; SIM_FIELDS.forEach(function(f){ s.values[f.k] = ''; }); return s; }
 // Valor que o Controller mandaria para a procedure (null quando não há).
 function scenarioParam(sc, f){ return (f.appt && !sc.temAgendamento) ? null : blankToNull(sc.values[f.k]); }
 
@@ -1399,8 +1420,9 @@ function simulateFind(rows, sc){
   var top = matches.filter(function(m){ return m.spec === maxSpec; }), rest = matches.filter(function(m){ return m.spec < maxSpec; });
   var atraso = scenarioAtraso(sc);
   out.atraso = atraso;
-  var ordered;
-  if (sc.temAgendamento && String(sc.tipo).toLowerCase() === 'checkin') {
+  var ordered, delayRelevant = sc.temAgendamento && String(sc.tipo).toLowerCase() === 'checkin';
+  out.delayIgnored = delayRelevant && atraso === null; // horário não informado: escolhe só pelas condições
+  if (delayRelevant && atraso !== null) {
     out.delayApplied = true;
     // Controller: DateTime.Now < horário do compromisso + LimiteAtraso  <=>  atraso < limite
     var valid = top.filter(function(m){ return atraso < m.row.limite; }), late = top.filter(function(m){ return !(atraso < m.row.limite); });
@@ -1636,7 +1658,7 @@ var TESTS = [
   }],
   ['condicionais: consulta só com IdServico válido; leitura distingue NULL de vazio', function(){
     eq(buildCondQuery(''), null); eq(buildCondQuery('x'), null);
-    var q = buildCondQuery('00006700-A728-40D5-0000-C00000000000'); has(q, "DECLARE @IdServico UNIQUEIDENTIFIER = '00006700-A728-40D5-0000-C00000000000';"); has(q, 'c.Agenda');
+    var q = buildCondQuery('00006700-A728-40D5-0000-C00000000000'); has(q, "DECLARE @IdServico UNIQUEIDENTIFIER = '00006700-A728-40D5-0000-C00000000000';"); has(q, 'c.[Agenda]');
     var hdr = COND_QUERY_COLUMNS.join('\t');
     var line = ['AAAAAAAA-0000-0000-0000-000000000001','F1','1','Checkin','0','NULL','2','NULL','1','','NULL','NULL','NULL','NULL','NULL','NULL','NULL','3','NULL','NULL','NULL'].join('\t');
     var r = parseCondSnapshot(hdr + '\r\n' + line);
@@ -1737,6 +1759,48 @@ var TESTS = [
     sc.horaCheckin = '10:30'; s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'Elegibilidade com Guia'); eq(s.limitDelay, undefined);
     sc.horaCheckin = '11:30'; s = simulate(R, sc); eq(s.ranked[0].row.flowName, 'com Guia sem Exames'); eq(s.limitDelay, undefined);
     sc.tipo = 'WEBCHECKIN'; R.forEach(function(r){ r.c.TipoCheckin = 'WebCheckin'; }); sc.horaCheckin = '19:00'; eq(simulate(R, sc).limitDelay, undefined);
+  }],
+  ['condicionais: linha sem cabeçalho e com coluna a menos (Agenda) não vira texto vazio', function(){
+    // 20 colunas (falta Agenda no fim): banco sem a coluna Agenda, resultado colado sem cabeçalho
+    var mk = function(id, nome, tipo, esc, escId, prio, lim, conv){
+      return [id, nome, '1', tipo, esc, escId, prio, lim, 'NULL', conv, 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL'].join('\t');
+    };
+    var txt = [mk('DD151D58-C416-4B8C-93B5-9FCA5C5AB25C', 'Fluxo Básico', 'Checkin', '0', 'NULL', '1', '-60', 'NULL'),
+               mk('FEEEA139-BB9E-F011-AD37-027F2C6F7061', 'Paciente sem agendamento', 'Walkin', '0', 'NULL', '1', '5000', 'NULL'),
+               mk('3FE714F4-EE49-4220-98A1-7C0EFE2099AE', 'Com Guia', 'Checkin', '0', 'NULL', '1', '-60', '10')].join('\r\n');
+    var r = parseCondSnapshot(txt);
+    eq(r.error, null); ok(r.warning && r.warning.indexOf('20') >= 0, 'avisa a quantidade de colunas');
+    eq(r.rows[0].c.Agenda, null); eq(r.rows[2].c.Convenio, '10');
+    var sc = newScenario(); sc.atraso = '-90';
+    eq(simulate(r.rows, sc).ranked[0].row.flowName, 'Fluxo Básico');
+    sc.tipo = 'WALKIN'; sc.temAgendamento = false; eq(simulate(r.rows, sc).ranked[0].row.flowName, 'Paciente sem agendamento');
+    // com cabeçalho completo não há aviso
+    eq(parseCondSnapshot(exampleCondText()).warning, null);
+    // com cabeçalho e sem a coluna Agenda (banco antigo): NULL + aviso, sem erro
+    var lines = exampleCondText().split('\r\n').map(function(l){ return l.split('\t').slice(0, 20).join('\t'); });
+    var r2 = parseCondSnapshot(lines.join('\r\n'));
+    eq(r2.error, null); has(r2.warning, 'Agenda'); eq(r2.rows[0].c.Agenda, null); eq(r2.rows.length, 7);
+    ok(parseCondSnapshot('IdFluxo\tFluxo\nAAAAAAAA-0000-0000-0000-000000000001\tX').error, 'sem colunas obrigatórias');
+  }],
+  ['condicionais: consulta se adapta a bancos sem alguma coluna (COL_LENGTH)', function(){
+    var q = buildCondQuery('00000000-0000-4000-9000-000000000005');
+    has(q, "COL_LENGTH('dbo.CondicionaisPorFluxo', 'Agenda') IS NULL THEN N'NULL' ELSE N'c.[Agenda]' END + N' AS [Agenda]'");
+    has(q, "EXEC sp_executesql @sql, N'@IdServico UNIQUEIDENTIFIER', @IdServico = @IdServico;");
+    eq((q.match(/COL_LENGTH/g) || []).length, COND_QUERY_COLUMNS.length - 3);
+    ok(q.indexOf('TipoCheckin') < q.indexOf('LimiteAtraso') && q.indexOf('TipoAgenda') < q.lastIndexOf('[Agenda]'), 'ordem das colunas');
+  }],
+  ['condicionais: sem horário/atraso informado o atraso não é considerado', function(){
+    var R = simRows([
+      ['A1', 'Com Guia', 1, {Convenio:'10'}, {LimiteAtraso:'-60'}],
+      ['B1', 'Com Guia sem Exames', 2, {Convenio:'10'}, {LimiteAtraso:'-5'}],
+      ['D1', 'Escape Tela de Atraso', 1, {}, {FlagEscape:true, EscapeId:'LIMIT_DELAY', LimiteAtraso:'-5'}]
+    ]);
+    var sc = newScenario(); sc.values.convenio = '10';
+    eq(scenarioAtraso(sc), null);
+    var s = simulate(R, sc);
+    eq(s.delayIgnored, true); eq(s.delayApplied, false); eq(s.limitDelay, undefined); eq(s.fallbackDelay, false);
+    eq(s.ranked[0].row.flowName, 'Com Guia'); eq(s.ranked[0].window, undefined);
+    sc.atraso = '0'; s = simulate(R, sc); eq(s.delayApplied, true); ok(s.limitDelay, 'com atraso digitado volta a valer');
   }],
   ['condicionais: empate total desempata pelo ID do fluxo (ordem do Guid)', function(){
     var R = simRows([['F1', 'Segundo', 1, {}], ['A1', 'Primeiro', 1, {}]]);
@@ -2604,6 +2668,8 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
         var base = newScenario();
         s.sc = Object.assign(base, s.sc || {});
         s.sc.values = Object.assign(newScenario().values, (s.sc && s.sc.values) || {});
+        // Versões antigas começavam o atraso em '0' (considerava atraso sem horário); sem horários, passa a ser "não considerar".
+        if (String(s.sc.atraso) === '0' && !s.sc.horaAgendamento && !s.sc.horaCheckin) s.sc.atraso = '';
         return s;
       }
     } catch (e) {}
@@ -2647,11 +2713,13 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     var porHorario = parseHM(sc.horaAgendamento) !== null && parseHM(sc.horaCheckin) !== null;
     ['cond-hagend', 'cond-hcheckin'].forEach(function(id){ $(id).disabled = !aplica; });
     $('cond-atraso').disabled = !aplica || porHorario;
-    $('cond-atraso').value = porHorario ? String(scenarioAtraso(sc)) : sc.atraso;
+    $('cond-atraso').value = porHorario ? String(scenarioAtraso(sc)) : (sc.atraso || '');
+    $('cond-atraso').placeholder = 'vazio = não considera';
     var a = scenarioAtraso(sc);
     $('cond-atraso-hint').textContent = !aplica ? 'O limite de atraso só vale em check-in (CHECKIN) com agendamento.' :
       porHorario ? 'Check-in ' + Math.abs(a) + ' min ' + (a < 0 ? 'ANTES' : a > 0 ? 'DEPOIS' : 'exatamente no horário') + (a === 0 ? '' : ' do compromisso') + ' (atraso = ' + a + ').' :
-      'Preencha os dois horários para calcular o atraso, ou digite o atraso em minutos (negativo = adiantado).';
+      a === null ? 'Sem horário informado: o atraso NÃO é considerado (a escolha é só pelas condições). Preencha os dois horários ou digite o atraso em minutos para considerar.' :
+      'Atraso digitado: ' + a + ' min (negativo = adiantado).';
   }
   function renderCondQuery(){
     var s = (cond.servico || '').trim(), f = (cond.fluxo || '').trim(), q = buildCondQuery(s), msgs = [];
@@ -2662,7 +2730,8 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     $('cond-query').textContent = q || '-- Informe o IdServico (GUID válido) para gerar a consulta.';
     $('cond-copy-query').disabled = !q; $('cond-paste').disabled = !q; $('cond-load').disabled = !q;
     var nf = {}; cond.rows.forEach(function(r){ nf[r.flowId] = true; });
-    $('cond-loaded').textContent = cond.rows.length ? cond.rows.length + ' condição(ões) de ' + Object.keys(nf).length + ' fluxo(s) carregada(s).' : '';
+    $('cond-loaded').innerHTML = cond.rows.length ? esc(cond.rows.length + ' condição(ões) de ' + Object.keys(nf).length + ' fluxo(s) carregada(s).') +
+      (cond.warning ? '<div class="msgs" style="margin-top:6px"><div class="w">! ' + esc(cond.warning) + '</div></div>' : '') : '';
   }
   function condChips(r){
     var out = [];
@@ -2679,20 +2748,17 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     var html = '<div class="res-sum">' + cond.rows.length + ' condição(ões) carregada(s) · <strong>' + s.ranked.length + ' atendem</strong> · ' + s.excluded.length + ' não atendem' +
       (s.ranked.length ? ' · mais específica com ' + s.maxSpec + ' parâmetro(s)' : '') +
       (s.delayApplied ? ' · atraso considerado: <strong>' + s.atraso + ' min</strong>' +
-        (parseHM(cond.sc.horaAgendamento) !== null && parseHM(cond.sc.horaCheckin) !== null ? ' (compromisso ' + esc(cond.sc.horaAgendamento) + ', check-in ' + esc(cond.sc.horaCheckin) + ')' : '') : '') + '</div>';
-    // Bloqueio por atraso (PosBlockStartFlow): o fluxo escolhido não aceita mais o check-in -> escape LIMIT_DELAY
-    if (s.limitDelay) {
-      var ld = s.limitDelay, lw = ld.escape.ranked[0];
-      html += '<div class="res-card win" style="border-left-color:var(--warn);background:var(--warn-bg)"><h4>⚠ Destino final: ' +
-        (lw ? esc(lw.row.flowName) + ' <span class="tag">escape LIMIT_DELAY</span>' : 'nenhum fluxo de escape LIMIT_DELAY') + '</h4>' +
-        '<div class="res-note" style="color:var(--text)">O FindFlow escolhe <strong>' + esc(ld.flow) + '</strong>, mas ele ' + esc(limitText(cond.sc, ld.limite)) +
-        ' e o check-in foi ' + (parseHM(cond.sc.horaCheckin) !== null ? 'às ' + esc(cond.sc.horaCheckin) : 'com atraso de ' + s.atraso + ' min') +
-        '. Logo depois de escolher, o Controller redireciona para o escape de atraso (PosBlockStartFlow).' +
-        (lw ? '' : ' Este cliente não tem fluxo de escape LIMIT_DELAY que atenda: o Controller registra a falha e não redireciona.') + '</div>' +
-        (lw ? '<div class="mono muted" style="margin-top:4px">' + lw.row.flowId + '</div>' + condChips(lw.row) : '') + '</div>';
-      html += '<h4 style="margin:14px 0 8px;font-size:13px;color:var(--muted)">Escolha do FindFlow (antes do bloqueio por atraso)</h4>';
+        (parseHM(cond.sc.horaAgendamento) !== null && parseHM(cond.sc.horaCheckin) !== null ? ' (compromisso ' + esc(cond.sc.horaAgendamento) + ', check-in ' + esc(cond.sc.horaCheckin) + ')' : '') : '') +
+      (s.delayIgnored ? ' · <strong>horário não informado: atraso não considerado</strong>' : '') + '</div>';
+    // Bloqueio por atraso (PosBlockStartFlow): o fluxo do FindFlow não aceita mais o check-in -> o paciente vai para o escape LIMIT_DELAY,
+    // que passa a ser o ESCOLHIDO (nº 1). A escolha do FindFlow aparece em seguida, como próxima opção.
+    var ld = s.limitDelay, lw = ld ? ld.escape.ranked[0] : null;
+    var checkinTxt = parseHM(cond.sc.horaCheckin) !== null ? 'às ' + esc(cond.sc.horaCheckin) : 'com atraso de ' + s.atraso + ' min';
+    if (ld && !lw) {
+      html += '<div class="msgs"><div class="w">! O FindFlow escolhe <strong>' + esc(ld.flow) + '</strong>, mas ele ' + esc(limitText(cond.sc, ld.limite)) + ' e o check-in foi ' + checkinTxt +
+        '. O Controller tentaria redirecionar para o escape LIMIT_DELAY (atraso), mas este cliente não tem fluxo de escape LIMIT_DELAY que atenda: ele registra a falha e não redireciona.</div></div>';
     }
-    if (s.fallbackDelay) html += '<div class="msgs"><div class="w">! Nenhum fluxo mais específico está dentro do limite de atraso (atraso de ' + s.atraso + ' min): o FindFlow escolhe pela prioridade entre todos eles.</div></div>';
+    if (s.fallbackDelay) html +='<div class="msgs"><div class="w">! Nenhum fluxo mais específico está dentro do limite de atraso (atraso de ' + s.atraso + ' min): o FindFlow escolhe pela prioridade entre todos eles.</div></div>';
     if (cond.sc.escape && !blankToNull(cond.sc.escapeId)) {
       var escIds = {}; cond.rows.forEach(function(r){ if (r.c.FlagEscape && r.c.EscapeId) escIds[r.c.EscapeId] = true; });
       html += '<div class="msgs"><div class="w">! Informe o EscapeId: no escape o Controller sempre envia qual é. Sem ele só passam condições de escape com EscapeId NULL.' +
@@ -2701,10 +2767,14 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
     if (isGuid(mark)) {
       var pos = -1; s.ranked.forEach(function(m, i){ if (pos < 0 && m.row.flowId === mark) pos = i; });
       var mine = cond.rows.filter(function(r){ return r.flowId === mark; });
+      var markStatus = lw && lw.row.flowId === mark ? '✓ É o <strong>escolhido</strong> neste cenário (escape de atraso).' :
+        lw && pos === 0 ? 'Seria o escolhido pelo FindFlow, mas o check-in está fora do limite dele: o paciente é <strong>redirecionado ao escape de atraso</strong>.' :
+        pos === 0 ? '✓ É o <strong>escolhido</strong> neste cenário.' :
+        pos > 0 ? 'Atende, mas está na <strong>posição ' + (pos + 1 + (lw ? 1 : 0)) + '</strong> (não é o escolhido).' : 'Não atende a este cenário.';
       if (!mine.length) html += '<div class="msgs"><div class="w">O fluxo informado (' + mark + ') não tem condições neste serviço.</div></div>';
       else {
         html += '<div class="res-card mark"><h4>Fluxo informado: ' + esc(mine[0].flowName) + '</h4>' +
-          '<div class="res-note" style="color:var(--text)">' + (pos === 0 ? '✓ É o <strong>escolhido</strong> neste cenário.' : pos > 0 ? 'Atende, mas está na <strong>posição ' + (pos + 1) + '</strong> (não é o escolhido).' : 'Não atende a este cenário.') + '</div>' +
+          '<div class="res-note" style="color:var(--text)">' + markStatus + '</div>' +
           mine.map(function(r, k){
             var e = evalCondition(r, cond.sc);
             return '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)"><strong>Condição ' + (k + 1) + '</strong> exige: ' + esc(conditionRequirements(r).join(' · ')) +
@@ -2714,15 +2784,26 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
       }
     }
     if (!s.ranked.length) html += '<div class="msgs"><div class="e">✕ Nenhum fluxo atende a este cenário: o Controller não encontraria fluxo.</div></div>';
+    // Escape de atraso como escolhido (nº 1)
+    if (lw) {
+      html += '<div class="res-card win' + (lw.row.flowId === mark ? ' mark' : '') + '">' +
+        '<h4><span class="res-pos">1</span>' + esc(lw.row.flowName || '(sem nome)') + ' <span class="tag">será escolhido</span> <span class="tag warn">escape LIMIT_DELAY (atraso)</span></h4>' +
+        '<div class="mono muted" style="margin-top:4px">' + lw.row.flowId + '</div>' + condChips(lw.row) +
+        '<div class="res-note">Direcionado por atraso: o FindFlow escolheria <strong>' + esc(ld.flow) + '</strong>, que ' + esc(limitText(cond.sc, ld.limite)) +
+          ', e o check-in foi ' + checkinTxt + '. Logo depois de escolher, o Controller redireciona para este escape (PosBlockStartFlow).</div></div>';
+      html += '<h4 style="margin:14px 0 8px;font-size:13px;color:var(--muted)">Próximas opções (escolha do FindFlow antes do bloqueio por atraso)</h4>';
+    }
+    var off = lw ? 1 : 0;
     s.ranked.forEach(function(m, i){
-      html += '<div class="res-card' + (m.chosen ? ' win' : '') + (m.row.flowId === mark ? ' mark' : '') + '">' +
-        '<h4><span class="res-pos">' + (i + 1) + '</span>' + esc(m.row.flowName || '(sem nome)') +
-        (m.chosen ? (s.limitDelay ? ' <span class="tag warn">escolhido pelo FindFlow → redirecionado ao escape de atraso</span>' : ' <span class="tag">será escolhido</span>') : '') +
+      var isWin = m.chosen && !lw;
+      html += '<div class="res-card' + (isWin ? ' win' : '') + (m.row.flowId === mark ? ' mark' : '') + '">' +
+        '<h4><span class="res-pos">' + (i + 1 + off) + '</span>' + esc(m.row.flowName || '(sem nome)') +
+        (m.chosen ? (lw ? ' <span class="tag warn">escolhido pelo FindFlow, mas fora do limite → redirecionado</span>' : ' <span class="tag">será escolhido</span>') : '') +
         ' <span class="tag">' + m.spec + ' parâmetro(s)</span></h4>' +
         '<div class="mono muted" style="margin-top:4px">' + m.row.flowId + '</div>' + condChips(m.row) +
         (m.window ? '<div class="res-note" style="color:' + (m.inWindow ? 'var(--ok)' : 'var(--warn)') + '">' + (m.inWindow ? '✓ ' : '✕ ') + esc(m.window) + '</div>' : '') +
         (m.note ? '<div class="res-note">' + esc(m.note) + '</div>' : '') + '</div>';
-      if (i === 0 && s.ranked.length > 1) html += '<h4 style="margin:14px 0 8px;font-size:13px;color:var(--muted)">Próximas opções</h4>';
+      if (i === 0 && !lw && s.ranked.length > 1) html += '<h4 style="margin:14px 0 8px;font-size:13px;color:var(--muted)">Próximas opções</h4>';
     });
     if (s.excluded.length) {
       html += '<details style="margin-top:12px"><summary style="font-size:13px">Não atendem (' + s.excluded.length + ')</summary>' +
@@ -2765,7 +2846,7 @@ if (typeof module !== 'undefined') module.exports = {runTests:runTests};
       case 'cond-load':
         var r = parseCondSnapshot($('cond-paste').value);
         if (r.error) { alert(r.error); break; }
-        cond.rows = r.rows; $('cond-paste').value = ''; saveCond(); renderCond(); break;
+        cond.rows = r.rows; cond.warning = r.warning || null; $('cond-paste').value = ''; saveCond(); renderCond(); break;
       case 'cond-clear': cond.rows = []; $('cond-paste').value = ''; saveCond(); renderCond(); break;
       case 'cond-reset': cond.sc = newScenario(); saveCond(); renderCond(); break;
       case 'cond-example':
